@@ -1,0 +1,224 @@
+{
+  "pv": {
+    "name": "Task Lifecycle",
+    "version": "1.1.0"
+  },
+  "nodes": [
+    {
+      "id": "create",
+      "type": "text",
+      "x": 300,
+      "y": 0,
+      "width": 120,
+      "height": 50,
+      "text": "CREATE",
+      "pv": {
+        "nodeType": "CoreAPI",
+        "shape": "rectangle",
+        "description": "Entry point - createTask() or createDraft()"
+      }
+    },
+    {
+      "id": "draft",
+      "type": "text",
+      "x": 100,
+      "y": 120,
+      "width": 160,
+      "height": 80,
+      "text": "DRAFT",
+      "pv": {
+        "nodeType": "FileSystemService",
+        "shape": "rectangle",
+        "description": "backlog/drafts/ - Work-in-progress ideas not yet ready for the backlog. Created via createDraft()."
+      }
+    },
+    {
+      "id": "active",
+      "type": "text",
+      "x": 400,
+      "y": 120,
+      "width": 160,
+      "height": 80,
+      "text": "ACTIVE",
+      "pv": {
+        "nodeType": "CoreAPI",
+        "shape": "rectangle",
+        "description": "backlog/tasks/ - Main backlog. Tasks with any status (todo, in-progress, etc). Full feature support."
+      }
+    },
+    {
+      "id": "completed",
+      "type": "text",
+      "x": 620,
+      "y": 120,
+      "width": 160,
+      "height": 80,
+      "text": "COMPLETED",
+      "pv": {
+        "nodeType": "GitService",
+        "shape": "rectangle",
+        "description": "backlog/completed/ - Successfully finished tasks. Preserved for history and reference."
+      }
+    },
+    {
+      "id": "archived",
+      "type": "text",
+      "x": 300,
+      "y": 300,
+      "width": 160,
+      "height": 80,
+      "text": "ARCHIVED",
+      "pv": {
+        "nodeType": "Constants",
+        "shape": "rectangle",
+        "description": "backlog/archive/tasks/ or archive/drafts/ - Inactive items preserved for reference. Excluded from queries."
+      }
+    },
+    {
+      "id": "status-box",
+      "type": "text",
+      "x": 380,
+      "y": 230,
+      "width": 200,
+      "height": 50,
+      "text": "Status Changes",
+      "pv": {
+        "nodeType": "Utils",
+        "shape": "rectangle",
+        "description": "Within ACTIVE: backlog → todo → in-progress → review → done. Configurable per project. Triggers onStatusChange callbacks."
+      }
+    },
+    {
+      "id": "legend-title",
+      "type": "text",
+      "x": 650,
+      "y": 280,
+      "width": 150,
+      "height": 30,
+      "text": "Legend",
+      "pv": {
+        "nodeType": "Types",
+        "shape": "rectangle",
+        "description": "Transition types"
+      }
+    },
+    {
+      "id": "legend-location",
+      "type": "text",
+      "x": 650,
+      "y": 320,
+      "width": 150,
+      "height": 30,
+      "text": "Location Change",
+      "pv": {
+        "nodeType": "FileSystemService",
+        "shape": "rectangle",
+        "description": "File moves between directories"
+      }
+    },
+    {
+      "id": "legend-status",
+      "type": "text",
+      "x": 650,
+      "y": 360,
+      "width": 150,
+      "height": 30,
+      "text": "Status Change",
+      "pv": {
+        "nodeType": "Utils",
+        "shape": "rectangle",
+        "description": "Status field update within same location"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "create-draft",
+      "fromNode": "create",
+      "fromSide": "bottom",
+      "toNode": "draft",
+      "toSide": "top",
+      "label": "createDraft()",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "create-active",
+      "fromNode": "create",
+      "fromSide": "bottom",
+      "toNode": "active",
+      "toSide": "top",
+      "label": "createTask()",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "draft-active",
+      "fromNode": "draft",
+      "fromSide": "right",
+      "toNode": "active",
+      "toSide": "left",
+      "label": "promoteDraft()",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "active-draft",
+      "fromNode": "active",
+      "fromSide": "left",
+      "toNode": "draft",
+      "toSide": "right",
+      "label": "demoteTask()",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "active-completed",
+      "fromNode": "active",
+      "fromSide": "right",
+      "toNode": "completed",
+      "toSide": "left",
+      "label": "completeTask()",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "active-archived",
+      "fromNode": "active",
+      "fromSide": "bottom",
+      "toNode": "archived",
+      "toSide": "top",
+      "label": "archiveTask()",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "draft-archived",
+      "fromNode": "draft",
+      "fromSide": "bottom",
+      "toNode": "archived",
+      "toSide": "left",
+      "label": "archiveDraft()",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "active-status",
+      "fromNode": "active",
+      "fromSide": "bottom",
+      "toNode": "status-box",
+      "toSide": "top",
+      "label": "updateTask()",
+      "pv": {
+        "edgeType": "Uses"
+      }
+    }
+  ]
+}
