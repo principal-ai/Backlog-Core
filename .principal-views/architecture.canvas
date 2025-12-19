@@ -1,0 +1,406 @@
+{
+  "pv": {
+    "name": "Core Package Architecture",
+    "version": "1.1.0"
+  },
+  "nodes": [
+    {
+      "id": "core-api",
+      "type": "text",
+      "x": 300,
+      "y": 100,
+      "width": 160,
+      "height": 80,
+      "text": "Core API",
+      "pv": {
+        "nodeType": "CoreAPI",
+        "shape": "rectangle",
+        "description": "src/core/backlog.ts - Main entry point. Accepts adapters via CoreOptions. Composes FileSystem + GitOperations services."
+      }
+    },
+    {
+      "id": "content-store",
+      "type": "text",
+      "x": 500,
+      "y": 100,
+      "width": 140,
+      "height": 60,
+      "text": "ContentStore",
+      "pv": {
+        "nodeType": "ContentStore",
+        "shape": "rectangle",
+        "description": "src/core/content-store.ts - In-memory task cache. Enables file watching for real-time updates."
+      }
+    },
+    {
+      "id": "search-service",
+      "type": "text",
+      "x": 680,
+      "y": 100,
+      "width": 140,
+      "height": 60,
+      "text": "SearchService",
+      "pv": {
+        "nodeType": "SearchService",
+        "shape": "rectangle",
+        "description": "src/core/search-service.ts - Full-text search over tasks using ContentStore."
+      }
+    },
+    {
+      "id": "fs-service",
+      "type": "text",
+      "x": 200,
+      "y": 250,
+      "width": 160,
+      "height": 70,
+      "text": "FileSystem Service",
+      "pv": {
+        "nodeType": "FileSystemService",
+        "shape": "rectangle",
+        "description": "src/file-system/operations.ts - Task CRUD operations. Uses FileSystemAdapter + GlobAdapter."
+      }
+    },
+    {
+      "id": "git-service",
+      "type": "text",
+      "x": 420,
+      "y": 250,
+      "width": 160,
+      "height": 70,
+      "text": "GitOperations Service",
+      "pv": {
+        "nodeType": "GitService",
+        "shape": "rectangle",
+        "description": "src/git/operations.ts - Git commands (status, branch detection). Uses GitAdapter."
+      }
+    },
+    {
+      "id": "markdown",
+      "type": "text",
+      "x": -27,
+      "y": 288,
+      "width": 140,
+      "height": 60,
+      "text": "Markdown Parser",
+      "pv": {
+        "nodeType": "MarkdownParser",
+        "shape": "rectangle",
+        "description": "src/markdown/ - Parse task markdown to objects, serialize back. Pure functions, no adapters needed."
+      }
+    },
+    {
+      "id": "fs-adapter",
+      "type": "text",
+      "x": 100,
+      "y": 400,
+      "width": 160,
+      "height": 60,
+      "text": "FileSystemAdapter",
+      "pv": {
+        "nodeType": "FileSystemAdapter",
+        "shape": "rectangle",
+        "description": "src/pure-core/abstractions/FileSystemAdapter.ts - Interface for file operations: exists, readFile, writeFile, createDir, deleteFile, stat"
+      }
+    },
+    {
+      "id": "glob-adapter",
+      "type": "text",
+      "x": 300,
+      "y": 400,
+      "width": 140,
+      "height": 60,
+      "text": "GlobAdapter",
+      "pv": {
+        "nodeType": "GlobAdapter",
+        "shape": "rectangle",
+        "description": "src/pure-core/abstractions/GlobAdapter.ts - Interface for glob operations: scan, scanSync, match"
+      }
+    },
+    {
+      "id": "git-adapter",
+      "type": "text",
+      "x": 480,
+      "y": 400,
+      "width": 140,
+      "height": 60,
+      "text": "GitAdapter",
+      "pv": {
+        "nodeType": "GitAdapter",
+        "shape": "rectangle",
+        "description": "src/pure-core/abstractions/GitAdapter.ts - Interface for git operations: exec, isGitRepository, initRepository, getCurrentBranch"
+      }
+    },
+    {
+      "id": "utils",
+      "type": "text",
+      "x": 660,
+      "y": 400,
+      "width": 120,
+      "height": 60,
+      "text": "Utils",
+      "pv": {
+        "nodeType": "Utils",
+        "shape": "rectangle",
+        "description": "src/utils/ - Pure utility functions: task-path, status, sorting, task-builders, assignee, etc."
+      }
+    },
+    {
+      "id": "types",
+      "type": "text",
+      "x": 800,
+      "y": 400,
+      "width": 100,
+      "height": 60,
+      "text": "Types",
+      "pv": {
+        "nodeType": "Types",
+        "shape": "rectangle",
+        "description": "src/types/ - TypeScript definitions: Task, BacklogConfig, SearchFilters, Document, Sequence, etc."
+      }
+    },
+    {
+      "id": "constants",
+      "type": "text",
+      "x": 800,
+      "y": 250,
+      "width": 100,
+      "height": 60,
+      "text": "Constants",
+      "pv": {
+        "nodeType": "Constants",
+        "shape": "rectangle",
+        "description": "src/constants/ - DEFAULT_DIRECTORIES, DEFAULT_STATUSES, FALLBACK_STATUS"
+      }
+    },
+    {
+      "id": "bun-adapters",
+      "type": "text",
+      "x": 100,
+      "y": 550,
+      "width": 180,
+      "height": 60,
+      "text": "Bun Adapters",
+      "pv": {
+        "nodeType": "BunAdapters",
+        "shape": "rectangle",
+        "description": "src/bun-adapters/ - BunFileSystemAdapter, BunGlobAdapter, BunGitAdapter. Uses Bun.file, Bun.Glob, Bun.spawn"
+      }
+    },
+    {
+      "id": "test-adapters",
+      "type": "text",
+      "x": 309,
+      "y": 633,
+      "width": 180,
+      "height": 60,
+      "text": "Test Adapters",
+      "pv": {
+        "nodeType": "TestAdapters",
+        "shape": "rectangle",
+        "description": "src/test-adapters/ - InMemoryFileSystemAdapter, InMemoryGlobAdapter, MockGitAdapter. For unit testing."
+      }
+    },
+    {
+      "id": "node-adapters",
+      "type": "text",
+      "x": 488,
+      "y": 636,
+      "width": 160,
+      "height": 60,
+      "text": "Node Adapters",
+      "pv": {
+        "nodeType": "NodeAdapters",
+        "shape": "rectangle",
+        "description": "Future: Node.js adapter implementations using node:fs, glob package, child_process"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "core-fs",
+      "fromNode": "core-api",
+      "fromSide": "bottom",
+      "toNode": "fs-service",
+      "toSide": "top",
+      "label": "composes (this.fs)",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "core-git",
+      "fromNode": "core-api",
+      "fromSide": "bottom",
+      "toNode": "git-service",
+      "toSide": "top",
+      "label": "composes (this.git)",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "core-content",
+      "fromNode": "core-api",
+      "fromSide": "right",
+      "toNode": "content-store",
+      "toSide": "left",
+      "label": "creates",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "core-search",
+      "fromNode": "content-store",
+      "fromSide": "right",
+      "toNode": "search-service",
+      "toSide": "left",
+      "label": "provides data",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "fs-fsadapter",
+      "fromNode": "fs-service",
+      "fromSide": "bottom",
+      "toNode": "fs-adapter",
+      "toSide": "top",
+      "label": "uses",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "fs-globadapter",
+      "fromNode": "fs-service",
+      "fromSide": "bottom",
+      "toNode": "glob-adapter",
+      "toSide": "top",
+      "label": "uses",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "git-gitadapter",
+      "fromNode": "git-service",
+      "fromSide": "bottom",
+      "toNode": "git-adapter",
+      "toSide": "top",
+      "label": "uses",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "bun-fs-impl",
+      "fromNode": "bun-adapters",
+      "fromSide": "top",
+      "toNode": "fs-adapter",
+      "toSide": "bottom",
+      "label": "implements",
+      "pv": {
+        "edgeType": "Implements"
+      }
+    },
+    {
+      "id": "bun-glob-impl",
+      "fromNode": "bun-adapters",
+      "fromSide": "top",
+      "toNode": "glob-adapter",
+      "toSide": "bottom",
+      "label": "implements",
+      "pv": {
+        "edgeType": "Implements"
+      }
+    },
+    {
+      "id": "bun-git-impl",
+      "fromNode": "bun-adapters",
+      "fromSide": "top",
+      "toNode": "git-adapter",
+      "toSide": "bottom",
+      "label": "implements",
+      "pv": {
+        "edgeType": "Implements"
+      }
+    },
+    {
+      "id": "test-fs-impl",
+      "fromNode": "test-adapters",
+      "fromSide": "top",
+      "toNode": "fs-adapter",
+      "toSide": "bottom",
+      "label": "implements",
+      "pv": {
+        "edgeType": "Implements"
+      }
+    },
+    {
+      "id": "test-glob-impl",
+      "fromNode": "test-adapters",
+      "fromSide": "top",
+      "toNode": "glob-adapter",
+      "toSide": "bottom",
+      "label": "implements",
+      "pv": {
+        "edgeType": "Implements"
+      }
+    },
+    {
+      "id": "test-git-impl",
+      "fromNode": "test-adapters",
+      "fromSide": "top",
+      "toNode": "git-adapter",
+      "toSide": "bottom",
+      "label": "implements",
+      "pv": {
+        "edgeType": "Implements"
+      }
+    },
+    {
+      "id": "node-fs-impl",
+      "fromNode": "node-adapters",
+      "fromSide": "top",
+      "toNode": "fs-adapter",
+      "toSide": "bottom",
+      "label": "implements (future)",
+      "pv": {
+        "edgeType": "Implements"
+      }
+    },
+    {
+      "id": "node-glob-impl",
+      "fromNode": "node-adapters",
+      "fromSide": "top",
+      "toNode": "glob-adapter",
+      "toSide": "bottom",
+      "label": "implements (future)",
+      "pv": {
+        "edgeType": "Implements"
+      }
+    },
+    {
+      "id": "node-git-impl",
+      "fromNode": "node-adapters",
+      "fromSide": "top",
+      "toNode": "git-adapter",
+      "toSide": "bottom",
+      "label": "implements (future)",
+      "pv": {
+        "edgeType": "Implements"
+      }
+    },
+    {
+      "id": "edge-fs-service-markdown-1766166152254",
+      "fromNode": "fs-service",
+      "toNode": "markdown",
+      "fromSide": "left",
+      "toSide": "right",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    }
+  ]
+}

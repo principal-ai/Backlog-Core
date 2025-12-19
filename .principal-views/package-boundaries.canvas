@@ -1,0 +1,287 @@
+{
+  "pv": {
+    "name": "Package Boundaries - Core Extraction",
+    "version": "1.1.0"
+  },
+  "nodes": [
+    {
+      "id": "core-package",
+      "type": "group",
+      "x": 50,
+      "y": 50,
+      "width": 500,
+      "height": 550,
+      "label": "@backlog-md/core",
+      "pv": {
+        "nodeType": "CorePackage",
+        "shape": "rectangle",
+        "description": "Runtime-agnostic core package. No Bun dependencies. Requires adapters to be injected."
+      }
+    },
+    {
+      "id": "cli-package",
+      "type": "group",
+      "x": 600,
+      "y": 50,
+      "width": 350,
+      "height": 550,
+      "label": "backlog.md CLI",
+      "pv": {
+        "nodeType": "CLIPackage",
+        "shape": "rectangle",
+        "description": "CLI package. Depends on @backlog-md/core. Contains Bun-specific code."
+      }
+    },
+    {
+      "id": "abstractions",
+      "type": "text",
+      "x": 51,
+      "y": 110,
+      "width": 200,
+      "height": 50,
+      "text": "abstractions/",
+      "pv": {
+        "nodeType": "Abstractions",
+        "shape": "rectangle",
+        "description": "FileSystemAdapter, GlobAdapter, GitAdapter interfaces"
+      }
+    },
+    {
+      "id": "core-dir",
+      "type": "text",
+      "x": 50,
+      "y": 194,
+      "width": 200,
+      "height": 50,
+      "text": "core/",
+      "pv": {
+        "nodeType": "CoreAPI",
+        "shape": "rectangle",
+        "description": "backlog.ts, content-store.ts, search-service.ts, sequences.ts, reorder.ts, task-loader.ts"
+      }
+    },
+    {
+      "id": "fs-dir",
+      "type": "text",
+      "x": 49,
+      "y": 283,
+      "width": 200,
+      "height": 50,
+      "text": "file-system/",
+      "pv": {
+        "nodeType": "FileSystemService",
+        "shape": "rectangle",
+        "description": "operations.ts - FileSystem service class"
+      }
+    },
+    {
+      "id": "git-dir",
+      "type": "text",
+      "x": 48,
+      "y": 358,
+      "width": 200,
+      "height": 50,
+      "text": "git/",
+      "pv": {
+        "nodeType": "GitService",
+        "shape": "rectangle",
+        "description": "operations.ts - GitOperations service class"
+      }
+    },
+    {
+      "id": "markdown-dir",
+      "type": "text",
+      "x": 298,
+      "y": 105,
+      "width": 200,
+      "height": 50,
+      "text": "markdown/",
+      "pv": {
+        "nodeType": "MarkdownParser",
+        "shape": "rectangle",
+        "description": "parser.ts, serializer.ts - Pure functions"
+      }
+    },
+    {
+      "id": "types-dir",
+      "type": "text",
+      "x": 299,
+      "y": 190,
+      "width": 200,
+      "height": 50,
+      "text": "types/",
+      "pv": {
+        "nodeType": "Types",
+        "shape": "rectangle",
+        "description": "Task, BacklogConfig, Document, Sequence, etc."
+      }
+    },
+    {
+      "id": "utils-dir",
+      "type": "text",
+      "x": 298,
+      "y": 270,
+      "width": 200,
+      "height": 50,
+      "text": "utils/",
+      "pv": {
+        "nodeType": "Utils",
+        "shape": "rectangle",
+        "description": "task-path, status, sorting, task-builders, assignee (pure functions)"
+      }
+    },
+    {
+      "id": "constants-dir",
+      "type": "text",
+      "x": 300,
+      "y": 356,
+      "width": 200,
+      "height": 50,
+      "text": "constants/",
+      "pv": {
+        "nodeType": "Constants",
+        "shape": "rectangle",
+        "description": "DEFAULT_DIRECTORIES, DEFAULT_STATUSES"
+      }
+    },
+    {
+      "id": "test-adapters-dir",
+      "type": "text",
+      "x": 46,
+      "y": 444,
+      "width": 200,
+      "height": 50,
+      "text": "test-adapters/",
+      "pv": {
+        "nodeType": "TestAdapters",
+        "shape": "rectangle",
+        "description": "InMemoryFileSystemAdapter, InMemoryGlobAdapter, MockGitAdapter"
+      }
+    },
+    {
+      "id": "review-note",
+      "type": "text",
+      "x": 46,
+      "y": 530,
+      "width": 420,
+      "height": 80,
+      "text": "REVIEW: Audit for Bun-specific code",
+      "pv": {
+        "nodeType": "CoreAPI",
+        "shape": "rectangle",
+        "description": "Run: grep -r 'Bun\\.' src/core src/file-system src/git src/markdown src/utils src/types to find any remaining Bun dependencies"
+      }
+    },
+    {
+      "id": "cli-entry",
+      "type": "text",
+      "x": 641,
+      "y": 113,
+      "width": 280,
+      "height": 50,
+      "text": "cli.ts",
+      "pv": {
+        "nodeType": "CLI",
+        "shape": "rectangle",
+        "description": "CLI entry point - stays in CLI package"
+      }
+    },
+    {
+      "id": "commands-dir",
+      "type": "text",
+      "x": 631,
+      "y": 194,
+      "width": 280,
+      "height": 50,
+      "text": "commands/",
+      "pv": {
+        "nodeType": "CLI",
+        "shape": "rectangle",
+        "description": "CLI command handlers - stays in CLI package"
+      }
+    },
+    {
+      "id": "bun-adapters-dir",
+      "type": "text",
+      "x": 618,
+      "y": 273,
+      "width": 280,
+      "height": 50,
+      "text": "bun-adapters/",
+      "pv": {
+        "nodeType": "BunAdapters",
+        "shape": "rectangle",
+        "description": "BunFileSystemAdapter, BunGlobAdapter, BunGitAdapter - Bun-specific"
+      }
+    },
+    {
+      "id": "ui-dir",
+      "type": "text",
+      "x": 644,
+      "y": 364,
+      "width": 280,
+      "height": 50,
+      "text": "ui/",
+      "pv": {
+        "nodeType": "CLI",
+        "shape": "rectangle",
+        "description": "TUI components (blessed/ink) - stays in CLI package"
+      }
+    },
+    {
+      "id": "web-dir",
+      "type": "text",
+      "x": 644,
+      "y": 447,
+      "width": 280,
+      "height": 50,
+      "text": "web/",
+      "pv": {
+        "nodeType": "WebServer",
+        "shape": "rectangle",
+        "description": "Web server + React UI - stays in CLI package"
+      }
+    },
+    {
+      "id": "mcp-dir",
+      "type": "text",
+      "x": 645,
+      "y": 623,
+      "width": 280,
+      "height": 50,
+      "text": "mcp/",
+      "pv": {
+        "nodeType": "MCP",
+        "shape": "rectangle",
+        "description": "MCP server - stays in CLI package"
+      }
+    },
+    {
+      "id": "formatters-dir",
+      "type": "text",
+      "x": 627,
+      "y": 539,
+      "width": 280,
+      "height": 50,
+      "text": "formatters/",
+      "pv": {
+        "nodeType": "CLI",
+        "shape": "rectangle",
+        "description": "CLI output formatters - stays in CLI package"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "cli-uses-core",
+      "fromNode": "cli-package",
+      "fromSide": "left",
+      "toNode": "core-package",
+      "toSide": "right",
+      "label": "imports @backlog-md/core",
+      "pv": {
+        "edgeType": "Consumes"
+      }
+    }
+  ]
+}

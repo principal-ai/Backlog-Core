@@ -1,0 +1,144 @@
+version: "1.1.0"
+name: "Backlog Core Component Library"
+
+nodeComponents:
+  # Core Package Modules
+  CoreAPI:
+    description: "Main Core class - entry point for all backlog operations"
+    icon: "Core"
+    color: "#FF6B35"
+
+  FileSystemService:
+    description: "FileSystem service - task CRUD via adapters"
+    icon: "Folder"
+    color: "#4ECDC4"
+
+  GitService:
+    description: "GitOperations service - git commands via adapters"
+    icon: "Git"
+    color: "#27AE60"
+
+  ContentStore:
+    description: "In-memory task cache with file watching"
+    icon: "Database"
+    color: "#3498DB"
+
+  SearchService:
+    description: "Full-text search over tasks"
+    icon: "Search"
+    color: "#9B59B6"
+
+  MarkdownParser:
+    description: "Parse/serialize task markdown (pure functions)"
+    icon: "Document"
+    color: "#45B7D1"
+
+  Types:
+    description: "TypeScript type definitions (Task, Config, etc.)"
+    icon: "Code"
+    color: "#E74C3C"
+
+  Utils:
+    description: "Pure utility functions (task-path, status, sorting)"
+    icon: "Tools"
+    color: "#95A5A6"
+
+  Constants:
+    description: "Default values and configuration constants"
+    icon: "Settings"
+    color: "#7F8C8D"
+
+  # Abstractions Layer
+  Abstractions:
+    description: "Adapter interface definitions"
+    icon: "Interface"
+    color: "#8E44AD"
+
+  FileSystemAdapter:
+    description: "Interface: exists, readFile, writeFile, createDir"
+    icon: "Interface"
+    color: "#8E44AD"
+
+  GlobAdapter:
+    description: "Interface: scan, scanSync, match"
+    icon: "Interface"
+    color: "#8E44AD"
+
+  GitAdapter:
+    description: "Interface: exec, isGitRepository, initRepository"
+    icon: "Interface"
+    color: "#8E44AD"
+
+  # Adapter Implementations
+  BunAdapters:
+    description: "Bun runtime adapter implementations"
+    icon: "Bun"
+    color: "#FBF0DF"
+
+  TestAdapters:
+    description: "In-memory adapters for testing"
+    icon: "Test"
+    color: "#2ECC71"
+
+  NodeAdapters:
+    description: "Node.js adapter implementations (future)"
+    icon: "Node"
+    color: "#68A063"
+
+  # External Consumers
+  CLI:
+    description: "backlog.md CLI (consumes core)"
+    icon: "Terminal"
+    color: "#007ACC"
+
+  MCP:
+    description: "MCP server (consumes core)"
+    icon: "Server"
+    color: "#9B59B6"
+
+  WebServer:
+    description: "Web server (consumes core)"
+    icon: "Web"
+    color: "#E67E22"
+
+  # Package Boundaries
+  CorePackage:
+    description: "@backlog-md/core npm package boundary"
+    icon: "Package"
+    color: "#FF6B35"
+
+  CLIPackage:
+    description: "backlog.md CLI package boundary"
+    icon: "Package"
+    color: "#007ACC"
+
+edgeComponents:
+  Dependency:
+    description: "Module imports/depends on"
+    style: "solid"
+    color: "#7F8C8D"
+
+  Implements:
+    description: "Implements interface"
+    style: "dashed"
+    color: "#27AE60"
+
+  Injects:
+    description: "Dependency injection"
+    style: "dotted"
+    color: "#8E44AD"
+
+  Uses:
+    description: "Uses/calls"
+    style: "solid"
+    color: "#3498DB"
+
+  Contains:
+    description: "Package contains module"
+    style: "solid"
+    color: "#95A5A6"
+
+  Consumes:
+    description: "External package consumes"
+    style: "double"
+    color: "#E74C3C"
