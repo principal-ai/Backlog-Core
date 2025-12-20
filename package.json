@@ -1,0 +1,98 @@
+{
+  "name": "@backlog-md/core",
+  "version": "0.1.0",
+  "description": "Runtime-agnostic core package for Backlog.md task management",
+  "author": "Backlog.md Team",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./abstractions": {
+      "types": "./dist/abstractions/index.d.ts",
+      "import": "./dist/abstractions/index.js",
+      "default": "./dist/abstractions/index.js"
+    },
+    "./test-adapters": {
+      "types": "./dist/test-adapters/index.d.ts",
+      "import": "./dist/test-adapters/index.js",
+      "default": "./dist/test-adapters/index.js"
+    },
+    "./markdown": {
+      "types": "./dist/markdown/index.d.ts",
+      "import": "./dist/markdown/index.js",
+      "default": "./dist/markdown/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js",
+      "default": "./dist/types/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "bun run clean && bun run build:lib",
+    "clean": "rm -rf dist",
+    "build:lib": "tsc",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage",
+    "test:watch": "bun test --watch",
+    "lint": "eslint src --max-warnings 0",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@principal-ai/repository-abstraction": "^0.4.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "@types/bun": "^1.1.20",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^10.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.4.0",
+    "typescript": "^5.6.3"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "tests/**/*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/backlog-md/core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/backlog-md/core/issues"
+  },
+  "keywords": [
+    "backlog",
+    "task-management",
+    "markdown",
+    "git",
+    "core"
+  ]
+}
