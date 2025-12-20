@@ -70,11 +70,17 @@ export {
 } from "./markdown";
 
 // ============================================================================
-// Core API (placeholder - to be implemented)
+// Core API
 // ============================================================================
 
-// TODO: Export Core class when implemented
-// export { Core, type CoreOptions } from "./core";
+export { Core, type CoreOptions } from "./core";
+export { parseBacklogConfig, serializeBacklogConfig } from "./core";
+
+// ============================================================================
+// Utilities
+// ============================================================================
+
+export { sortTasks, groupTasksByStatus } from "./utils";
 
 // ============================================================================
 // Re-exports from repository-abstraction for convenience
