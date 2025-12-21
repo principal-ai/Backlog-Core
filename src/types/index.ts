@@ -96,12 +96,48 @@ export interface TaskUpdateInput {
   rawContent?: string;
 }
 
+/** Pagination options for task listing */
+export interface PaginationOptions {
+  /** Number of items per page (default: 10) */
+  limit?: number;
+  /** Page offset (0-based, default: 0) */
+  offset?: number;
+  /** Sort field (default: 'title') */
+  sortBy?: "title" | "createdDate" | "priority" | "ordinal";
+  /** Sort direction (default: 'asc') */
+  sortDirection?: "asc" | "desc";
+}
+
+/** Paginated result wrapper */
+export interface PaginatedResult<T> {
+  /** Items for current page */
+  items: T[];
+  /** Total count of items (before pagination) */
+  total: number;
+  /** Whether more items exist */
+  hasMore: boolean;
+  /** Current offset */
+  offset: number;
+  /** Current limit */
+  limit: number;
+}
+
+/** Paginated tasks grouped by status */
+export interface PaginatedTasksByStatus {
+  /** Map of status -> paginated tasks */
+  byStatus: Map<string, PaginatedResult<Task>>;
+  /** Configured statuses (for column order) */
+  statuses: string[];
+}
+
 export interface TaskListFilter {
   status?: string;
   assignee?: string;
   priority?: "high" | "medium" | "low";
   parentTaskId?: string;
   labels?: string[];
+  /** Pagination options */
+  pagination?: PaginationOptions;
 }
 
 export interface Decision {

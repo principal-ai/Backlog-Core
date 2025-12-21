@@ -35,6 +35,11 @@ export type {
   AcceptanceCriterion,
   AcceptanceCriterionInput,
 
+  // Pagination types
+  PaginationOptions,
+  PaginatedResult,
+  PaginatedTasksByStatus,
+
   // Document types
   Document,
   Decision,
@@ -80,7 +85,12 @@ export { parseBacklogConfig, serializeBacklogConfig } from "./core";
 // Utilities
 // ============================================================================
 
-export { sortTasks, groupTasksByStatus } from "./utils";
+export {
+  sortTasks,
+  sortTasksByTitle,
+  sortTasksBy,
+  groupTasksByStatus,
+} from "./utils";
 
 // ============================================================================
 // Re-exports from repository-abstraction for convenience

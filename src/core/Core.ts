@@ -6,10 +6,17 @@
  */
 
 import type { FileSystemAdapter } from "@principal-ai/repository-abstraction";
-import type { Task, BacklogConfig, TaskListFilter } from "../types";
+import type {
+  Task,
+  BacklogConfig,
+  TaskListFilter,
+  PaginationOptions,
+  PaginatedResult,
+  PaginatedTasksByStatus,
+} from "../types";
 import { parseBacklogConfig, serializeBacklogConfig } from "./config-parser";
 import { parseTaskMarkdown } from "../markdown";
-import { sortTasks, groupTasksByStatus } from "../utils";
+import { sortTasks, sortTasksBy, groupTasksByStatus } from "../utils";
 
 /**
  * Options for initializing a new Backlog.md project
@@ -235,6 +242,131 @@ export class Core {
   }
 
   /**
+   * List tasks with pagination
+   *
+   * @param filter - Filter and pagination options
+   * @returns Paginated result with tasks
+   */
+  listTasksPaginated(filter?: TaskListFilter): PaginatedResult<Task> {
+    this.ensureInitialized();
+
+    // Apply filters
+    let tasks = this.applyFilters(Array.from(this.tasks.values()), filter);
+
+    // Sort
+    const pagination = filter?.pagination ?? {};
+    const sortBy = pagination.sortBy ?? "title";
+    const sortDirection = pagination.sortDirection ?? "asc";
+
+    tasks = sortTasksBy(tasks, sortBy, sortDirection);
+
+    // Paginate
+    const limit = pagination.limit ?? 10;
+    const offset = pagination.offset ?? 0;
+    const total = tasks.length;
+    const items = tasks.slice(offset, offset + limit);
+
+    return {
+      items,
+      total,
+      hasMore: offset + limit < total,
+      offset,
+      limit,
+    };
+  }
+
+  /**
+   * Get tasks by status with pagination per column
+   *
+   * @param pagination - Pagination options (applied per status)
+   * @returns Paginated tasks grouped by status
+   */
+  getTasksByStatusPaginated(
+    pagination?: PaginationOptions
+  ): PaginatedTasksByStatus {
+    this.ensureInitialized();
+
+    const limit = pagination?.limit ?? 10;
+    const offset = pagination?.offset ?? 0;
+    const sortBy = pagination?.sortBy ?? "title";
+    const sortDirection = pagination?.sortDirection ?? "asc";
+
+    const byStatus = new Map<string, PaginatedResult<Task>>();
+
+    // Group all tasks by status first (without sorting)
+    const allGrouped = new Map<string, Task[]>();
+    for (const status of this.config!.statuses) {
+      allGrouped.set(status, []);
+    }
+    for (const task of this.tasks.values()) {
+      const list = allGrouped.get(task.status);
+      if (list) {
+        list.push(task);
+      } else {
+        allGrouped.set(task.status, [task]);
+      }
+    }
+
+    // Paginate each status column
+    for (const status of this.config!.statuses) {
+      let tasks = allGrouped.get(status) ?? [];
+      tasks = sortTasksBy(tasks, sortBy, sortDirection);
+
+      const total = tasks.length;
+      const items = tasks.slice(offset, offset + limit);
+
+      byStatus.set(status, {
+        items,
+        total,
+        hasMore: offset + limit < total,
+        offset,
+        limit,
+      });
+    }
+
+    return {
+      byStatus,
+      statuses: this.config!.statuses,
+    };
+  }
+
+  /**
+   * Load more tasks for a specific status
+   *
+   * @param status - Status column to load more from
+   * @param currentOffset - Current offset (items already loaded)
+   * @param pagination - Pagination options (limit, sortBy, sortDirection)
+   * @returns Paginated result for the status
+   */
+  loadMoreForStatus(
+    status: string,
+    currentOffset: number,
+    pagination?: Omit<PaginationOptions, "offset">
+  ): PaginatedResult<Task> {
+    this.ensureInitialized();
+
+    const limit = pagination?.limit ?? 10;
+    const sortBy = pagination?.sortBy ?? "title";
+    const sortDirection = pagination?.sortDirection ?? "asc";
+
+    let tasks = Array.from(this.tasks.values()).filter(
+      (t) => t.status === status
+    );
+    tasks = sortTasksBy(tasks, sortBy, sortDirection);
+
+    const total = tasks.length;
+    const items = tasks.slice(currentOffset, currentOffset + limit);
+
+    return {
+      items,
+      total,
+      hasMore: currentOffset + limit < total,
+      offset: currentOffset,
+      limit,
+    };
+  }
+
+  /**
    * Reload all tasks from disk
    *
    * Useful after external changes to task files.
@@ -251,6 +383,32 @@ export class Core {
     if (!this.initialized) {
       throw new Error("Core not initialized. Call initialize() first.");
     }
+  }
+
+  private applyFilters(tasks: Task[], filter?: TaskListFilter): Task[] {
+    if (!filter) return tasks;
+
+    let result = tasks;
+
+    if (filter.status) {
+      result = result.filter((t) => t.status === filter.status);
+    }
+    if (filter.assignee) {
+      result = result.filter((t) => t.assignee.includes(filter.assignee!));
+    }
+    if (filter.priority) {
+      result = result.filter((t) => t.priority === filter.priority);
+    }
+    if (filter.labels && filter.labels.length > 0) {
+      result = result.filter((t) =>
+        filter.labels!.some((label) => t.labels.includes(label))
+      );
+    }
+    if (filter.parentTaskId) {
+      result = result.filter((t) => t.parentTaskId === filter.parentTaskId);
+    }
+
+    return result;
   }
 
   private async loadTasksFromDirectory(

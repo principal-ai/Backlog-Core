@@ -11,6 +11,53 @@ const PRIORITY_ORDER: Record<string, number> = {
 };
 
 /**
+ * Sort tasks alphabetically by title
+ *
+ * @param tasks - Tasks to sort
+ * @param direction - Sort direction ('asc' or 'desc')
+ * @returns New sorted array
+ */
+export function sortTasksByTitle(
+  tasks: Task[],
+  direction: "asc" | "desc" = "asc"
+): Task[] {
+  return [...tasks].sort((a, b) => {
+    const cmp = a.title.localeCompare(b.title);
+    return direction === "asc" ? cmp : -cmp;
+  });
+}
+
+/**
+ * Sort tasks by a specified field
+ *
+ * @param tasks - Tasks to sort
+ * @param sortBy - Field to sort by
+ * @param direction - Sort direction
+ * @returns New sorted array
+ */
+export function sortTasksBy(
+  tasks: Task[],
+  sortBy: "title" | "createdDate" | "priority" | "ordinal" = "title",
+  direction: "asc" | "desc" = "asc"
+): Task[] {
+  switch (sortBy) {
+    case "title":
+      return sortTasksByTitle(tasks, direction);
+    case "createdDate":
+      return [...tasks].sort((a, b) => {
+        const cmp = a.createdDate.localeCompare(b.createdDate);
+        return direction === "asc" ? cmp : -cmp;
+      });
+    case "priority":
+    case "ordinal":
+    default:
+      // Use existing sortTasks for priority/ordinal
+      const sorted = sortTasks(tasks);
+      return direction === "desc" ? sorted.reverse() : sorted;
+  }
+}
+
+/**
  * Sort tasks by: ordinal → priority → createdDate
  *
  * - Tasks with ordinal are sorted first by ordinal
