@@ -73,7 +73,7 @@ export {
 // Core API
 // ============================================================================
 
-export { Core, type CoreOptions } from "./core";
+export { Core, type CoreOptions, type InitProjectOptions } from "./core";
 export { parseBacklogConfig, serializeBacklogConfig } from "./core";
 
 // ============================================================================

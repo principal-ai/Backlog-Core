@@ -7,9 +7,23 @@
 
 import type { FileSystemAdapter } from "@principal-ai/repository-abstraction";
 import type { Task, BacklogConfig, TaskListFilter } from "../types";
-import { parseBacklogConfig } from "./config-parser";
+import { parseBacklogConfig, serializeBacklogConfig } from "./config-parser";
 import { parseTaskMarkdown } from "../markdown";
 import { sortTasks, groupTasksByStatus } from "../utils";
+
+/**
+ * Options for initializing a new Backlog.md project
+ */
+export interface InitProjectOptions {
+  /** Project name (defaults to directory name) */
+  projectName?: string;
+  /** Initial statuses (defaults to ["To Do", "In Progress", "Done"]) */
+  statuses?: string[];
+  /** Initial labels (defaults to []) */
+  labels?: string[];
+  /** Default status for new tasks (defaults to first status) */
+  defaultStatus?: string;
+}
 
 /**
  * Options for creating a Core instance
@@ -59,6 +73,63 @@ export class Core {
   async isBacklogProject(): Promise<boolean> {
     const configPath = this.fs.join(this.projectRoot, "backlog", "config.yml");
     return this.fs.exists(configPath);
+  }
+
+  /**
+   * Initialize a new Backlog.md project in the projectRoot directory
+   *
+   * Creates the backlog/ directory and config.yml file.
+   * Task directories (tasks/, completed/) are created lazily when needed.
+   *
+   * @param options - Optional configuration for the new project
+   * @throws Error if project already exists
+   *
+   * @example
+   * ```typescript
+   * const core = new Core({ projectRoot: '/path/to/project', adapters: { fs } });
+   *
+   * // Initialize with defaults
+   * await core.initProject();
+   *
+   * // Or with custom options
+   * await core.initProject({
+   *   projectName: 'My Project',
+   *   statuses: ['Backlog', 'In Progress', 'Review', 'Done'],
+   *   labels: ['bug', 'feature', 'docs']
+   * });
+   * ```
+   */
+  async initProject(options: InitProjectOptions = {}): Promise<void> {
+    // Check if already a backlog project
+    if (await this.isBacklogProject()) {
+      throw new Error(
+        `Already a Backlog.md project: config.yml exists at ${this.fs.join(this.projectRoot, "backlog", "config.yml")}`
+      );
+    }
+
+    // Derive project name from directory if not provided
+    const dirName = this.projectRoot.split("/").pop() || "Backlog";
+    const projectName = options.projectName || dirName;
+
+    // Build config with defaults
+    const statuses = options.statuses || ["To Do", "In Progress", "Done"];
+    const config: BacklogConfig = {
+      projectName,
+      statuses,
+      labels: options.labels || [],
+      milestones: [],
+      defaultStatus: options.defaultStatus || statuses[0],
+      dateFormat: "YYYY-MM-DD",
+    };
+
+    // Create backlog directory
+    const backlogDir = this.fs.join(this.projectRoot, "backlog");
+    await this.fs.createDir(backlogDir, { recursive: true });
+
+    // Write config.yml
+    const configPath = this.fs.join(backlogDir, "config.yml");
+    const configContent = serializeBacklogConfig(config);
+    await this.fs.writeFile(configPath, configContent);
   }
 
   /**
