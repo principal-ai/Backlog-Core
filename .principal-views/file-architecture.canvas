@@ -1,0 +1,456 @@
+{
+  "pv": {
+    "name": "File-to-Concept Architecture",
+    "version": "1.0.0",
+    "description": "Visual mapping of source files to architectural concepts"
+  },
+  "nodes": [
+    {
+      "id": "header",
+      "type": "text",
+      "x": 300,
+      "y": -80,
+      "width": 400,
+      "height": 50,
+      "text": "@backlog-md/core - File Architecture",
+      "pv": {
+        "nodeType": "Header",
+        "shape": "rectangle",
+        "style": "header"
+      }
+    },
+    {
+      "id": "entry-point",
+      "type": "text",
+      "x": 300,
+      "y": 0,
+      "width": 400,
+      "height": 80,
+      "text": "Package Entry Point\nsrc/index.ts",
+      "pv": {
+        "nodeType": "EntryPoint",
+        "shape": "rectangle",
+        "style": "primary",
+        "description": "Main export barrel. Re-exports all public APIs: Core class, types, markdown utilities, sorting functions. Also re-exports InMemoryFileSystemAdapter from @principal-ai/repository-abstraction.",
+        "exports": ["Core", "CoreOptions", "Task", "BacklogConfig", "parseTaskMarkdown", "serializeTaskMarkdown", "sortTasks"]
+      }
+    },
+    {
+      "id": "fs-group-label",
+      "type": "text",
+      "x": -50,
+      "y": 100,
+      "width": 200,
+      "height": 30,
+      "text": "src/",
+      "pv": {
+        "nodeType": "FolderLabel",
+        "shape": "text",
+        "style": "folder-label"
+      }
+    },
+    {
+      "id": "core-folder",
+      "type": "group",
+      "x": 0,
+      "y": 120,
+      "width": 300,
+      "height": 280,
+      "label": "core/",
+      "pv": {
+        "nodeType": "Folder",
+        "shape": "folder"
+      }
+    },
+    {
+      "id": "core-class",
+      "type": "text",
+      "x": 20,
+      "y": 160,
+      "width": 260,
+      "height": 100,
+      "text": "Core.ts\n\nMain API class:\n- initialize()\n- listTasks()\n- getTasksByStatus()\n- pagination support",
+      "pv": {
+        "nodeType": "File",
+        "shape": "file",
+        "style": "core-file",
+        "filePath": "src/core/Core.ts",
+        "description": "Runtime-agnostic Core class. Accepts FileSystemAdapter via constructor. Manages task loading, caching, filtering, and pagination. Supports both eager and lazy initialization modes."
+      }
+    },
+    {
+      "id": "config-parser",
+      "type": "text",
+      "x": 20,
+      "y": 280,
+      "width": 260,
+      "height": 80,
+      "text": "config-parser.ts\n\nYAML config:\n- parseBacklogConfig()\n- serializeBacklogConfig()",
+      "pv": {
+        "nodeType": "File",
+        "shape": "file",
+        "style": "core-file",
+        "filePath": "src/core/config-parser.ts",
+        "description": "Parses backlog/config.yml files into BacklogConfig objects. Uses js-yaml for YAML parsing."
+      }
+    },
+    {
+      "id": "markdown-folder",
+      "type": "group",
+      "x": 340,
+      "y": 120,
+      "width": 300,
+      "height": 280,
+      "label": "markdown/",
+      "pv": {
+        "nodeType": "Folder",
+        "shape": "folder"
+      }
+    },
+    {
+      "id": "markdown-parser",
+      "type": "text",
+      "x": 360,
+      "y": 160,
+      "width": 260,
+      "height": 200,
+      "text": "index.ts\n\nTask Markdown I/O:\n- parseTaskMarkdown()\n- serializeTaskMarkdown()\n- extractTaskIndexFromPath()\n\nParses:\n- YAML frontmatter\n- Title (# heading)\n- Acceptance criteria\n- Descriptions",
+      "pv": {
+        "nodeType": "File",
+        "shape": "file",
+        "style": "util-file",
+        "filePath": "src/markdown/index.ts",
+        "description": "Pure functions for converting between markdown files and Task objects. Handles frontmatter extraction, acceptance criteria parsing, and serialization back to markdown format."
+      }
+    },
+    {
+      "id": "types-folder",
+      "type": "group",
+      "x": 680,
+      "y": 120,
+      "width": 280,
+      "height": 280,
+      "label": "types/",
+      "pv": {
+        "nodeType": "Folder",
+        "shape": "folder"
+      }
+    },
+    {
+      "id": "types-index",
+      "type": "text",
+      "x": 700,
+      "y": 160,
+      "width": 240,
+      "height": 220,
+      "text": "index.ts\n\nType definitions:\n- Task, TaskStatus\n- TaskCreateInput\n- TaskUpdateInput\n- BacklogConfig\n- PaginationOptions\n- PaginatedResult\n- SearchOptions\n- Decision, Document",
+      "pv": {
+        "nodeType": "File",
+        "shape": "file",
+        "style": "type-file",
+        "filePath": "src/types/index.ts",
+        "description": "All TypeScript interfaces and types. Compatible with original Backlog.md types. Includes Task, BacklogConfig, pagination types, search types, and helper functions like isLocalEditableTask()."
+      }
+    },
+    {
+      "id": "utils-folder",
+      "type": "group",
+      "x": 0,
+      "y": 440,
+      "width": 300,
+      "height": 160,
+      "label": "utils/",
+      "pv": {
+        "nodeType": "Folder",
+        "shape": "folder"
+      }
+    },
+    {
+      "id": "sorting",
+      "type": "text",
+      "x": 20,
+      "y": 480,
+      "width": 260,
+      "height": 100,
+      "text": "sorting.ts\n\nTask sorting:\n- sortTasks()\n- sortTasksBy()\n- groupTasksByStatus()",
+      "pv": {
+        "nodeType": "File",
+        "shape": "file",
+        "style": "util-file",
+        "filePath": "src/utils/sorting.ts",
+        "description": "Pure sorting utilities. sortTasks() provides default sorting by priority then title. sortTasksBy() allows custom sort fields. groupTasksByStatus() groups tasks into a Map preserving status order from config."
+      }
+    },
+    {
+      "id": "abstractions-folder",
+      "type": "group",
+      "x": 340,
+      "y": 440,
+      "width": 300,
+      "height": 160,
+      "label": "abstractions/",
+      "pv": {
+        "nodeType": "Folder",
+        "shape": "folder"
+      }
+    },
+    {
+      "id": "abstractions-index",
+      "type": "text",
+      "x": 360,
+      "y": 480,
+      "width": 260,
+      "height": 50,
+      "text": "index.ts\nRe-exports from repository-abstraction",
+      "pv": {
+        "nodeType": "File",
+        "shape": "file",
+        "style": "adapter-file",
+        "filePath": "src/abstractions/index.ts",
+        "description": "Barrel export for adapter interfaces. Re-exports FileSystemAdapter, GlobAdapter from @principal-ai/repository-abstraction."
+      }
+    },
+    {
+      "id": "git-adapter",
+      "type": "text",
+      "x": 360,
+      "y": 540,
+      "width": 260,
+      "height": 50,
+      "text": "GitAdapter.ts\nGit operation interface",
+      "pv": {
+        "nodeType": "File",
+        "shape": "file",
+        "style": "adapter-file",
+        "filePath": "src/abstractions/GitAdapter.ts",
+        "description": "Interface for git operations: exec(), isGitRepository(), getCurrentBranch(). Allows different git implementations (shell, isomorphic-git, etc)."
+      }
+    },
+    {
+      "id": "test-adapters-folder",
+      "type": "group",
+      "x": 680,
+      "y": 440,
+      "width": 280,
+      "height": 160,
+      "label": "test-adapters/",
+      "pv": {
+        "nodeType": "Folder",
+        "shape": "folder"
+      }
+    },
+    {
+      "id": "mock-git",
+      "type": "text",
+      "x": 700,
+      "y": 480,
+      "width": 240,
+      "height": 100,
+      "text": "MockGitAdapter.ts\n\nTest double for GitAdapter:\n- Configurable responses\n- No real git calls",
+      "pv": {
+        "nodeType": "File",
+        "shape": "file",
+        "style": "test-file",
+        "filePath": "src/test-adapters/MockGitAdapter.ts",
+        "description": "In-memory mock implementation of GitAdapter for unit testing. Returns configurable responses without making real git calls."
+      }
+    },
+    {
+      "id": "external-deps",
+      "type": "group",
+      "x": 100,
+      "y": 650,
+      "width": 500,
+      "height": 100,
+      "label": "External Dependencies",
+      "pv": {
+        "nodeType": "External",
+        "shape": "folder"
+      }
+    },
+    {
+      "id": "repo-abstraction",
+      "type": "text",
+      "x": 120,
+      "y": 680,
+      "width": 220,
+      "height": 50,
+      "text": "@principal-ai/repository-abstraction\nFileSystemAdapter, GlobAdapter",
+      "pv": {
+        "nodeType": "Dependency",
+        "shape": "rectangle",
+        "style": "external",
+        "description": "Provides adapter interfaces and InMemoryFileSystemAdapter for testing. Core depends on these for all file I/O."
+      }
+    },
+    {
+      "id": "js-yaml",
+      "type": "text",
+      "x": 360,
+      "y": 680,
+      "width": 120,
+      "height": 50,
+      "text": "js-yaml\nYAML parsing",
+      "pv": {
+        "nodeType": "Dependency",
+        "shape": "rectangle",
+        "style": "external",
+        "description": "YAML parsing for config.yml files."
+      }
+    },
+    {
+      "id": "data-flow-label",
+      "type": "text",
+      "x": 1020,
+      "y": 100,
+      "width": 200,
+      "height": 30,
+      "text": "Data Flow",
+      "pv": {
+        "nodeType": "SectionLabel",
+        "shape": "text",
+        "style": "section-label"
+      }
+    },
+    {
+      "id": "flow-diagram",
+      "type": "text",
+      "x": 1000,
+      "y": 140,
+      "width": 280,
+      "height": 380,
+      "text": "1. Consumer creates Core\n   with FileSystemAdapter\n\n2. Core.initialize()\n   - Reads config.yml\n   - Uses config-parser\n\n3. Core loads tasks/\n   - Reads .md files\n   - Uses markdown parser\n   - Caches in Map<id, Task>\n\n4. Consumer queries:\n   - listTasks(filter)\n   - getTasksByStatus()\n   - Pagination methods\n\n5. Results use:\n   - sorting utilities\n   - groupTasksByStatus()",
+      "pv": {
+        "nodeType": "Documentation",
+        "shape": "note",
+        "style": "flow-note"
+      }
+    },
+    {
+      "id": "project-structure",
+      "type": "text",
+      "x": 1000,
+      "y": 550,
+      "width": 280,
+      "height": 200,
+      "text": "Backlog Project Structure\n\nproject/\n  backlog/\n    config.yml     <- BacklogConfig\n    tasks/\n      001 - Task.md  <- Task\n      002 - Task.md  <- Task\n    completed/\n      003 - Done.md  <- Task (source=completed)",
+      "pv": {
+        "nodeType": "Documentation",
+        "shape": "note",
+        "style": "structure-note"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "entry-to-core",
+      "fromNode": "entry-point",
+      "fromSide": "bottom",
+      "toNode": "core-class",
+      "toSide": "top",
+      "label": "exports Core",
+      "pv": {
+        "edgeType": "Export"
+      }
+    },
+    {
+      "id": "entry-to-markdown",
+      "fromNode": "entry-point",
+      "fromSide": "bottom",
+      "toNode": "markdown-parser",
+      "toSide": "top",
+      "label": "exports parse/serialize",
+      "pv": {
+        "edgeType": "Export"
+      }
+    },
+    {
+      "id": "entry-to-types",
+      "fromNode": "entry-point",
+      "fromSide": "bottom",
+      "toNode": "types-index",
+      "toSide": "top",
+      "label": "exports types",
+      "pv": {
+        "edgeType": "Export"
+      }
+    },
+    {
+      "id": "core-uses-config",
+      "fromNode": "core-class",
+      "fromSide": "bottom",
+      "toNode": "config-parser",
+      "toSide": "top",
+      "label": "uses",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "core-uses-markdown",
+      "fromNode": "core-class",
+      "fromSide": "right",
+      "toNode": "markdown-parser",
+      "toSide": "left",
+      "label": "parses tasks",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "core-uses-sorting",
+      "fromNode": "core-class",
+      "fromSide": "bottom",
+      "toNode": "sorting",
+      "toSide": "top",
+      "label": "sorts results",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "core-uses-types",
+      "fromNode": "core-class",
+      "fromSide": "right",
+      "toNode": "types-index",
+      "toSide": "left",
+      "label": "Task, Config types",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "markdown-uses-types",
+      "fromNode": "markdown-parser",
+      "fromSide": "right",
+      "toNode": "types-index",
+      "toSide": "left",
+      "label": "Task type",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "abstractions-to-repo",
+      "fromNode": "abstractions-index",
+      "fromSide": "bottom",
+      "toNode": "repo-abstraction",
+      "toSide": "top",
+      "label": "re-exports",
+      "pv": {
+        "edgeType": "Export"
+      }
+    },
+    {
+      "id": "core-uses-fs-adapter",
+      "fromNode": "core-class",
+      "fromSide": "bottom",
+      "toNode": "abstractions-index",
+      "toSide": "top",
+      "label": "FileSystemAdapter",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    }
+  ]
+}
