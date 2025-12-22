@@ -130,6 +130,43 @@ export interface PaginatedTasksByStatus {
   statuses: string[];
 }
 
+/**
+ * Lightweight task index entry for lazy loading.
+ * Extracted from filename/path only - no file reads required.
+ */
+export interface TaskIndexEntry {
+  /** Task ID extracted from filename */
+  id: string;
+  /** Full file path */
+  filePath: string;
+  /** Title extracted from filename */
+  title: string;
+  /** Source directory name: "tasks" or "completed" */
+  source: "tasks" | "completed";
+}
+
+/** Paginated tasks grouped by source (Active/Completed) */
+export interface PaginatedTasksBySource {
+  /** Map of source -> paginated tasks */
+  bySource: Map<string, PaginatedResult<Task>>;
+  /** Available sources in display order */
+  sources: string[];
+}
+
+/** Per-source pagination options for lazy loading */
+export interface SourcePaginationOptions {
+  /** Limit for active tasks (default: 10) */
+  tasksLimit?: number;
+  /** Limit for completed tasks (default: 10) */
+  completedLimit?: number;
+  /** Page offset (0-based, default: 0) */
+  offset?: number;
+  /** Sort direction for active tasks (default: 'asc' by title) */
+  tasksSortDirection?: "asc" | "desc";
+  /** Sort completed by ID descending for most recent (default: true) */
+  completedSortByIdDesc?: boolean;
+}
+
 export interface TaskListFilter {
   status?: string;
   assignee?: string;

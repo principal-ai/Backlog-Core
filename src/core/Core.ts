@@ -13,9 +13,12 @@ import type {
   PaginationOptions,
   PaginatedResult,
   PaginatedTasksByStatus,
+  PaginatedTasksBySource,
+  TaskIndexEntry,
+  SourcePaginationOptions,
 } from "../types";
 import { parseBacklogConfig, serializeBacklogConfig } from "./config-parser";
-import { parseTaskMarkdown } from "../markdown";
+import { parseTaskMarkdown, extractTaskIndexFromPath } from "../markdown";
 import { sortTasks, sortTasksBy, groupTasksByStatus } from "../utils";
 
 /**
@@ -68,6 +71,10 @@ export class Core {
   private config: BacklogConfig | null = null;
   private tasks: Map<string, Task> = new Map();
   private initialized = false;
+
+  /** Lightweight task index for lazy loading (no file reads) */
+  private taskIndex: Map<string, TaskIndexEntry> = new Map();
+  private lazyInitialized = false;
 
   constructor(options: CoreOptions) {
     this.projectRoot = options.projectRoot;
@@ -174,6 +181,229 @@ export class Core {
     }
 
     this.initialized = true;
+  }
+
+  /**
+   * Initialize with lazy loading (no file content reads)
+   *
+   * Only loads config and builds task index from file paths.
+   * Task content is loaded on-demand via loadTask().
+   * Use this for web/panel contexts where file reads are expensive.
+   *
+   * @param filePaths - Array of all file paths in the project
+   */
+  async initializeLazy(filePaths: string[]): Promise<void> {
+    if (this.lazyInitialized) return;
+
+    // Load config
+    const configPath = this.fs.join(this.projectRoot, "backlog", "config.yml");
+    const configExists = await this.fs.exists(configPath);
+
+    if (!configExists) {
+      throw new Error(
+        `Not a Backlog.md project: config.yml not found at ${configPath}`
+      );
+    }
+
+    const configContent = await this.fs.readFile(configPath);
+    this.config = parseBacklogConfig(configContent);
+
+    // Build task index from file paths only (no file reads)
+    this.taskIndex.clear();
+    for (const filePath of filePaths) {
+      if (!filePath.endsWith(".md")) continue;
+      // Check for backlog/tasks or backlog/completed (with or without leading slash)
+      const isTaskFile = filePath.includes("backlog/tasks/") || filePath.includes("backlog\\tasks\\");
+      const isCompletedFile = filePath.includes("backlog/completed/") || filePath.includes("backlog\\completed\\");
+      if (!isTaskFile && !isCompletedFile) continue;
+      // Skip config.yml
+      if (filePath.endsWith("config.yml")) continue;
+
+      const indexEntry = extractTaskIndexFromPath(filePath);
+      this.taskIndex.set(indexEntry.id, indexEntry);
+    }
+
+    this.lazyInitialized = true;
+  }
+
+  /**
+   * Check if lazy initialization is complete
+   */
+  isLazyInitialized(): boolean {
+    return this.lazyInitialized;
+  }
+
+  /**
+   * Get the task index (lightweight entries)
+   */
+  getTaskIndex(): Map<string, TaskIndexEntry> {
+    if (!this.lazyInitialized) {
+      throw new Error("Core not lazy initialized. Call initializeLazy() first.");
+    }
+    return this.taskIndex;
+  }
+
+  /**
+   * Load a single task by ID (on-demand loading)
+   *
+   * @param id - Task ID
+   * @returns Task or undefined if not found
+   */
+  async loadTask(id: string): Promise<Task | undefined> {
+    // Return from cache if already loaded
+    if (this.tasks.has(id)) {
+      return this.tasks.get(id);
+    }
+
+    // Get index entry
+    const indexEntry = this.taskIndex.get(id);
+    if (!indexEntry) {
+      return undefined;
+    }
+
+    // Load and parse task file
+    try {
+      const content = await this.fs.readFile(indexEntry.filePath);
+      const task = parseTaskMarkdown(content, indexEntry.filePath);
+      task.source = indexEntry.source === "completed" ? "completed" : "local";
+      this.tasks.set(task.id, task);
+      return task;
+    } catch (error) {
+      console.warn(`Failed to load task ${id} from ${indexEntry.filePath}:`, error);
+      return undefined;
+    }
+  }
+
+  /**
+   * Load multiple tasks by ID (on-demand loading)
+   *
+   * @param ids - Array of task IDs to load
+   * @returns Array of loaded tasks (undefined entries filtered out)
+   */
+  async loadTasks(ids: string[]): Promise<Task[]> {
+    const tasks = await Promise.all(ids.map((id) => this.loadTask(id)));
+    return tasks.filter((t): t is Task => t !== undefined);
+  }
+
+  /**
+   * Get tasks by source (tasks/completed) with pagination
+   *
+   * This is a lazy-loading alternative to getTasksByStatusPaginated().
+   * Groups by directory (tasks/ or completed/) instead of status.
+   * Only loads task content for items in the requested page.
+   *
+   * @param options - Per-source pagination options
+   * @returns Paginated tasks grouped by source
+   */
+  async getTasksBySourcePaginated(
+    options?: SourcePaginationOptions
+  ): Promise<PaginatedTasksBySource> {
+    if (!this.lazyInitialized) {
+      throw new Error("Core not lazy initialized. Call initializeLazy() first.");
+    }
+
+    const tasksLimit = options?.tasksLimit ?? 10;
+    const completedLimit = options?.completedLimit ?? 10;
+    const offset = options?.offset ?? 0;
+    const tasksSortDirection = options?.tasksSortDirection ?? "asc";
+    const completedSortByIdDesc = options?.completedSortByIdDesc ?? true;
+
+    const sources: Array<"tasks" | "completed"> = ["tasks", "completed"];
+    const bySource = new Map<string, PaginatedResult<Task>>();
+
+    for (const source of sources) {
+      // Get index entries for this source
+      let entries = Array.from(this.taskIndex.values()).filter(
+        (e) => e.source === source
+      );
+
+      // Per-source limit
+      const limit = source === "tasks" ? tasksLimit : completedLimit;
+
+      // Sort by ID (numeric)
+      entries = entries.sort((a, b) => {
+        const aNum = parseInt(a.id.replace(/\D/g, ""), 10) || 0;
+        const bNum = parseInt(b.id.replace(/\D/g, ""), 10) || 0;
+        // Completed: descending (most recent first), Active: ascending
+        return source === "completed" && completedSortByIdDesc
+          ? bNum - aNum
+          : aNum - bNum;
+      });
+
+      const total = entries.length;
+      const pageEntries = entries.slice(offset, offset + limit);
+
+      // Load only the tasks for this page
+      const items = await this.loadTasks(pageEntries.map((e) => e.id));
+
+      bySource.set(source, {
+        items,
+        total,
+        hasMore: offset + limit < total,
+        offset,
+        limit,
+      });
+    }
+
+    return {
+      bySource,
+      sources,
+    };
+  }
+
+  /**
+   * Load more tasks for a specific source (lazy loading)
+   *
+   * @param source - Source to load more from ("tasks" or "completed")
+   * @param currentOffset - Current offset (items already loaded)
+   * @param options - Pagination options
+   * @returns Paginated result for the source
+   */
+  async loadMoreForSource(
+    source: "tasks" | "completed",
+    currentOffset: number,
+    options?: {
+      limit?: number;
+      sortDirection?: "asc" | "desc";
+      completedSortByIdDesc?: boolean;
+    }
+  ): Promise<PaginatedResult<Task>> {
+    if (!this.lazyInitialized) {
+      throw new Error("Core not lazy initialized. Call initializeLazy() first.");
+    }
+
+    const limit = options?.limit ?? 10;
+    const sortDirection = options?.sortDirection ?? "asc";
+    const completedSortByIdDesc = options?.completedSortByIdDesc ?? true;
+
+    // Get index entries for this source
+    let entries = Array.from(this.taskIndex.values()).filter(
+      (e) => e.source === source
+    );
+
+    // Sort by ID (numeric)
+    entries = entries.sort((a, b) => {
+      const aNum = parseInt(a.id.replace(/\D/g, ""), 10) || 0;
+      const bNum = parseInt(b.id.replace(/\D/g, ""), 10) || 0;
+      // Completed: descending (most recent first), Active: ascending
+      return source === "completed" && completedSortByIdDesc
+        ? bNum - aNum
+        : aNum - bNum;
+    });
+
+    const total = entries.length;
+    const pageEntries = entries.slice(currentOffset, currentOffset + limit);
+
+    // Load only the tasks for this page
+    const items = await this.loadTasks(pageEntries.map((e) => e.id));
+
+    return {
+      items,
+      total,
+      hasMore: currentOffset + limit < total,
+      offset: currentOffset,
+      limit,
+    };
   }
 
   /**

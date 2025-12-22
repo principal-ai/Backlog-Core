@@ -4,7 +4,7 @@
  * This module handles conversion between markdown files and Task objects.
  */
 
-import type { Task, AcceptanceCriterion } from "../types";
+import type { Task, AcceptanceCriterion, TaskIndexEntry } from "../types";
 
 /**
  * Parsed frontmatter from a task markdown file
@@ -298,6 +298,125 @@ function extractIdFromPath(filePath: string): string {
   return filename.replace(/\.md$/, "");
 }
 
+/**
+ * Extract title from filename
+ * Pattern: "task-001 - My Task Title.md" -> "My Task Title"
+ * Pattern: "001 - My Task Title.md" -> "My Task Title"
+ * Fallback: filename without extension
+ */
+function extractTitleFromPath(filePath: string): string {
+  const filename = filePath.split("/").pop() || "";
+  // Match: optional "task-", id, " - ", then capture title
+  const match = filename.match(/^(?:task-)?\d+(?:\.\d+)?\s*-\s*(.+)\.md$/);
+  if (match) {
+    return match[1].trim();
+  }
+  // Fallback: filename without extension
+  return filename.replace(/\.md$/, "");
+}
+
+/**
+ * Extract source directory from file path
+ * Returns "tasks" or "completed" based on path
+ */
+function extractSourceFromPath(filePath: string): "tasks" | "completed" {
+  if (filePath.includes("/completed/") || filePath.includes("\\completed\\")) {
+    return "completed";
+  }
+  return "tasks";
+}
+
+/**
+ * Extract task index entry from file path only (no file read required)
+ *
+ * @param filePath - Path to the task file
+ * @returns TaskIndexEntry with id, title, filePath, and source
+ */
+export function extractTaskIndexFromPath(filePath: string): TaskIndexEntry {
+  return {
+    id: extractIdFromPath(filePath),
+    filePath,
+    title: extractTitleFromPath(filePath),
+    source: extractSourceFromPath(filePath),
+  };
+}
+
 function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Options for getTaskBodyMarkdown
+ */
+export interface TaskBodyMarkdownOptions {
+  /** Include the h1 title in the output (default: false) */
+  includeTitle?: boolean;
+}
+
+/**
+ * Extract the markdown body from a Task object for rendering in a viewer.
+ *
+ * This returns the markdown content without frontmatter, suitable for
+ * passing to a markdown renderer like DocumentView.
+ *
+ * @param task - Task object with rawContent or parsed fields
+ * @param options - Options for body extraction
+ * @returns Markdown string for the body content
+ */
+export function getTaskBodyMarkdown(
+  task: Task,
+  options: TaskBodyMarkdownOptions = {}
+): string {
+  const { includeTitle = false } = options;
+
+  // If we have rawContent, use it (stripping title if needed)
+  if (task.rawContent) {
+    let body = task.rawContent;
+
+    if (!includeTitle && task.title) {
+      // Remove the h1 title line
+      body = body.replace(new RegExp(`^#\\s+${escapeRegex(task.title)}\\s*\\n?`, "m"), "");
+    }
+
+    return body.trim();
+  }
+
+  // Reconstruct from parsed fields if no rawContent
+  const sections: string[] = [];
+
+  if (includeTitle && task.title) {
+    sections.push(`# ${task.title}`);
+    sections.push("");
+  }
+
+  if (task.description) {
+    sections.push(task.description);
+    sections.push("");
+  }
+
+  if (task.acceptanceCriteriaItems && task.acceptanceCriteriaItems.length > 0) {
+    sections.push("## Acceptance Criteria");
+    sections.push("");
+    for (const criterion of task.acceptanceCriteriaItems) {
+      const checkbox = criterion.checked ? "[x]" : "[ ]";
+      sections.push(`- ${checkbox} ${criterion.text}`);
+    }
+    sections.push("");
+  }
+
+  if (task.implementationPlan) {
+    sections.push("## Implementation Plan");
+    sections.push("");
+    sections.push(task.implementationPlan);
+    sections.push("");
+  }
+
+  if (task.implementationNotes) {
+    sections.push("## Implementation Notes");
+    sections.push("");
+    sections.push(task.implementationNotes);
+    sections.push("");
+  }
+
+  return sections.join("\n").trim();
 }

@@ -39,6 +39,9 @@ export type {
   PaginationOptions,
   PaginatedResult,
   PaginatedTasksByStatus,
+  PaginatedTasksBySource,
+  TaskIndexEntry,
+  SourcePaginationOptions,
 
   // Document types
   Document,
@@ -71,7 +74,10 @@ export { isLocalEditableTask } from "./types";
 export {
   parseTaskMarkdown,
   serializeTaskMarkdown,
+  extractTaskIndexFromPath,
+  getTaskBodyMarkdown,
   type TaskFrontmatter,
+  type TaskBodyMarkdownOptions,
 } from "./markdown";
 
 // ============================================================================
