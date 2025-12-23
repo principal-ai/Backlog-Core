@@ -16,10 +16,25 @@ import type {
   PaginatedTasksBySource,
   TaskIndexEntry,
   SourcePaginationOptions,
+  MilestoneSummary,
 } from "../types";
 import { parseBacklogConfig, serializeBacklogConfig } from "./config-parser";
-import { parseTaskMarkdown, extractTaskIndexFromPath } from "../markdown";
-import { sortTasks, sortTasksBy, groupTasksByStatus } from "../utils";
+import {
+  parseTaskMarkdown,
+  extractTaskIndexFromPath,
+  parseMilestoneMarkdown,
+  serializeMilestoneMarkdown,
+  getMilestoneFilename,
+  extractMilestoneIdFromFilename,
+} from "../markdown";
+import {
+  sortTasks,
+  sortTasksBy,
+  groupTasksByStatus,
+  groupTasksByMilestone,
+  milestoneKey,
+} from "../utils";
+import type { Milestone } from "../types";
 
 /**
  * Options for initializing a new Backlog.md project
@@ -47,6 +62,26 @@ export interface CoreOptions {
     /** FileSystem adapter (required) */
     fs: FileSystemAdapter;
   };
+}
+
+/**
+ * Input for creating a new milestone
+ */
+export interface MilestoneCreateInput {
+  /** Milestone title (required) */
+  title: string;
+  /** Optional description */
+  description?: string;
+}
+
+/**
+ * Input for updating an existing milestone
+ */
+export interface MilestoneUpdateInput {
+  /** New title (optional) */
+  title?: string;
+  /** New description (optional) */
+  description?: string;
 }
 
 /**
@@ -435,6 +470,10 @@ export class Core {
     if (filter?.priority) {
       tasks = tasks.filter((t) => t.priority === filter.priority);
     }
+    if (filter?.milestone) {
+      const filterKey = milestoneKey(filter.milestone);
+      tasks = tasks.filter((t) => milestoneKey(t.milestone) === filterKey);
+    }
     if (filter?.labels && filter.labels.length > 0) {
       tasks = tasks.filter((t) =>
         filter.labels!.some((label) => t.labels.includes(label))
@@ -458,6 +497,276 @@ export class Core {
     this.ensureInitialized();
     const tasks = Array.from(this.tasks.values());
     return groupTasksByStatus(tasks, this.config!.statuses);
+  }
+
+  /**
+   * Get tasks grouped by milestone
+   *
+   * Returns a MilestoneSummary with:
+   * - milestones: List of milestone IDs in display order
+   * - buckets: Array of MilestoneBucket with tasks, progress, status counts
+   *
+   * The first bucket is always "Tasks without milestone".
+   * Each bucket includes progress percentage based on done status.
+   *
+   * @example
+   * ```typescript
+   * const summary = core.getTasksByMilestone();
+   * for (const bucket of summary.buckets) {
+   *   console.log(`${bucket.label}: ${bucket.progress}% complete`);
+   *   console.log(`  ${bucket.doneCount}/${bucket.total} tasks done`);
+   * }
+   * ```
+   */
+  getTasksByMilestone(): MilestoneSummary {
+    this.ensureInitialized();
+    const tasks = Array.from(this.tasks.values());
+    return groupTasksByMilestone(
+      tasks,
+      this.config!.milestones,
+      this.config!.statuses
+    );
+  }
+
+  // =========================================================================
+  // Milestone CRUD Operations
+  // =========================================================================
+
+  /**
+   * Get the milestones directory path
+   */
+  private getMilestonesDir(): string {
+    return this.fs.join(this.projectRoot, "backlog", "milestones");
+  }
+
+  /**
+   * List all milestones from the milestones directory
+   *
+   * @returns Array of Milestone objects sorted by ID
+   */
+  async listMilestones(): Promise<Milestone[]> {
+    const milestonesDir = this.getMilestonesDir();
+
+    // Check if directory exists
+    if (!(await this.fs.exists(milestonesDir))) {
+      return [];
+    }
+
+    const entries = await this.fs.readDir(milestonesDir);
+    const milestones: Milestone[] = [];
+
+    for (const entry of entries) {
+      // Skip non-milestone files
+      if (!entry.endsWith(".md")) continue;
+      if (entry.toLowerCase() === "readme.md") continue;
+
+      const milestoneId = extractMilestoneIdFromFilename(entry);
+      if (!milestoneId) continue;
+
+      const filepath = this.fs.join(milestonesDir, entry);
+
+      // Skip directories
+      if (await this.fs.isDirectory(filepath)) continue;
+
+      try {
+        const content = await this.fs.readFile(filepath);
+        milestones.push(parseMilestoneMarkdown(content));
+      } catch (error) {
+        console.warn(`Failed to parse milestone file ${filepath}:`, error);
+      }
+    }
+
+    // Sort by ID for consistent ordering
+    return milestones.sort((a, b) =>
+      a.id.localeCompare(b.id, undefined, { numeric: true })
+    );
+  }
+
+  /**
+   * Load a single milestone by ID
+   *
+   * @param id - Milestone ID (e.g., "m-0")
+   * @returns Milestone or null if not found
+   */
+  async loadMilestone(id: string): Promise<Milestone | null> {
+    const milestonesDir = this.getMilestonesDir();
+
+    if (!(await this.fs.exists(milestonesDir))) {
+      return null;
+    }
+
+    const entries = await this.fs.readDir(milestonesDir);
+
+    // Find file matching the ID
+    const milestoneFile = entries.find((entry) => {
+      const fileId = extractMilestoneIdFromFilename(entry);
+      return fileId === id;
+    });
+
+    if (!milestoneFile) {
+      return null;
+    }
+
+    const filepath = this.fs.join(milestonesDir, milestoneFile);
+
+    try {
+      const content = await this.fs.readFile(filepath);
+      return parseMilestoneMarkdown(content);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Create a new milestone
+   *
+   * @param input - Milestone creation input
+   * @returns Created milestone
+   */
+  async createMilestone(input: MilestoneCreateInput): Promise<Milestone> {
+    const milestonesDir = this.getMilestonesDir();
+
+    // Ensure milestones directory exists
+    await this.fs.createDir(milestonesDir, { recursive: true });
+
+    // Find next available milestone ID
+    const entries = await this.fs.readDir(milestonesDir).catch(() => []);
+    const existingIds = entries
+      .map((f) => {
+        const match = f.match(/^m-(\d+)/);
+        return match?.[1] ? parseInt(match[1], 10) : -1;
+      })
+      .filter((id) => id >= 0);
+
+    const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 0;
+    const id = `m-${nextId}`;
+
+    const description = input.description || `Milestone: ${input.title}`;
+
+    // Create a temporary milestone to generate content
+    const tempMilestone: Milestone = {
+      id,
+      title: input.title,
+      description,
+      rawContent: "",
+    };
+
+    // Generate content
+    const content = serializeMilestoneMarkdown(tempMilestone);
+
+    // Create the final milestone with correct rawContent
+    const milestone: Milestone = {
+      id,
+      title: input.title,
+      description,
+      rawContent: content,
+    };
+
+    // Write file
+    const filename = getMilestoneFilename(id, input.title);
+    const filepath = this.fs.join(milestonesDir, filename);
+    await this.fs.writeFile(filepath, content);
+
+    return milestone;
+  }
+
+  /**
+   * Update an existing milestone
+   *
+   * @param id - Milestone ID to update
+   * @param input - Fields to update
+   * @returns Updated milestone or null if not found
+   */
+  async updateMilestone(
+    id: string,
+    input: MilestoneUpdateInput
+  ): Promise<Milestone | null> {
+    const existing = await this.loadMilestone(id);
+    if (!existing) {
+      return null;
+    }
+
+    const milestonesDir = this.getMilestonesDir();
+    const entries = await this.fs.readDir(milestonesDir);
+
+    // Find the current file
+    const currentFile = entries.find((entry) => {
+      const fileId = extractMilestoneIdFromFilename(entry);
+      return fileId === id;
+    });
+
+    if (!currentFile) {
+      return null;
+    }
+
+    // Build updated values
+    const newTitle = input.title ?? existing.title;
+    const newDescription = input.description ?? existing.description;
+
+    // Create a temporary milestone to generate content
+    const tempMilestone: Milestone = {
+      id: existing.id,
+      title: newTitle,
+      description: newDescription,
+      rawContent: "",
+    };
+
+    // Generate new content
+    const content = serializeMilestoneMarkdown(tempMilestone);
+
+    // Create the final updated milestone
+    const updated: Milestone = {
+      id: existing.id,
+      title: newTitle,
+      description: newDescription,
+      rawContent: content,
+    };
+
+    // Delete old file
+    const oldPath = this.fs.join(milestonesDir, currentFile);
+    await this.fs.deleteFile(oldPath);
+
+    // Write new file (with potentially new filename if title changed)
+    const newFilename = getMilestoneFilename(id, updated.title);
+    const newPath = this.fs.join(milestonesDir, newFilename);
+    await this.fs.writeFile(newPath, content);
+
+    return updated;
+  }
+
+  /**
+   * Delete a milestone
+   *
+   * @param id - Milestone ID to delete
+   * @returns true if deleted, false if not found
+   */
+  async deleteMilestone(id: string): Promise<boolean> {
+    const milestonesDir = this.getMilestonesDir();
+
+    if (!(await this.fs.exists(milestonesDir))) {
+      return false;
+    }
+
+    const entries = await this.fs.readDir(milestonesDir);
+
+    // Find file matching the ID
+    const milestoneFile = entries.find((entry) => {
+      const fileId = extractMilestoneIdFromFilename(entry);
+      return fileId === id;
+    });
+
+    if (!milestoneFile) {
+      return false;
+    }
+
+    const filepath = this.fs.join(milestonesDir, milestoneFile);
+
+    try {
+      await this.fs.deleteFile(filepath);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -628,6 +937,10 @@ export class Core {
     }
     if (filter.priority) {
       result = result.filter((t) => t.priority === filter.priority);
+    }
+    if (filter.milestone) {
+      const filterKey = milestoneKey(filter.milestone);
+      result = result.filter((t) => milestoneKey(t.milestone) === filterKey);
     }
     if (filter.labels && filter.labels.length > 0) {
       result = result.filter((t) =>

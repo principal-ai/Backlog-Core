@@ -59,6 +59,7 @@ export interface TaskCreateInput {
   description?: string;
   status?: TaskStatus;
   priority?: "high" | "medium" | "low";
+  milestone?: string;
   labels?: string[];
   assignee?: string[];
   dependencies?: string[];
@@ -74,6 +75,7 @@ export interface TaskUpdateInput {
   description?: string;
   status?: TaskStatus;
   priority?: "high" | "medium" | "low";
+  milestone?: string | null;
   labels?: string[];
   addLabels?: string[];
   removeLabels?: string[];
@@ -171,6 +173,7 @@ export interface TaskListFilter {
   status?: string;
   assignee?: string;
   priority?: "high" | "medium" | "low";
+  milestone?: string;
   parentTaskId?: string;
   labels?: string[];
   /** Pagination options */
@@ -187,6 +190,60 @@ export interface Decision {
   consequences: string;
   alternatives?: string;
   readonly rawContent: string; // Raw markdown content without frontmatter
+}
+
+// ============================================================================
+// Milestone Types
+// ============================================================================
+
+/**
+ * A milestone entity stored as a file in backlog/milestones/
+ * File pattern: m-{id}.md (e.g., m-0.md, m-1.md)
+ */
+export interface Milestone {
+  /** Unique identifier (e.g., "m-0", "m-1") */
+  id: string;
+  /** Display title (e.g., "Release 1.0", "Sprint 3") */
+  title: string;
+  /** Rich description of the milestone */
+  description: string;
+  /** Raw markdown content without frontmatter */
+  readonly rawContent: string;
+}
+
+/**
+ * A bucket grouping tasks by milestone for UI display
+ * Used for kanban-style milestone views with progress tracking
+ */
+export interface MilestoneBucket {
+  /** Normalized key for comparison (lowercase, trimmed) */
+  key: string;
+  /** Display label (milestone title or "Tasks without milestone") */
+  label: string;
+  /** Milestone ID (undefined for "no milestone" bucket) */
+  milestone?: string;
+  /** True if this is the "uncategorized" bucket */
+  isNoMilestone: boolean;
+  /** Tasks in this milestone */
+  tasks: Task[];
+  /** Count of tasks per status */
+  statusCounts: Record<string, number>;
+  /** Total number of tasks */
+  total: number;
+  /** Number of tasks with "done" status */
+  doneCount: number;
+  /** Progress percentage (0-100) */
+  progress: number;
+}
+
+/**
+ * Summary of all milestones with their task buckets
+ */
+export interface MilestoneSummary {
+  /** List of milestone IDs in display order */
+  milestones: string[];
+  /** Buckets containing tasks grouped by milestone */
+  buckets: MilestoneBucket[];
 }
 
 export interface Document {

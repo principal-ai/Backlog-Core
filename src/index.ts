@@ -47,6 +47,11 @@ export type {
   Document,
   Decision,
 
+  // Milestone types
+  Milestone,
+  MilestoneBucket,
+  MilestoneSummary,
+
   // Search types
   SearchResult,
   SearchResultType,
@@ -76,15 +81,27 @@ export {
   serializeTaskMarkdown,
   extractTaskIndexFromPath,
   getTaskBodyMarkdown,
+  // Milestone parsing
+  parseMilestoneMarkdown,
+  serializeMilestoneMarkdown,
+  getMilestoneFilename,
+  extractMilestoneIdFromFilename,
   type TaskFrontmatter,
   type TaskBodyMarkdownOptions,
+  type MilestoneFrontmatter,
 } from "./markdown";
 
 // ============================================================================
 // Core API
 // ============================================================================
 
-export { Core, type CoreOptions, type InitProjectOptions } from "./core";
+export {
+  Core,
+  type CoreOptions,
+  type InitProjectOptions,
+  type MilestoneCreateInput,
+  type MilestoneUpdateInput,
+} from "./core";
 export { parseBacklogConfig, serializeBacklogConfig } from "./core";
 
 // ============================================================================
@@ -96,6 +113,17 @@ export {
   sortTasksByTitle,
   sortTasksBy,
   groupTasksByStatus,
+  // Milestone utilities
+  normalizeMilestoneName,
+  milestoneKey,
+  isDoneStatus,
+  getMilestoneLabel,
+  collectMilestoneIds,
+  collectMilestones,
+  buildMilestoneBuckets,
+  buildMilestoneBucketsFromConfig,
+  buildMilestoneSummary,
+  groupTasksByMilestone,
 } from "./utils";
 
 // ============================================================================

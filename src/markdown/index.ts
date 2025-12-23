@@ -4,7 +4,7 @@
  * This module handles conversion between markdown files and Task objects.
  */
 
-import type { Task, AcceptanceCriterion, TaskIndexEntry } from "../types";
+import type { Task, AcceptanceCriterion, TaskIndexEntry, Milestone } from "../types";
 
 /**
  * Parsed frontmatter from a task markdown file
@@ -343,6 +343,141 @@ export function extractTaskIndexFromPath(filePath: string): TaskIndexEntry {
 
 function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// ============================================================================
+// Milestone Parsing & Serialization
+// ============================================================================
+
+/**
+ * Parsed frontmatter from a milestone markdown file
+ */
+export interface MilestoneFrontmatter {
+  id?: string;
+  title?: string;
+}
+
+/**
+ * Extract a section from markdown content by heading
+ */
+function extractSection(content: string, sectionTitle: string): string | undefined {
+  // Normalize to LF for reliable matching across platforms
+  const src = content.replace(/\r\n/g, "\n");
+  const regex = new RegExp(`## ${sectionTitle}\\s*\\n([\\s\\S]*?)(?=\\n## |$)`, "i");
+  const match = src.match(regex);
+  return match?.[1]?.trim();
+}
+
+/**
+ * Parse milestone frontmatter from raw YAML
+ */
+function parseMilestoneFrontmatter(raw: string): MilestoneFrontmatter {
+  const result: MilestoneFrontmatter = {};
+
+  for (const line of raw.split("\n")) {
+    const match = line.match(/^(\w+):\s*(.+)$/);
+    if (!match) continue;
+
+    const [, key, value] = match;
+    let cleanValue = value.trim();
+
+    // Remove surrounding quotes if present
+    if ((cleanValue.startsWith('"') && cleanValue.endsWith('"')) ||
+        (cleanValue.startsWith("'") && cleanValue.endsWith("'"))) {
+      cleanValue = cleanValue.slice(1, -1);
+    }
+
+    switch (key) {
+      case "id":
+      case "title":
+        result[key] = cleanValue;
+        break;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Parse milestone markdown content into a Milestone object
+ *
+ * @param content - Raw markdown content
+ * @returns Parsed milestone object
+ */
+export function parseMilestoneMarkdown(content: string): Milestone {
+  let frontmatter: MilestoneFrontmatter = {};
+  let remaining = content;
+
+  // Extract frontmatter
+  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---\n/);
+  if (frontmatterMatch) {
+    frontmatter = parseMilestoneFrontmatter(frontmatterMatch[1]);
+    remaining = content.slice(frontmatterMatch[0].length);
+  }
+
+  const rawContent = remaining.trim();
+  const description = extractSection(rawContent, "Description") || "";
+
+  return {
+    id: frontmatter.id || "",
+    title: frontmatter.title || "",
+    description,
+    rawContent,
+  };
+}
+
+/**
+ * Serialize a Milestone object to markdown content
+ *
+ * @param milestone - Milestone to serialize
+ * @returns Markdown string
+ */
+export function serializeMilestoneMarkdown(milestone: Milestone): string {
+  const lines: string[] = [];
+
+  // Frontmatter
+  lines.push("---");
+  lines.push(`id: ${milestone.id}`);
+  // Escape quotes in title
+  const escapedTitle = milestone.title.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  lines.push(`title: "${escapedTitle}"`);
+  lines.push("---");
+  lines.push("");
+
+  // Description section
+  lines.push("## Description");
+  lines.push("");
+  lines.push(milestone.description || `Milestone: ${milestone.title}`);
+  lines.push("");
+
+  return lines.join("\n");
+}
+
+/**
+ * Generate a safe filename for a milestone
+ *
+ * @param id - Milestone ID (e.g., "m-0")
+ * @param title - Milestone title
+ * @returns Safe filename (e.g., "m-0 - release-1.0.md")
+ */
+export function getMilestoneFilename(id: string, title: string): string {
+  const safeTitle = title
+    .replace(/[<>:"/\\|?*]/g, "")
+    .replace(/\s+/g, "-")
+    .toLowerCase()
+    .slice(0, 50);
+  return `${id} - ${safeTitle}.md`;
+}
+
+/**
+ * Extract milestone ID from filename
+ *
+ * @param filename - Filename (e.g., "m-0 - release-1.0.md")
+ * @returns Milestone ID or null if not a valid milestone file
+ */
+export function extractMilestoneIdFromFilename(filename: string): string | null {
+  const match = filename.match(/^(m-\d+)/);
+  return match ? match[1] : null;
 }
 
 /**
