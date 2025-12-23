@@ -355,6 +355,7 @@ function escapeRegex(str: string): string {
 export interface MilestoneFrontmatter {
   id?: string;
   title?: string;
+  tasks?: string[];
 }
 
 /**
@@ -392,6 +393,16 @@ function parseMilestoneFrontmatter(raw: string): MilestoneFrontmatter {
       case "title":
         result[key] = cleanValue;
         break;
+      case "tasks":
+        // Parse [id1, id2, id3] format
+        if (cleanValue.startsWith("[") && cleanValue.endsWith("]")) {
+          result.tasks = cleanValue
+            .slice(1, -1)
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
+        }
+        break;
     }
   }
 
@@ -423,6 +434,7 @@ export function parseMilestoneMarkdown(content: string): Milestone {
     title: frontmatter.title || "",
     description,
     rawContent,
+    tasks: frontmatter.tasks || [],
   };
 }
 
@@ -441,6 +453,8 @@ export function serializeMilestoneMarkdown(milestone: Milestone): string {
   // Escape quotes in title
   const escapedTitle = milestone.title.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
   lines.push(`title: "${escapedTitle}"`);
+  // Tasks array
+  lines.push(`tasks: [${milestone.tasks.join(", ")}]`);
   lines.push("---");
   lines.push("");
 

@@ -201,6 +201,7 @@ export function buildMilestoneBucketsFromConfig(
     title: id,
     description: "",
     rawContent: "",
+    tasks: [],
   }));
 
   return buildMilestoneBuckets(tasks, milestoneEntities, statuses);

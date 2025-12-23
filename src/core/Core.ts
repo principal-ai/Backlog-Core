@@ -17,10 +17,13 @@ import type {
   TaskIndexEntry,
   SourcePaginationOptions,
   MilestoneSummary,
+  TaskCreateInput,
+  TaskUpdateInput,
 } from "../types";
 import { parseBacklogConfig, serializeBacklogConfig } from "./config-parser";
 import {
   parseTaskMarkdown,
+  serializeTaskMarkdown,
   extractTaskIndexFromPath,
   parseMilestoneMarkdown,
   serializeMilestoneMarkdown,
@@ -649,6 +652,7 @@ export class Core {
       title: input.title,
       description,
       rawContent: "",
+      tasks: [],
     };
 
     // Generate content
@@ -660,6 +664,7 @@ export class Core {
       title: input.title,
       description,
       rawContent: content,
+      tasks: [],
     };
 
     // Write file
@@ -709,6 +714,7 @@ export class Core {
       title: newTitle,
       description: newDescription,
       rawContent: "",
+      tasks: existing.tasks,
     };
 
     // Generate new content
@@ -720,6 +726,7 @@ export class Core {
       title: newTitle,
       description: newDescription,
       rawContent: content,
+      tasks: existing.tasks,
     };
 
     // Delete old file
@@ -986,5 +993,356 @@ export class Core {
         console.warn(`Failed to parse task file ${fullPath}:`, error);
       }
     }
+  }
+
+  // =========================================================================
+  // Milestone-Task Sync Helpers
+  // =========================================================================
+
+  /**
+   * Add a task ID to a milestone's tasks array
+   *
+   * @param taskId - Task ID to add
+   * @param milestoneId - Milestone ID to update
+   */
+  private async addTaskToMilestone(
+    taskId: string,
+    milestoneId: string
+  ): Promise<void> {
+    const milestone = await this.loadMilestone(milestoneId);
+    if (!milestone) {
+      console.warn(
+        `Milestone ${milestoneId} not found when adding task ${taskId}`
+      );
+      return;
+    }
+
+    // Check if task already in milestone
+    if (milestone.tasks.includes(taskId)) {
+      return;
+    }
+
+    // Update milestone with new task
+    const updatedMilestone: Milestone = {
+      ...milestone,
+      tasks: [...milestone.tasks, taskId],
+    };
+
+    await this.writeMilestoneFile(updatedMilestone);
+  }
+
+  /**
+   * Remove a task ID from a milestone's tasks array
+   *
+   * @param taskId - Task ID to remove
+   * @param milestoneId - Milestone ID to update
+   */
+  private async removeTaskFromMilestone(
+    taskId: string,
+    milestoneId: string
+  ): Promise<void> {
+    const milestone = await this.loadMilestone(milestoneId);
+    if (!milestone) {
+      return;
+    }
+
+    // Check if task is in milestone
+    if (!milestone.tasks.includes(taskId)) {
+      return;
+    }
+
+    // Update milestone without the task
+    const updatedMilestone: Milestone = {
+      ...milestone,
+      tasks: milestone.tasks.filter((id) => id !== taskId),
+    };
+
+    await this.writeMilestoneFile(updatedMilestone);
+  }
+
+  /**
+   * Write a milestone to disk
+   */
+  private async writeMilestoneFile(milestone: Milestone): Promise<void> {
+    const milestonesDir = this.getMilestonesDir();
+    const entries = await this.fs.readDir(milestonesDir).catch(() => []);
+
+    // Find and delete the current file
+    const currentFile = entries.find((entry) => {
+      const fileId = extractMilestoneIdFromFilename(entry);
+      return fileId === milestone.id;
+    });
+
+    if (currentFile) {
+      const oldPath = this.fs.join(milestonesDir, currentFile);
+      await this.fs.deleteFile(oldPath).catch(() => {});
+    }
+
+    // Write new file
+    const content = serializeMilestoneMarkdown(milestone);
+    const filename = getMilestoneFilename(milestone.id, milestone.title);
+    const filepath = this.fs.join(milestonesDir, filename);
+    await this.fs.writeFile(filepath, content);
+  }
+
+  /**
+   * Get the tasks directory path
+   */
+  private getTasksDir(): string {
+    return this.fs.join(this.projectRoot, "backlog", "tasks");
+  }
+
+  // =========================================================================
+  // Task CRUD Operations
+  // =========================================================================
+
+  /**
+   * Create a new task
+   *
+   * @param input - Task creation input
+   * @returns Created task
+   */
+  async createTask(input: TaskCreateInput): Promise<Task> {
+    this.ensureInitialized();
+
+    const tasksDir = this.getTasksDir();
+
+    // Ensure tasks directory exists
+    await this.fs.createDir(tasksDir, { recursive: true });
+
+    // Generate next task ID
+    const existingIds = Array.from(this.tasks.keys())
+      .map((id) => parseInt(id.replace(/\D/g, ""), 10))
+      .filter((n) => !isNaN(n));
+    const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+    const taskId = String(nextId);
+
+    // Build task object
+    const now = new Date().toISOString().split("T")[0];
+    const task: Task = {
+      id: taskId,
+      title: input.title,
+      status: input.status || this.config!.defaultStatus || "To Do",
+      priority: input.priority,
+      assignee: input.assignee || [],
+      createdDate: now,
+      labels: input.labels || [],
+      milestone: input.milestone,
+      dependencies: input.dependencies || [],
+      parentTaskId: input.parentTaskId,
+      description: input.description,
+      implementationPlan: input.implementationPlan,
+      implementationNotes: input.implementationNotes,
+      acceptanceCriteriaItems: input.acceptanceCriteria?.map((ac, i) => ({
+        index: i + 1,
+        text: ac.text,
+        checked: ac.checked || false,
+      })),
+      rawContent: input.rawContent,
+      source: "local",
+    };
+
+    // Serialize and write file
+    const content = serializeTaskMarkdown(task);
+    const safeTitle = input.title
+      .replace(/[<>:"/\\|?*]/g, "")
+      .replace(/\s+/g, " ")
+      .slice(0, 50);
+    const filename = `${taskId} - ${safeTitle}.md`;
+    const filepath = this.fs.join(tasksDir, filename);
+    await this.fs.writeFile(filepath, content);
+
+    // Update in-memory cache
+    task.filePath = filepath;
+    this.tasks.set(taskId, task);
+
+    // Sync milestone if specified
+    if (input.milestone) {
+      await this.addTaskToMilestone(taskId, input.milestone);
+    }
+
+    return task;
+  }
+
+  /**
+   * Update an existing task
+   *
+   * @param id - Task ID to update
+   * @param input - Fields to update
+   * @returns Updated task or null if not found
+   */
+  async updateTask(id: string, input: TaskUpdateInput): Promise<Task | null> {
+    this.ensureInitialized();
+
+    const existing = this.tasks.get(id);
+    if (!existing) {
+      return null;
+    }
+
+    const oldMilestone = existing.milestone;
+    const newMilestone =
+      input.milestone === null
+        ? undefined
+        : input.milestone !== undefined
+          ? input.milestone
+          : oldMilestone;
+
+    // Build updated task
+    const now = new Date().toISOString().split("T")[0];
+    const updated: Task = {
+      ...existing,
+      title: input.title ?? existing.title,
+      status: input.status ?? existing.status,
+      priority: input.priority ?? existing.priority,
+      milestone: newMilestone,
+      updatedDate: now,
+      description: input.description ?? existing.description,
+      implementationPlan: input.clearImplementationPlan
+        ? undefined
+        : input.implementationPlan ?? existing.implementationPlan,
+      implementationNotes: input.clearImplementationNotes
+        ? undefined
+        : input.implementationNotes ?? existing.implementationNotes,
+      ordinal: input.ordinal ?? existing.ordinal,
+      dependencies: input.dependencies ?? existing.dependencies,
+    };
+
+    // Handle label operations
+    if (input.labels) {
+      updated.labels = input.labels;
+    } else {
+      if (input.addLabels) {
+        updated.labels = [...new Set([...updated.labels, ...input.addLabels])];
+      }
+      if (input.removeLabels) {
+        updated.labels = updated.labels.filter(
+          (l) => !input.removeLabels!.includes(l)
+        );
+      }
+    }
+
+    // Handle assignee
+    if (input.assignee) {
+      updated.assignee = input.assignee;
+    }
+
+    // Handle dependency operations
+    if (input.addDependencies) {
+      updated.dependencies = [
+        ...new Set([...updated.dependencies, ...input.addDependencies]),
+      ];
+    }
+    if (input.removeDependencies) {
+      updated.dependencies = updated.dependencies.filter(
+        (d) => !input.removeDependencies!.includes(d)
+      );
+    }
+
+    // Handle acceptance criteria
+    if (input.acceptanceCriteria) {
+      updated.acceptanceCriteriaItems = input.acceptanceCriteria.map(
+        (ac, i) => ({
+          index: i + 1,
+          text: ac.text,
+          checked: ac.checked || false,
+        })
+      );
+    }
+
+    // Serialize and write file
+    const content = serializeTaskMarkdown(updated);
+
+    // Delete old file if exists
+    if (existing.filePath) {
+      await this.fs.deleteFile(existing.filePath).catch(() => {});
+    }
+
+    // Write new file
+    const tasksDir = this.getTasksDir();
+    const safeTitle = updated.title
+      .replace(/[<>:"/\\|?*]/g, "")
+      .replace(/\s+/g, " ")
+      .slice(0, 50);
+    const filename = `${id} - ${safeTitle}.md`;
+    const filepath = this.fs.join(tasksDir, filename);
+    await this.fs.writeFile(filepath, content);
+
+    // Update in-memory cache
+    updated.filePath = filepath;
+    this.tasks.set(id, updated);
+
+    // Handle milestone sync
+    const milestoneChanged =
+      milestoneKey(oldMilestone) !== milestoneKey(newMilestone);
+    if (milestoneChanged) {
+      // Remove from old milestone
+      if (oldMilestone) {
+        await this.removeTaskFromMilestone(id, oldMilestone);
+      }
+      // Add to new milestone
+      if (newMilestone) {
+        await this.addTaskToMilestone(id, newMilestone);
+      }
+    }
+
+    return updated;
+  }
+
+  /**
+   * Delete a task
+   *
+   * @param id - Task ID to delete
+   * @returns true if deleted, false if not found
+   */
+  async deleteTask(id: string): Promise<boolean> {
+    this.ensureInitialized();
+
+    const task = this.tasks.get(id);
+    if (!task) {
+      return false;
+    }
+
+    // Remove from milestone if assigned
+    if (task.milestone) {
+      await this.removeTaskFromMilestone(id, task.milestone);
+    }
+
+    // Delete file
+    if (task.filePath) {
+      try {
+        await this.fs.deleteFile(task.filePath);
+      } catch {
+        // File may already be deleted
+      }
+    }
+
+    // Remove from in-memory cache
+    this.tasks.delete(id);
+
+    return true;
+  }
+
+  /**
+   * Load specific tasks by their IDs (for lazy loading milestone tasks)
+   *
+   * @param ids - Array of task IDs to load
+   * @returns Array of loaded tasks (missing tasks excluded)
+   */
+  async loadTasksByIds(ids: string[]): Promise<Task[]> {
+    // If fully initialized, return from cache
+    if (this.initialized) {
+      return ids
+        .map((id) => this.tasks.get(id))
+        .filter((t): t is Task => t !== undefined);
+    }
+
+    // If lazy initialized, load on demand
+    if (this.lazyInitialized) {
+      return this.loadTasks(ids);
+    }
+
+    throw new Error(
+      "Core not initialized. Call initialize() or initializeLazy() first."
+    );
   }
 }

@@ -209,6 +209,8 @@ export interface Milestone {
   description: string;
   /** Raw markdown content without frontmatter */
   readonly rawContent: string;
+  /** Task IDs belonging to this milestone (authoritative source of truth) */
+  tasks: string[];
 }
 
 /**
