@@ -1,0 +1,45 @@
+name: Quality Lens Analysis
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install project dependencies
+        run: npm ci
+        continue-on-error: true
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Install Quality Lens CLI
+        run: npm install -g @principal-ai/quality-lens-cli
+
+      - name: Run quality lenses
+        run: quality-lens run . --install --output results.json --format json
+
+      - name: Display results summary
+        if: always()
+        run: quality-lens summary results.json
+
+      - name: Upload results artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-lens-results-${{ github.sha }}
+          path: results.json
+          if-no-files-found: warn

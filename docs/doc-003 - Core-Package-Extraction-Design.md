@@ -142,41 +142,41 @@ backlog.md/
 
 ### Must Include (Pure Logic)
 
-| Module | Reason |
-|--------|--------|
-| `abstractions/` | Adapter interfaces - the contract |
-| `core/backlog.ts` | Main API class |
-| `core/content-store.ts` | In-memory task cache |
-| `core/search-service.ts` | Full-text search |
-| `core/sequences.ts` | Sequence/ordering logic |
-| `core/reorder.ts` | Ordinal calculations |
-| `core/config-migration.ts` | Config version handling |
-| `core/task-loader.ts` | Cross-branch task loading |
-| `file-system/operations.ts` | FileSystem service |
-| `git/operations.ts` | GitOperations service |
-| `markdown/` | Parser & serializer |
-| `types/` | All type definitions |
-| `utils/` | Pure utility functions |
-| `constants/` | Default values |
+| Module                      | Reason                            |
+| --------------------------- | --------------------------------- |
+| `abstractions/`             | Adapter interfaces - the contract |
+| `core/backlog.ts`           | Main API class                    |
+| `core/content-store.ts`     | In-memory task cache              |
+| `core/search-service.ts`    | Full-text search                  |
+| `core/sequences.ts`         | Sequence/ordering logic           |
+| `core/reorder.ts`           | Ordinal calculations              |
+| `core/config-migration.ts`  | Config version handling           |
+| `core/task-loader.ts`       | Cross-branch task loading         |
+| `file-system/operations.ts` | FileSystem service                |
+| `git/operations.ts`         | GitOperations service             |
+| `markdown/`                 | Parser & serializer               |
+| `types/`                    | All type definitions              |
+| `utils/`                    | Pure utility functions            |
+| `constants/`                | Default values                    |
 
 ### Must NOT Include (Runtime-Specific)
 
-| Module | Reason |
-|--------|--------|
-| `cli.ts` | Bun CLI entry point |
-| `commands/` | CLI-specific handlers |
+| Module          | Reason                     |
+| --------------- | -------------------------- |
+| `cli.ts`        | Bun CLI entry point        |
+| `commands/`     | CLI-specific handlers      |
 | `bun-adapters/` | Bun runtime implementation |
-| `ui/` | TUI (blessed/ink) |
-| `web/` | Bun.serve + React |
-| `mcp/` | MCP protocol server |
-| `formatters/` | CLI output formatting |
-| `board.ts` | CLI board display |
-| `readme.ts` | CLI readme generation |
+| `ui/`           | TUI (blessed/ink)          |
+| `web/`          | Bun.serve + React          |
+| `mcp/`          | MCP protocol server        |
+| `formatters/`   | CLI output formatting      |
+| `board.ts`      | CLI board display          |
+| `readme.ts`     | CLI readme generation      |
 
 ### Conditional (Consider Including)
 
-| Module | Decision |
-|--------|----------|
+| Module           | Decision                                                   |
+| ---------------- | ---------------------------------------------------------- |
 | `test-adapters/` | Include as `@backlog-md/core/test-adapters` subpath export |
 
 ## Export Strategy
@@ -211,6 +211,7 @@ export { parseTaskMarkdown, serializeTaskMarkdown } from './markdown';
 ### Phase 1: Prepare Monorepo Structure
 
 1. Create `packages/` directory structure:
+
    ```
    packages/
    ├── core/           # @backlog-md/core
@@ -242,15 +243,15 @@ If moving to a separate repository:
 
 ```typescript
 // Current (Bun-defaulting)
-const core = new Core('/path/to/project');
+const core = new Core("/path/to/project");
 
 // With custom adapters
-const core = new Core('/path/to/project', {
+const core = new Core("/path/to/project", {
   adapters: {
     fs: new NodeFileSystemAdapter(),
     glob: new NodeGlobAdapter(),
     git: new NodeGitAdapter(),
-  }
+  },
 });
 ```
 
@@ -260,14 +261,15 @@ The core package should NOT include Bun adapters. Consumers must provide adapter
 
 ```typescript
 // Option A: Require adapters (breaking change)
-const core = new Core('/path', { adapters: { fs, glob, git } });
+const core = new Core("/path", { adapters: { fs, glob, git } });
 
 // Option B: Provide adapter bundles as separate packages
-import { bunAdapters } from '@backlog-md/bun-adapters';
-const core = new Core('/path', { adapters: bunAdapters });
+import { bunAdapters } from "@backlog-md/bun-adapters";
+const core = new Core("/path", { adapters: bunAdapters });
 ```
 
 **Recommendation**: Option B with separate adapter packages:
+
 - `@backlog-md/bun-adapters`
 - `@backlog-md/node-adapters` (future)
 - `@backlog-md/browser-adapters` (future, limited)
@@ -285,6 +287,7 @@ Current code uses some Bun-specific APIs in "pure" modules:
 5. **`node:fs`** - Used in some places, needs review
 
 Scan for remaining Bun-specific code:
+
 ```bash
 grep -r "Bun\." src/core src/file-system src/git src/markdown src/utils src/types
 ```
@@ -292,6 +295,7 @@ grep -r "Bun\." src/core src/file-system src/git src/markdown src/utils src/type
 ### Browser Compatibility
 
 For browser environments:
+
 - Git operations would need a different approach (isomorphic-git or API)
 - File operations would need IndexedDB or API adapter
 - Most pure logic (parsing, types, utils) should work
@@ -303,14 +307,14 @@ For browser environments:
 Use test adapters for fast, deterministic tests:
 
 ```typescript
-import { Core } from '@backlog-md/core';
-import { createTestAdapters } from '@backlog-md/core/test-adapters';
+import { Core } from "@backlog-md/core";
+import { createTestAdapters } from "@backlog-md/core/test-adapters";
 
 const adapters = createTestAdapters();
-const core = new Core('/test/project', { adapters });
+const core = new Core("/test/project", { adapters });
 
 // Seed in-memory filesystem
-adapters.fs.writeFileSync('/test/project/backlog.md', '# Backlog');
+adapters.fs.writeFileSync("/test/project/backlog.md", "# Backlog");
 ```
 
 ### Integration Tests

@@ -15,10 +15,10 @@ Runtime-agnostic core package for Backlog.md task management.
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [Core Package Extraction Design](docs/doc-003%20-%20Core-Package-Extraction-Design.md) | Architecture and migration plan |
-| [Test Adapter Specification](docs/test-adapter-specification.md) | Functionality requirements for test adapters |
+| Document                                                                               | Description                                  |
+| -------------------------------------------------------------------------------------- | -------------------------------------------- |
+| [Core Package Extraction Design](docs/doc-003%20-%20Core-Package-Extraction-Design.md) | Architecture and migration plan              |
+| [Test Adapter Specification](docs/test-adapter-specification.md)                       | Functionality requirements for test adapters |
 
 ## Architecture Diagrams
 
@@ -41,25 +41,25 @@ The core package will expose these adapter interfaces:
 ```typescript
 // FileSystemAdapter - file operations
 interface FileSystemAdapter {
-  readFile(path: string): Promise<string>
-  writeFile(path: string, content: string): Promise<void>
-  exists(path: string): Promise<boolean>
-  createDir(path: string, options?: { recursive?: boolean }): Promise<void>
-  deleteFile(path: string): Promise<void>
-  rename(from: string, to: string): Promise<void>
+  readFile(path: string): Promise<string>;
+  writeFile(path: string, content: string): Promise<void>;
+  exists(path: string): Promise<boolean>;
+  createDir(path: string, options?: { recursive?: boolean }): Promise<void>;
+  deleteFile(path: string): Promise<void>;
+  rename(from: string, to: string): Promise<void>;
   // ...
 }
 
 // GlobAdapter - pattern matching
 interface GlobAdapter {
-  scan(pattern: string, options?: { cwd?: string }): AsyncIterable<string>
+  scan(pattern: string, options?: { cwd?: string }): AsyncIterable<string>;
 }
 
 // GitAdapter - git operations
 interface GitAdapter {
-  exec(args: string[], options?: { cwd?: string }): Promise<ExecResult>
-  isGitRepository(root: string): Promise<boolean>
-  initRepository(root: string): Promise<void>
+  exec(args: string[], options?: { cwd?: string }): Promise<ExecResult>;
+  isGitRepository(root: string): Promise<boolean>;
+  initRepository(root: string): Promise<void>;
 }
 ```
 

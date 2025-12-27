@@ -25,10 +25,7 @@ export default [
     },
     rules: {
       ...typescriptPlugin.configs.recommended.rules,
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_" },
-      ],
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/explicit-module-boundary-types": "off",
       "@typescript-eslint/no-explicit-any": "error",
@@ -62,10 +59,7 @@ export default [
     },
     rules: {
       ...typescriptPlugin.configs.recommended.rules,
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_" },
-      ],
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/explicit-module-boundary-types": "off",
       "@typescript-eslint/no-explicit-any": "error",
@@ -73,12 +67,7 @@ export default [
     },
   },
   {
-    ignores: [
-      "dist/**",
-      "node_modules/**",
-      "*.config.js",
-      "**/*.d.ts",
-    ],
+    ignores: ["dist/**", "node_modules/**", "*.config.js", "**/*.d.ts"],
   },
   prettierConfig,
 ];

@@ -14,12 +14,12 @@ Tasks flow through a defined lifecycle from creation to completion or archival. 
 
 Tasks exist in one of four directory locations:
 
-| Location | Directory | Purpose |
-|----------|-----------|---------|
-| **Drafts** | `backlog/drafts/` | Work-in-progress tasks not yet ready for the backlog |
-| **Active** | `backlog/tasks/` | Tasks that are part of the active backlog |
-| **Completed** | `backlog/completed/` | Successfully finished tasks |
-| **Archived** | `backlog/archive/tasks/` | Inactive tasks preserved for reference |
+| Location      | Directory                | Purpose                                              |
+| ------------- | ------------------------ | ---------------------------------------------------- |
+| **Drafts**    | `backlog/drafts/`        | Work-in-progress tasks not yet ready for the backlog |
+| **Active**    | `backlog/tasks/`         | Tasks that are part of the active backlog            |
+| **Completed** | `backlog/completed/`     | Successfully finished tasks                          |
+| **Archived**  | `backlog/archive/tasks/` | Inactive tasks preserved for reference               |
 
 Additionally, drafts can be archived:
 | Location | Directory | Purpose |
@@ -45,15 +45,18 @@ Statuses are independent of locations - a task in `tasks/` can have any status. 
 **Location:** `backlog/drafts/`
 
 A draft is an incomplete task idea. Drafts:
+
 - Are not visible in the main task list by default
 - Do not require a full task structure
 - Can be promoted to active tasks when ready
 - Can be archived if abandoned
 
 **Entry points:**
+
 - `createDraft()` - Create new draft directly
 
 **Exit points:**
+
 - `promoteDraft()` → Active (moves to `tasks/`)
 - `archiveDraft()` → Archived Draft (moves to `archive/drafts/`)
 
@@ -64,21 +67,25 @@ A draft is an incomplete task idea. Drafts:
 **Location:** `backlog/tasks/`
 
 Active tasks are the main backlog. They:
+
 - Appear in task lists and boards
 - Can have any configured status
 - Support full task features (dependencies, AC, ordering)
 - Can be completed or archived
 
 **Entry points:**
+
 - `createTask()` / `createTaskFromData()` - Create new active task
 - `promoteDraft()` - Promote from draft
 
 **Exit points:**
+
 - `completeTask()` → Completed (moves to `completed/`)
 - `archiveTask()` → Archived (moves to `archive/tasks/`)
 - `demoteTask()` → Draft (moves to `drafts/`)
 
 **Internal transitions:**
+
 - Status changes via `updateTask()` (e.g., todo → in-progress → done)
 - Status callbacks can trigger on specific transitions
 
@@ -89,14 +96,17 @@ Active tasks are the main backlog. They:
 **Location:** `backlog/completed/`
 
 Completed tasks represent finished work. They:
+
 - Are preserved for reference and history
 - Can be queried separately from active tasks
 - May be auto-archived after a configurable period
 
 **Entry points:**
+
 - `completeTask()` - Complete an active task
 
 **Exit points:**
+
 - Manual move back to `tasks/` (via file operations)
 - Future: `archiveCompleted()` for bulk archival
 
@@ -107,15 +117,18 @@ Completed tasks represent finished work. They:
 **Location:** `backlog/archive/tasks/` or `backlog/archive/drafts/`
 
 Archived items are preserved but inactive. They:
+
 - Are excluded from normal task queries
 - Maintain full history and content
 - Can be restored if needed
 
 **Entry points:**
+
 - `archiveTask()` - Archive an active task
 - `archiveDraft()` - Archive a draft
 
 **Exit points:**
+
 - Manual restoration (via file operations)
 - Future: `restoreTask()` / `restoreDraft()`
 
@@ -157,15 +170,15 @@ Archived items are preserved but inactive. They:
 
 ### Transition Methods
 
-| Method | From | To | Description |
-|--------|------|-----|-------------|
-| `createTask()` | - | Active | Create new active task |
-| `createDraft()` | - | Draft | Create new draft |
-| `promoteDraft()` | Draft | Active | Move draft to active backlog |
-| `demoteTask()` | Active | Draft | Move active task back to drafts |
-| `completeTask()` | Active | Completed | Mark task as finished |
-| `archiveTask()` | Active | Archived | Archive without completing |
-| `archiveDraft()` | Draft | Archived | Archive draft idea |
+| Method           | From   | To        | Description                     |
+| ---------------- | ------ | --------- | ------------------------------- |
+| `createTask()`   | -      | Active    | Create new active task          |
+| `createDraft()`  | -      | Draft     | Create new draft                |
+| `promoteDraft()` | Draft  | Active    | Move draft to active backlog    |
+| `demoteTask()`   | Active | Draft     | Move active task back to drafts |
+| `completeTask()` | Active | Completed | Mark task as finished           |
+| `archiveTask()`  | Active | Archived  | Archive without completing      |
+| `archiveDraft()` | Draft  | Archived  | Archive draft idea              |
 
 ### Status Transitions (within Active)
 
@@ -176,6 +189,7 @@ Status changes happen within the Active state and are controlled by:
 3. **Status callbacks:** `onStatusChange` hooks
 
 Example status flow:
+
 ```
 backlog → todo → in-progress → review → done
 ```
@@ -207,6 +221,7 @@ Tasks can exist on multiple git branches with different states:
 3. **Merge resolution:** Most recent modification wins
 
 The `loadTasks()` method merges tasks from:
+
 - Current working directory
 - Other local branches
 - Remote branches (if `remoteOperations` enabled)
@@ -219,7 +234,7 @@ The `loadTasks()` method merges tasks from:
 
 ```typescript
 await core.updateTasksBulk(
-  tasks.map(t => ({ ...t, status: "done" })),
+  tasks.map((t) => ({ ...t, status: "done" })),
   "Complete sprint tasks"
 );
 ```
@@ -238,11 +253,13 @@ for (const task of oldTasks) {
 ## File Naming Convention
 
 Task files follow this pattern:
+
 ```
 task-{id} - {sanitized-title}.md
 ```
 
 Examples:
+
 - `task-1 - Setup-project-structure.md`
 - `task-42.1 - Implement-sub-feature.md`
 
@@ -254,16 +271,16 @@ When a task is moved between locations, the file is renamed/moved but the ID rem
 
 Planned event hooks for lifecycle transitions:
 
-| Event | Trigger |
-|-------|---------|
-| `task:created` | New task created |
-| `task:updated` | Task content modified |
-| `task:status-changed` | Status field changed |
-| `task:promoted` | Draft → Active |
-| `task:demoted` | Active → Draft |
-| `task:completed` | Active → Completed |
-| `task:archived` | Any → Archived |
-| `task:restored` | Archived → Active/Draft |
+| Event                 | Trigger                 |
+| --------------------- | ----------------------- |
+| `task:created`        | New task created        |
+| `task:updated`        | Task content modified   |
+| `task:status-changed` | Status field changed    |
+| `task:promoted`       | Draft → Active          |
+| `task:demoted`        | Active → Draft          |
+| `task:completed`      | Active → Completed      |
+| `task:archived`       | Any → Archived          |
+| `task:restored`       | Archived → Active/Draft |
 
 ---
 

@@ -18,15 +18,16 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 
 ### 1.1 Task CRUD Operations
 
-| Operation | Description | Adapter Requirements |
-|-----------|-------------|---------------------|
-| Create task | Generate ID, save markdown file | `writeFile`, `exists`, `createDir` |
-| Read task | Load and parse task by ID | `readFile`, `exists` |
-| Update task | Modify and save, handle renames | `writeFile`, `rename`, `exists` |
-| Delete/Archive task | Move to archive directory | `rename`, `createDir` |
-| List tasks | Enumerate tasks in directory | `glob.scan` |
+| Operation           | Description                     | Adapter Requirements               |
+| ------------------- | ------------------------------- | ---------------------------------- |
+| Create task         | Generate ID, save markdown file | `writeFile`, `exists`, `createDir` |
+| Read task           | Load and parse task by ID       | `readFile`, `exists`               |
+| Update task         | Modify and save, handle renames | `writeFile`, `rename`, `exists`    |
+| Delete/Archive task | Move to archive directory       | `rename`, `createDir`              |
+| List tasks          | Enumerate tasks in directory    | `glob.scan`                        |
 
 **Test Scenarios:**
+
 - [ ] Create task with auto-generated ID
 - [ ] Create task with explicit ID
 - [ ] Create sub-task with parent ID (e.g., `42.1`)
@@ -43,15 +44,16 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 
 ### 1.2 Task Movement
 
-| Operation | Description | Adapter Requirements |
-|-----------|-------------|---------------------|
-| Archive task | Move `tasks/` → `archive/tasks/` | `rename`, `createDir` |
-| Complete task | Move `tasks/` → `completed/` | `rename`, `createDir` |
-| Demote task | Move `tasks/` → `drafts/` | `rename`, `createDir` |
-| Promote draft | Move `drafts/` → `tasks/` | `rename`, `createDir` |
+| Operation     | Description                        | Adapter Requirements  |
+| ------------- | ---------------------------------- | --------------------- |
+| Archive task  | Move `tasks/` → `archive/tasks/`   | `rename`, `createDir` |
+| Complete task | Move `tasks/` → `completed/`       | `rename`, `createDir` |
+| Demote task   | Move `tasks/` → `drafts/`          | `rename`, `createDir` |
+| Promote draft | Move `drafts/` → `tasks/`          | `rename`, `createDir` |
 | Archive draft | Move `drafts/` → `archive/drafts/` | `rename`, `createDir` |
 
 **Test Scenarios:**
+
 - [ ] Archive task creates archive directory if missing
 - [ ] Complete task moves to completed directory
 - [ ] Demote task preserves content
@@ -60,14 +62,15 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 
 ### 1.3 Task Ordering (Sequences)
 
-| Operation | Description | Adapter Requirements |
-|-----------|-------------|---------------------|
-| Reorder task | Update ordinal field | `readFile`, `writeFile` |
-| Resolve conflicts | Reassign ordinals on collision | `readFile`, `writeFile` (batch) |
-| Move to sequence | Update dependencies | `readFile`, `writeFile` |
-| Remove from sequence | Clear dependencies | `readFile`, `writeFile` |
+| Operation            | Description                    | Adapter Requirements            |
+| -------------------- | ------------------------------ | ------------------------------- |
+| Reorder task         | Update ordinal field           | `readFile`, `writeFile`         |
+| Resolve conflicts    | Reassign ordinals on collision | `readFile`, `writeFile` (batch) |
+| Move to sequence     | Update dependencies            | `readFile`, `writeFile`         |
+| Remove from sequence | Clear dependencies             | `readFile`, `writeFile`         |
 
 **Test Scenarios:**
+
 - [ ] Reorder task between two others
 - [ ] Reorder to beginning of list
 - [ ] Reorder to end of list
@@ -77,14 +80,15 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 
 ### 1.4 Acceptance Criteria
 
-| Operation | Description | Adapter Requirements |
-|-----------|-------------|---------------------|
-| Add criteria | Append to AC list | `readFile`, `writeFile` |
+| Operation       | Description              | Adapter Requirements    |
+| --------------- | ------------------------ | ----------------------- |
+| Add criteria    | Append to AC list        | `readFile`, `writeFile` |
 | Remove criteria | Remove by index, reindex | `readFile`, `writeFile` |
-| Toggle checked | Update check status | `readFile`, `writeFile` |
-| List criteria | Parse from task | `readFile` |
+| Toggle checked  | Update check status      | `readFile`, `writeFile` |
+| List criteria   | Parse from task          | `readFile`              |
 
 **Test Scenarios:**
+
 - [ ] Add first acceptance criterion
 - [ ] Add multiple criteria
 - [ ] Remove middle criterion (verify reindexing)
@@ -95,14 +99,15 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 
 ## 2. Document Management
 
-| Operation | Description | Adapter Requirements |
-|-----------|-------------|---------------------|
+| Operation       | Description            | Adapter Requirements               |
+| --------------- | ---------------------- | ---------------------------------- |
 | Create document | Generate ID, save file | `writeFile`, `exists`, `createDir` |
-| Read document | Load by ID | `readFile`, `exists` |
-| Update document | Modify content | `writeFile` |
-| List documents | Enumerate recursively | `glob.scan` |
+| Read document   | Load by ID             | `readFile`, `exists`               |
+| Update document | Modify content         | `writeFile`                        |
+| List documents  | Enumerate recursively  | `glob.scan`                        |
 
 **Test Scenarios:**
+
 - [ ] Create document with auto-generated ID
 - [ ] Create document in subdirectory
 - [ ] Update document content
@@ -113,14 +118,15 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 
 ## 3. Decision Management
 
-| Operation | Description | Adapter Requirements |
-|-----------|-------------|---------------------|
+| Operation       | Description            | Adapter Requirements               |
+| --------------- | ---------------------- | ---------------------------------- |
 | Create decision | Generate ID, save file | `writeFile`, `exists`, `createDir` |
-| Read decision | Load and parse | `readFile`, `exists` |
-| Update decision | Modify from content | `writeFile` |
-| List decisions | Enumerate directory | `glob.scan` |
+| Read decision   | Load and parse         | `readFile`, `exists`               |
+| Update decision | Modify from content    | `writeFile`                        |
+| List decisions  | Enumerate directory    | `glob.scan`                        |
 
 **Test Scenarios:**
+
 - [ ] Create decision with title
 - [ ] Parse decision fields (context, decision, consequences)
 - [ ] Update decision from raw content
@@ -130,14 +136,15 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 
 ## 4. Configuration Management
 
-| Operation | Description | Adapter Requirements |
-|-----------|-------------|---------------------|
-| Load config | Read backlog.json | `readFile`, `exists` |
-| Save config | Write backlog.json | `writeFile` |
-| Migrate config | Handle legacy formats | `readFile`, `writeFile` |
-| User settings | Read/write user prefs | `readFile`, `writeFile`, `homedir` |
+| Operation      | Description           | Adapter Requirements               |
+| -------------- | --------------------- | ---------------------------------- |
+| Load config    | Read backlog.json     | `readFile`, `exists`               |
+| Save config    | Write backlog.json    | `writeFile`                        |
+| Migrate config | Handle legacy formats | `readFile`, `writeFile`            |
+| User settings  | Read/write user prefs | `readFile`, `writeFile`, `homedir` |
 
 **Test Scenarios:**
+
 - [ ] Load valid config
 - [ ] Handle missing config (use defaults)
 - [ ] Save config changes
@@ -152,14 +159,15 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 
 ### 5.1 File Staging
 
-| Operation | Description | MockGitAdapter Method |
-|-----------|-------------|----------------------|
-| Stage file | `git add <file>` | `exec(["add", file])` |
-| Stage multiple | `git add <files...>` | `exec(["add", ...files])` |
-| Stage directory | `git add <dir>` | `exec(["add", dir])` |
-| Stage move | Record move for commit | `exec(["add", ...])` |
+| Operation       | Description            | MockGitAdapter Method     |
+| --------------- | ---------------------- | ------------------------- |
+| Stage file      | `git add <file>`       | `exec(["add", file])`     |
+| Stage multiple  | `git add <files...>`   | `exec(["add", ...files])` |
+| Stage directory | `git add <dir>`        | `exec(["add", dir])`      |
+| Stage move      | Record move for commit | `exec(["add", ...])`      |
 
 **Test Scenarios:**
+
 - [ ] Stage single file
 - [ ] Stage multiple files
 - [ ] Stage entire backlog directory
@@ -167,13 +175,14 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 
 ### 5.2 Committing
 
-| Operation | Description | MockGitAdapter Method |
-|-----------|-------------|----------------------|
-| Commit changes | `git commit -m` | `exec(["commit", "-m", msg])` |
-| Task commit | Prefixed message | `exec(["commit", ...])` |
-| Validate staged | Check for changes first | `exec(["status", ...])` |
+| Operation       | Description             | MockGitAdapter Method         |
+| --------------- | ----------------------- | ----------------------------- |
+| Commit changes  | `git commit -m`         | `exec(["commit", "-m", msg])` |
+| Task commit     | Prefixed message        | `exec(["commit", ...])`       |
+| Validate staged | Check for changes first | `exec(["status", ...])`       |
 
 **Test Scenarios:**
+
 - [ ] Commit with message
 - [ ] Commit with task ID prefix
 - [ ] Reject commit when nothing staged
@@ -181,14 +190,15 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 
 ### 5.3 Repository Status
 
-| Operation | Description | MockGitAdapter Method |
-|-----------|-------------|----------------------|
-| Get status | `git status --porcelain` | `exec(["status", "--porcelain"])` |
-| Is clean | Check working tree | `exec(["status", ...])` |
+| Operation      | Description                 | MockGitAdapter Method                |
+| -------------- | --------------------------- | ------------------------------------ |
+| Get status     | `git status --porcelain`    | `exec(["status", "--porcelain"])`    |
+| Is clean       | Check working tree          | `exec(["status", ...])`              |
 | Current branch | `git branch --show-current` | `exec(["branch", "--show-current"])` |
-| Last commit | `git log -1 --format=%s` | `exec(["log", ...])` |
+| Last commit    | `git log -1 --format=%s`    | `exec(["log", ...])`                 |
 
 **Test Scenarios:**
+
 - [ ] Detect clean working tree
 - [ ] Detect uncommitted changes
 - [ ] Get current branch name
@@ -196,14 +206,15 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 
 ### 5.4 Branch Operations
 
-| Operation | Description | MockGitAdapter Method |
-|-----------|-------------|----------------------|
-| List local branches | `git branch` | `exec(["branch"])` |
-| List all branches | `git branch -a` | `exec(["branch", "-a"])` |
+| Operation            | Description     | MockGitAdapter Method    |
+| -------------------- | --------------- | ------------------------ |
+| List local branches  | `git branch`    | `exec(["branch"])`       |
+| List all branches    | `git branch -a` | `exec(["branch", "-a"])` |
 | List remote branches | `git branch -r` | `exec(["branch", "-r"])` |
-| Recent branches | Filter by date | `exec(["branch", ...])` |
+| Recent branches      | Filter by date  | `exec(["branch", ...])`  |
 
 **Test Scenarios:**
+
 - [ ] List local branches only
 - [ ] List all branches including remotes
 - [ ] List branches active in last N days
@@ -211,13 +222,14 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 
 ### 5.5 Cross-Branch Task Loading
 
-| Operation | Description | MockGitAdapter Method |
-|-----------|-------------|----------------------|
-| List tree files | `git ls-tree` | `exec(["ls-tree", ...])` |
-| Show file | `git show ref:path` | `exec(["show", ref:path])` |
-| File mod dates | `git log --format` | `exec(["log", ...])` |
+| Operation       | Description         | MockGitAdapter Method      |
+| --------------- | ------------------- | -------------------------- |
+| List tree files | `git ls-tree`       | `exec(["ls-tree", ...])`   |
+| Show file       | `git show ref:path` | `exec(["show", ref:path])` |
+| File mod dates  | `git log --format`  | `exec(["log", ...])`       |
 
 **Test Scenarios:**
+
 - [ ] Load task from other local branch
 - [ ] Load task from remote branch
 - [ ] Merge task from multiple branches (most recent wins)
@@ -226,13 +238,14 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 
 ### 5.6 Remote Operations
 
-| Operation | Description | MockGitAdapter Method |
-|-----------|-------------|----------------------|
-| Fetch | `git fetch` | `exec(["fetch", ...])` |
-| Has remote | `git remote` | `exec(["remote"])` |
+| Operation           | Description          | MockGitAdapter Method               |
+| ------------------- | -------------------- | ----------------------------------- |
+| Fetch               | `git fetch`          | `exec(["fetch", ...])`              |
+| Has remote          | `git remote`         | `exec(["remote"])`                  |
 | Check remote exists | `git remote get-url` | `exec(["remote", "get-url", name])` |
 
 **Test Scenarios:**
+
 - [ ] Fetch updates from remote
 - [ ] Skip fetch when no remotes
 - [ ] Handle network error with retry
@@ -242,15 +255,16 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 
 ## 6. Content Store (In-Memory Cache)
 
-| Operation | Description | Dependencies |
-|-----------|-------------|--------------|
-| Initialize | Load all content | FileSystem ops |
-| Subscribe | Listen for changes | Event emitter |
-| Get tasks | Query with filters | In-memory filter |
-| Upsert task | Update cache | Direct mutation |
-| File watching | React to changes | Adapter events (optional) |
+| Operation     | Description        | Dependencies              |
+| ------------- | ------------------ | ------------------------- |
+| Initialize    | Load all content   | FileSystem ops            |
+| Subscribe     | Listen for changes | Event emitter             |
+| Get tasks     | Query with filters | In-memory filter          |
+| Upsert task   | Update cache       | Direct mutation           |
+| File watching | React to changes   | Adapter events (optional) |
 
 **Test Scenarios:**
+
 - [ ] Initialize store loads all content
 - [ ] Query tasks by status
 - [ ] Query tasks by multiple filters
@@ -263,14 +277,15 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 
 ## 7. Search Service
 
-| Operation | Description | Dependencies |
-|-----------|-------------|--------------|
-| Full-text search | Fuzzy match | ContentStore data |
-| Type filter | Task/doc/decision | In-memory filter |
-| Status filter | By task status | In-memory filter |
-| Combined search | Query + filters | Both |
+| Operation        | Description       | Dependencies      |
+| ---------------- | ----------------- | ----------------- |
+| Full-text search | Fuzzy match       | ContentStore data |
+| Type filter      | Task/doc/decision | In-memory filter  |
+| Status filter    | By task status    | In-memory filter  |
+| Combined search  | Query + filters   | Both              |
 
 **Test Scenarios:**
+
 - [ ] Search by title keyword
 - [ ] Search with fuzzy matching (typos)
 - [ ] Filter search by type
@@ -286,6 +301,7 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 ### 8.1 Filesystem Errors
 
 **Test Scenarios:**
+
 - [ ] Handle file not found gracefully
 - [ ] Handle permission denied
 - [ ] Handle directory not exists
@@ -296,6 +312,7 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 ### 8.2 Git Errors
 
 **Test Scenarios:**
+
 - [ ] Handle not a git repository
 - [ ] Handle git command failure
 - [ ] Handle network timeout on fetch
@@ -305,6 +322,7 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 ### 8.3 Concurrency
 
 **Test Scenarios:**
+
 - [ ] Concurrent task updates (last write wins)
 - [ ] Concurrent ID generation (no duplicates)
 - [ ] File watcher debouncing
@@ -319,23 +337,23 @@ The test adapters (`InMemoryFileSystemAdapter`, `InMemoryGlobAdapter`, `MockGitA
 ```typescript
 interface InMemoryFileSystemAdapter {
   // Core operations
-  readFile(path: string): Promise<string>
-  writeFile(path: string, content: string): Promise<void>
-  exists(path: string): Promise<boolean>
-  createDir(path: string, options?: { recursive?: boolean }): Promise<void>
-  deleteFile(path: string): Promise<void>
-  rename(from: string, to: string): Promise<void>
-  stat(path: string): Promise<{ isFile: boolean; isDirectory: boolean; mtime: Date }>
+  readFile(path: string): Promise<string>;
+  writeFile(path: string, content: string): Promise<void>;
+  exists(path: string): Promise<boolean>;
+  createDir(path: string, options?: { recursive?: boolean }): Promise<void>;
+  deleteFile(path: string): Promise<void>;
+  rename(from: string, to: string): Promise<void>;
+  stat(path: string): Promise<{ isFile: boolean; isDirectory: boolean; mtime: Date }>;
 
   // Path utilities
-  dirname(path: string): string
-  join(...paths: string[]): string
-  homedir(): string
+  dirname(path: string): string;
+  join(...paths: string[]): string;
+  homedir(): string;
 
   // Test utilities
-  seedFiles(files: Record<string, string>): void
-  getFiles(): Record<string, string>
-  clear(): void
+  seedFiles(files: Record<string, string>): void;
+  getFiles(): Record<string, string>;
+  clear(): void;
 }
 ```
 
@@ -344,10 +362,10 @@ interface InMemoryFileSystemAdapter {
 ```typescript
 interface InMemoryGlobAdapter {
   // Core operation
-  scan(pattern: string, options?: { cwd?: string }): AsyncIterable<string>
+  scan(pattern: string, options?: { cwd?: string }): AsyncIterable<string>;
 
   // Test utilities
-  setFileSystem(fs: InMemoryFileSystemAdapter): void
+  setFileSystem(fs: InMemoryFileSystemAdapter): void;
 }
 ```
 
@@ -356,22 +374,25 @@ interface InMemoryGlobAdapter {
 ```typescript
 interface MockGitAdapter {
   // Core operation
-  exec(args: string[], options?: { cwd?: string }): Promise<{ stdout: string; stderr: string; exitCode: number }>
-  isGitRepository(root: string): Promise<boolean>
-  initRepository(root: string): Promise<void>
+  exec(
+    args: string[],
+    options?: { cwd?: string }
+  ): Promise<{ stdout: string; stderr: string; exitCode: number }>;
+  isGitRepository(root: string): Promise<boolean>;
+  initRepository(root: string): Promise<void>;
 
   // Test configuration
-  mockResponse(command: string[], response: string | Error): void
-  mockBranch(name: string): void
-  mockRemote(name: string, url: string): void
-  mockStatus(files: Array<{ path: string; status: string }>): void
-  mockTree(ref: string, files: Record<string, string>): void
+  mockResponse(command: string[], response: string | Error): void;
+  mockBranch(name: string): void;
+  mockRemote(name: string, url: string): void;
+  mockStatus(files: Array<{ path: string; status: string }>): void;
+  mockTree(ref: string, files: Record<string, string>): void;
 
   // Assertions
-  getCommandHistory(): Array<{ args: string[]; cwd?: string }>
-  assertCommandCalled(args: string[]): void
-  assertCommandCalledTimes(args: string[], times: number): void
-  clearHistory(): void
+  getCommandHistory(): Array<{ args: string[]; cwd?: string }>;
+  assertCommandCalled(args: string[]): void;
+  assertCommandCalledTimes(args: string[], times: number): void;
+  clearHistory(): void;
 }
 ```
 

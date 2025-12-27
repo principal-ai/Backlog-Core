@@ -42,19 +42,14 @@ export function getMilestoneLabel(
   if (!milestoneId) {
     return "Tasks without milestone";
   }
-  const entity = milestoneEntities.find(
-    (m) => milestoneKey(m.id) === milestoneKey(milestoneId)
-  );
+  const entity = milestoneEntities.find((m) => milestoneKey(m.id) === milestoneKey(milestoneId));
   return entity?.title || milestoneId;
 }
 
 /**
  * Collect all unique milestone IDs from tasks and milestone entities
  */
-export function collectMilestoneIds(
-  tasks: Task[],
-  milestoneEntities: Milestone[]
-): string[] {
+export function collectMilestoneIds(tasks: Task[], milestoneEntities: Milestone[]): string[] {
   const merged: string[] = [];
   const seen = new Set<string>();
 
@@ -83,10 +78,7 @@ export function collectMilestoneIds(
 /**
  * Collect milestones from tasks and config (legacy support)
  */
-export function collectMilestones(
-  tasks: Task[],
-  configMilestones: string[]
-): string[] {
+export function collectMilestones(tasks: Task[], configMilestones: string[]): string[] {
   const merged: string[] = [];
   const seen = new Set<string>();
 
@@ -122,9 +114,7 @@ function createBucket(
   const bucketMilestoneKey = milestoneKey(milestoneId);
   const bucketTasks = tasks.filter((task) => {
     const taskMilestoneKey = milestoneKey(task.milestone);
-    return bucketMilestoneKey
-      ? taskMilestoneKey === bucketMilestoneKey
-      : !taskMilestoneKey;
+    return bucketMilestoneKey ? taskMilestoneKey === bucketMilestoneKey : !taskMilestoneKey;
   });
 
   const counts: Record<string, number> = {};
@@ -137,10 +127,7 @@ function createBucket(
   }
 
   const doneCount = bucketTasks.filter((t) => isDoneStatus(t.status)).length;
-  const progress =
-    bucketTasks.length > 0
-      ? Math.round((doneCount / bucketTasks.length) * 100)
-      : 0;
+  const progress = bucketTasks.length > 0 ? Math.round((doneCount / bucketTasks.length) * 100) : 0;
 
   const key = bucketMilestoneKey ? bucketMilestoneKey : NO_MILESTONE_KEY;
   const label = getMilestoneLabel(milestoneId, milestoneEntities);
@@ -177,9 +164,7 @@ export function buildMilestoneBuckets(
     // "No milestone" bucket first
     createBucket(undefined, tasks, statuses, milestoneEntities, true),
     // Then each milestone bucket
-    ...allMilestoneIds.map((m) =>
-      createBucket(m, tasks, statuses, milestoneEntities, false)
-    ),
+    ...allMilestoneIds.map((m) => createBucket(m, tasks, statuses, milestoneEntities, false)),
   ];
 
   return buckets;
@@ -243,11 +228,7 @@ export function groupTasksByMilestone(
   statuses: string[]
 ): MilestoneSummary {
   const milestones = collectMilestones(tasks, configMilestones);
-  const buckets = buildMilestoneBucketsFromConfig(
-    tasks,
-    configMilestones,
-    statuses
-  );
+  const buckets = buildMilestoneBucketsFromConfig(tasks, configMilestones, statuses);
 
   return {
     milestones,

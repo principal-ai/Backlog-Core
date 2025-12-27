@@ -33,15 +33,15 @@ KanbanBoard component (renders tasks by status)
 ## Core Class API
 
 ```typescript
-import { Core } from '@backlog-md/core';
+import { Core } from "@backlog-md/core";
 
 // Create with adapters
 const core = new Core({
-  projectRoot: '/path/to/project',
+  projectRoot: "/path/to/project",
   adapters: {
     fs: new PanelFileSystemAdapter(panelContext),
-    glob: new PanelGlobAdapter(panelContext),  // optional
-  }
+    glob: new PanelGlobAdapter(panelContext), // optional
+  },
 });
 
 // Initialize (loads config, discovers structure)
@@ -50,12 +50,12 @@ await core.initialize();
 // Query operations
 const tasks = await core.listTasks();
 const tasksByStatus = await core.getTasksByStatus();
-const task = await core.getTask('123');
+const task = await core.getTask("123");
 const config = core.getConfig();
 
 // Mutation operations (future)
-await core.updateTask('123', { status: 'in-progress' });
-await core.createTask({ title: 'New task', status: 'backlog' });
+await core.updateTask("123", { status: "in-progress" });
+await core.createTask({ title: "New task", status: "backlog" });
 ```
 
 ## Adapter Requirements
@@ -283,12 +283,12 @@ function parseBacklogConfig(content: string): BacklogConfig {
   const yaml = parseYaml(content);
 
   return {
-    projectName: yaml.project_name || 'Backlog',
-    statuses: yaml.statuses || ['backlog', 'in-progress', 'done'],
+    projectName: yaml.project_name || "Backlog",
+    statuses: yaml.statuses || ["backlog", "in-progress", "done"],
     labels: yaml.labels || [],
     milestones: yaml.milestones || [],
-    defaultStatus: yaml.default_status || 'backlog',
-    dateFormat: yaml.date_format || 'YYYY-MM-DD',
+    defaultStatus: yaml.default_status || "backlog",
+    dateFormat: yaml.date_format || "YYYY-MM-DD",
     // ... other fields
   };
 }
@@ -314,8 +314,8 @@ src/
 ```typescript
 // In the kanban panel
 
-import { Core, type Task, type BacklogConfig } from '@backlog-md/core';
-import type { FileSystemAdapter } from '@backlog-md/core/abstractions';
+import { Core, type Task, type BacklogConfig } from "@backlog-md/core";
+import type { FileSystemAdapter } from "@backlog-md/core/abstractions";
 
 // Implement adapter for PanelContext
 class PanelFileSystemAdapter implements FileSystemAdapter {
@@ -335,24 +335,24 @@ class PanelFileSystemAdapter implements FileSystemAdapter {
   async readDir(path: string): Promise<string[]> {
     const node = this.findNode(path);
     if (!node?.children) return [];
-    return node.children.map(c => c.name);
+    return node.children.map((c) => c.name);
   }
 
   async isDirectory(path: string): Promise<boolean> {
     const node = this.findNode(path);
-    return node?.type === 'directory';
+    return node?.type === "directory";
   }
 
   join(...paths: string[]): string {
-    return paths.join('/').replace(/\/+/g, '/');
+    return paths.join("/").replace(/\/+/g, "/");
   }
 
   dirname(path: string): string {
-    return path.split('/').slice(0, -1).join('/');
+    return path.split("/").slice(0, -1).join("/");
   }
 
   basename(path: string, ext?: string): string {
-    const base = path.split('/').pop() || '';
+    const base = path.split("/").pop() || "";
     if (ext && base.endsWith(ext)) {
       return base.slice(0, -ext.length);
     }
@@ -372,7 +372,7 @@ function useKanbanData() {
 
   useEffect(() => {
     const fs = new PanelFileSystemAdapter(fileTree, actions.openFile);
-    const core = new Core({ projectRoot: '/', adapters: { fs } });
+    const core = new Core({ projectRoot: "/", adapters: { fs } });
 
     core.initialize().then(() => {
       setConfig(core.getConfig());
@@ -390,22 +390,22 @@ function useKanbanData() {
 
 ```typescript
 // Update a task
-await core.updateTask('123', { status: 'done' });
+await core.updateTask("123", { status: "done" });
 
 // Create a new task
 const task = await core.createTask({
-  title: 'New feature',
-  status: 'backlog'
+  title: "New feature",
+  status: "backlog",
 });
 
 // Archive a task
-await core.archiveTask('123');
+await core.archiveTask("123");
 ```
 
 ### Event System
 
 ```typescript
-core.on('taskUpdated', (task: Task) => {
+core.on("taskUpdated", (task: Task) => {
   // React to changes
 });
 ```
@@ -413,12 +413,13 @@ core.on('taskUpdated', (task: Task) => {
 ### Search
 
 ```typescript
-const results = await core.search('authentication');
+const results = await core.search("authentication");
 ```
 
 ## Dependencies
 
 The Core class uses:
+
 - `parseTaskMarkdown` from `@backlog-md/core/markdown`
 - Types from `@backlog-md/core/types`
 - `yaml` npm package (^2.8.1) for task frontmatter parsing
@@ -435,30 +436,31 @@ Uses a **custom line-by-line parser** copied from the official Backlog.md projec
 // No YAML library needed - simple key: value parsing
 function parseBacklogConfig(content: string): BacklogConfig {
   const config: Partial<BacklogConfig> = {};
-  const lines = content.split('\n');
+  const lines = content.split("\n");
 
   for (const line of lines) {
     const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
+    if (!trimmed || trimmed.startsWith("#")) continue;
 
-    const colonIndex = trimmed.indexOf(':');
+    const colonIndex = trimmed.indexOf(":");
     if (colonIndex === -1) continue;
 
     const key = trimmed.substring(0, colonIndex).trim();
     const value = trimmed.substring(colonIndex + 1).trim();
 
     switch (key) {
-      case 'project_name':
-        config.projectName = value.replace(/['"]/g, '');
+      case "project_name":
+        config.projectName = value.replace(/['"]/g, "");
         break;
-      case 'statuses':
-      case 'labels':
-      case 'milestones':
+      case "statuses":
+      case "labels":
+      case "milestones":
         // Parse [item1, item2] format
-        if (value.startsWith('[') && value.endsWith(']')) {
-          config[key] = value.slice(1, -1)
-            .split(',')
-            .map(item => item.trim().replace(/['"]/g, ''))
+        if (value.startsWith("[") && value.endsWith("]")) {
+          config[key] = value
+            .slice(1, -1)
+            .split(",")
+            .map((item) => item.trim().replace(/['"]/g, ""))
             .filter(Boolean);
         }
         break;
@@ -475,17 +477,18 @@ function parseBacklogConfig(content: string): BacklogConfig {
 Uses the **`yaml` npm package** for proper YAML parsing of task frontmatter:
 
 ```typescript
-import YAML from 'yaml';
+import YAML from "yaml";
 
 function parseTaskFrontmatter(content: string): TaskFrontmatter {
   const match = content.match(/^---\n([\s\S]*?)\n---/);
-  if (!match) throw new Error('Missing frontmatter');
+  if (!match) throw new Error("Missing frontmatter");
 
   return YAML.parse(match[1]) as TaskFrontmatter;
 }
 ```
 
 This approach is copied from the kanban panel at:
+
 - `src/adapters/backlog-config-parser.ts` - Config parsing (line-by-line)
 - `src/adapters/backlog-parser.ts` - Task parsing (yaml library)
 
@@ -493,12 +496,12 @@ This approach is copied from the kanban panel at:
 
 The kanban panel (`/Users/griever/Developer/web-ade/industry-themed-backlogmd-kanban-panel`) contains working implementations of:
 
-| Function | Source File | Notes |
-|----------|-------------|-------|
-| `parseBacklogConfig()` | `backlog-config-parser.ts` | Copied from official Backlog.md |
-| `parseTaskFile()` | `backlog-parser.ts` | Uses `yaml` package |
-| `sortTasks()` | `backlog-parser.ts` | ordinal → priority → date |
-| `extractAcceptanceCriteria()` | `backlog-parser.ts` | Parses checkbox items |
+| Function                      | Source File                | Notes                           |
+| ----------------------------- | -------------------------- | ------------------------------- |
+| `parseBacklogConfig()`        | `backlog-config-parser.ts` | Copied from official Backlog.md |
+| `parseTaskFile()`             | `backlog-parser.ts`        | Uses `yaml` package             |
+| `sortTasks()`                 | `backlog-parser.ts`        | ordinal → priority → date       |
+| `extractAcceptanceCriteria()` | `backlog-parser.ts`        | Parses checkbox items           |
 
 These will be consolidated into @backlog-md/core.
 

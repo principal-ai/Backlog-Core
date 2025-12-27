@@ -383,8 +383,10 @@ function parseMilestoneFrontmatter(raw: string): MilestoneFrontmatter {
     let cleanValue = value.trim();
 
     // Remove surrounding quotes if present
-    if ((cleanValue.startsWith('"') && cleanValue.endsWith('"')) ||
-        (cleanValue.startsWith("'") && cleanValue.endsWith("'"))) {
+    if (
+      (cleanValue.startsWith('"') && cleanValue.endsWith('"')) ||
+      (cleanValue.startsWith("'") && cleanValue.endsWith("'"))
+    ) {
       cleanValue = cleanValue.slice(1, -1);
     }
 
@@ -512,10 +514,7 @@ export interface TaskBodyMarkdownOptions {
  * @param options - Options for body extraction
  * @returns Markdown string for the body content
  */
-export function getTaskBodyMarkdown(
-  task: Task,
-  options: TaskBodyMarkdownOptions = {}
-): string {
+export function getTaskBodyMarkdown(task: Task, options: TaskBodyMarkdownOptions = {}): string {
   const { includeTitle = false } = options;
 
   // If we have rawContent, use it (stripping title if needed)

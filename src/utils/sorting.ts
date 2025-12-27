@@ -17,10 +17,7 @@ const PRIORITY_ORDER: Record<string, number> = {
  * @param direction - Sort direction ('asc' or 'desc')
  * @returns New sorted array
  */
-export function sortTasksByTitle(
-  tasks: Task[],
-  direction: "asc" | "desc" = "asc"
-): Task[] {
+export function sortTasksByTitle(tasks: Task[], direction: "asc" | "desc" = "asc"): Task[] {
   return [...tasks].sort((a, b) => {
     const cmp = a.title.localeCompare(b.title);
     return direction === "asc" ? cmp : -cmp;
@@ -91,10 +88,7 @@ export function sortTasks(tasks: Task[]): Task[] {
  * @param statuses - Ordered list of statuses (for column ordering)
  * @returns Map with status as key and sorted tasks as value
  */
-export function groupTasksByStatus(
-  tasks: Task[],
-  statuses: string[]
-): Map<string, Task[]> {
+export function groupTasksByStatus(tasks: Task[], statuses: string[]): Map<string, Task[]> {
   const grouped = new Map<string, Task[]>();
 
   // Initialize with all configured statuses (preserves column order)

@@ -198,9 +198,7 @@ export class Core {
     const configExists = await this.fs.exists(configPath);
 
     if (!configExists) {
-      throw new Error(
-        `Not a Backlog.md project: config.yml not found at ${configPath}`
-      );
+      throw new Error(`Not a Backlog.md project: config.yml not found at ${configPath}`);
     }
 
     const configContent = await this.fs.readFile(configPath);
@@ -238,9 +236,7 @@ export class Core {
     const configExists = await this.fs.exists(configPath);
 
     if (!configExists) {
-      throw new Error(
-        `Not a Backlog.md project: config.yml not found at ${configPath}`
-      );
+      throw new Error(`Not a Backlog.md project: config.yml not found at ${configPath}`);
     }
 
     const configContent = await this.fs.readFile(configPath);
@@ -251,8 +247,10 @@ export class Core {
     for (const filePath of filePaths) {
       if (!filePath.endsWith(".md")) continue;
       // Check for backlog/tasks or backlog/completed (with or without leading slash)
-      const isTaskFile = filePath.includes("backlog/tasks/") || filePath.includes("backlog\\tasks\\");
-      const isCompletedFile = filePath.includes("backlog/completed/") || filePath.includes("backlog\\completed\\");
+      const isTaskFile =
+        filePath.includes("backlog/tasks/") || filePath.includes("backlog\\tasks\\");
+      const isCompletedFile =
+        filePath.includes("backlog/completed/") || filePath.includes("backlog\\completed\\");
       if (!isTaskFile && !isCompletedFile) continue;
       // Skip config.yml
       if (filePath.endsWith("config.yml")) continue;
@@ -351,9 +349,7 @@ export class Core {
 
     for (const source of sources) {
       // Get index entries for this source
-      let entries = Array.from(this.taskIndex.values()).filter(
-        (e) => e.source === source
-      );
+      let entries = Array.from(this.taskIndex.values()).filter((e) => e.source === source);
 
       // Per-source limit
       const limit = source === "tasks" ? tasksLimit : completedLimit;
@@ -363,9 +359,7 @@ export class Core {
         const aNum = parseInt(a.id.replace(/\D/g, ""), 10) || 0;
         const bNum = parseInt(b.id.replace(/\D/g, ""), 10) || 0;
         // Completed: descending (most recent first), Active: ascending
-        return source === "completed" && completedSortByIdDesc
-          ? bNum - aNum
-          : aNum - bNum;
+        return source === "completed" && completedSortByIdDesc ? bNum - aNum : aNum - bNum;
       });
 
       const total = entries.length;
@@ -415,18 +409,14 @@ export class Core {
     const completedSortByIdDesc = options?.completedSortByIdDesc ?? true;
 
     // Get index entries for this source
-    let entries = Array.from(this.taskIndex.values()).filter(
-      (e) => e.source === source
-    );
+    let entries = Array.from(this.taskIndex.values()).filter((e) => e.source === source);
 
     // Sort by ID (numeric)
     entries = entries.sort((a, b) => {
       const aNum = parseInt(a.id.replace(/\D/g, ""), 10) || 0;
       const bNum = parseInt(b.id.replace(/\D/g, ""), 10) || 0;
       // Completed: descending (most recent first), Active: ascending
-      return source === "completed" && completedSortByIdDesc
-        ? bNum - aNum
-        : aNum - bNum;
+      return source === "completed" && completedSortByIdDesc ? bNum - aNum : aNum - bNum;
     });
 
     const total = entries.length;
@@ -478,9 +468,7 @@ export class Core {
       tasks = tasks.filter((t) => milestoneKey(t.milestone) === filterKey);
     }
     if (filter?.labels && filter.labels.length > 0) {
-      tasks = tasks.filter((t) =>
-        filter.labels!.some((label) => t.labels.includes(label))
-      );
+      tasks = tasks.filter((t) => filter.labels!.some((label) => t.labels.includes(label)));
     }
     if (filter?.parentTaskId) {
       tasks = tasks.filter((t) => t.parentTaskId === filter.parentTaskId);
@@ -524,11 +512,7 @@ export class Core {
   getTasksByMilestone(): MilestoneSummary {
     this.ensureInitialized();
     const tasks = Array.from(this.tasks.values());
-    return groupTasksByMilestone(
-      tasks,
-      this.config!.milestones,
-      this.config!.statuses
-    );
+    return groupTasksByMilestone(tasks, this.config!.milestones, this.config!.statuses);
   }
 
   // =========================================================================
@@ -580,9 +564,7 @@ export class Core {
     }
 
     // Sort by ID for consistent ordering
-    return milestones.sort((a, b) =>
-      a.id.localeCompare(b.id, undefined, { numeric: true })
-    );
+    return milestones.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
   }
 
   /**
@@ -682,10 +664,7 @@ export class Core {
    * @param input - Fields to update
    * @returns Updated milestone or null if not found
    */
-  async updateMilestone(
-    id: string,
-    input: MilestoneUpdateInput
-  ): Promise<Milestone | null> {
+  async updateMilestone(id: string, input: MilestoneUpdateInput): Promise<Milestone | null> {
     const existing = await this.loadMilestone(id);
     if (!existing) {
       return null;
@@ -827,9 +806,7 @@ export class Core {
    * @param pagination - Pagination options (applied per status)
    * @returns Paginated tasks grouped by status
    */
-  getTasksByStatusPaginated(
-    pagination?: PaginationOptions
-  ): PaginatedTasksByStatus {
+  getTasksByStatusPaginated(pagination?: PaginationOptions): PaginatedTasksByStatus {
     this.ensureInitialized();
 
     const limit = pagination?.limit ?? 10;
@@ -895,9 +872,7 @@ export class Core {
     const sortBy = pagination?.sortBy ?? "title";
     const sortDirection = pagination?.sortDirection ?? "asc";
 
-    let tasks = Array.from(this.tasks.values()).filter(
-      (t) => t.status === status
-    );
+    let tasks = Array.from(this.tasks.values()).filter((t) => t.status === status);
     tasks = sortTasksBy(tasks, sortBy, sortDirection);
 
     const total = tasks.length;
@@ -950,9 +925,7 @@ export class Core {
       result = result.filter((t) => milestoneKey(t.milestone) === filterKey);
     }
     if (filter.labels && filter.labels.length > 0) {
-      result = result.filter((t) =>
-        filter.labels!.some((label) => t.labels.includes(label))
-      );
+      result = result.filter((t) => filter.labels!.some((label) => t.labels.includes(label)));
     }
     if (filter.parentTaskId) {
       result = result.filter((t) => t.parentTaskId === filter.parentTaskId);
@@ -961,10 +934,7 @@ export class Core {
     return result;
   }
 
-  private async loadTasksFromDirectory(
-    dir: string,
-    source: "local" | "completed"
-  ): Promise<void> {
+  private async loadTasksFromDirectory(dir: string, source: "local" | "completed"): Promise<void> {
     const entries = await this.fs.readDir(dir);
 
     for (const entry of entries) {
@@ -1005,15 +975,10 @@ export class Core {
    * @param taskId - Task ID to add
    * @param milestoneId - Milestone ID to update
    */
-  private async addTaskToMilestone(
-    taskId: string,
-    milestoneId: string
-  ): Promise<void> {
+  private async addTaskToMilestone(taskId: string, milestoneId: string): Promise<void> {
     const milestone = await this.loadMilestone(milestoneId);
     if (!milestone) {
-      console.warn(
-        `Milestone ${milestoneId} not found when adding task ${taskId}`
-      );
+      console.warn(`Milestone ${milestoneId} not found when adding task ${taskId}`);
       return;
     }
 
@@ -1037,10 +1002,7 @@ export class Core {
    * @param taskId - Task ID to remove
    * @param milestoneId - Milestone ID to update
    */
-  private async removeTaskFromMilestone(
-    taskId: string,
-    milestoneId: string
-  ): Promise<void> {
+  private async removeTaskFromMilestone(taskId: string, milestoneId: string): Promise<void> {
     const milestone = await this.loadMilestone(milestoneId);
     if (!milestone) {
       return;
@@ -1199,10 +1161,10 @@ export class Core {
       description: input.description ?? existing.description,
       implementationPlan: input.clearImplementationPlan
         ? undefined
-        : input.implementationPlan ?? existing.implementationPlan,
+        : (input.implementationPlan ?? existing.implementationPlan),
       implementationNotes: input.clearImplementationNotes
         ? undefined
-        : input.implementationNotes ?? existing.implementationNotes,
+        : (input.implementationNotes ?? existing.implementationNotes),
       ordinal: input.ordinal ?? existing.ordinal,
       dependencies: input.dependencies ?? existing.dependencies,
     };
@@ -1215,9 +1177,7 @@ export class Core {
         updated.labels = [...new Set([...updated.labels, ...input.addLabels])];
       }
       if (input.removeLabels) {
-        updated.labels = updated.labels.filter(
-          (l) => !input.removeLabels!.includes(l)
-        );
+        updated.labels = updated.labels.filter((l) => !input.removeLabels!.includes(l));
       }
     }
 
@@ -1228,9 +1188,7 @@ export class Core {
 
     // Handle dependency operations
     if (input.addDependencies) {
-      updated.dependencies = [
-        ...new Set([...updated.dependencies, ...input.addDependencies]),
-      ];
+      updated.dependencies = [...new Set([...updated.dependencies, ...input.addDependencies])];
     }
     if (input.removeDependencies) {
       updated.dependencies = updated.dependencies.filter(
@@ -1240,13 +1198,11 @@ export class Core {
 
     // Handle acceptance criteria
     if (input.acceptanceCriteria) {
-      updated.acceptanceCriteriaItems = input.acceptanceCriteria.map(
-        (ac, i) => ({
-          index: i + 1,
-          text: ac.text,
-          checked: ac.checked || false,
-        })
-      );
+      updated.acceptanceCriteriaItems = input.acceptanceCriteria.map((ac, i) => ({
+        index: i + 1,
+        text: ac.text,
+        checked: ac.checked || false,
+      }));
     }
 
     // Serialize and write file
@@ -1272,8 +1228,7 @@ export class Core {
     this.tasks.set(id, updated);
 
     // Handle milestone sync
-    const milestoneChanged =
-      milestoneKey(oldMilestone) !== milestoneKey(newMilestone);
+    const milestoneChanged = milestoneKey(oldMilestone) !== milestoneKey(newMilestone);
     if (milestoneChanged) {
       // Remove from old milestone
       if (oldMilestone) {
@@ -1331,9 +1286,7 @@ export class Core {
   async loadTasksByIds(ids: string[]): Promise<Task[]> {
     // If fully initialized, return from cache
     if (this.initialized) {
-      return ids
-        .map((id) => this.tasks.get(id))
-        .filter((t): t is Task => t !== undefined);
+      return ids.map((id) => this.tasks.get(id)).filter((t): t is Task => t !== undefined);
     }
 
     // If lazy initialized, load on demand
@@ -1341,8 +1294,6 @@ export class Core {
       return this.loadTasks(ids);
     }
 
-    throw new Error(
-      "Core not initialized. Call initialize() or initializeLazy() first."
-    );
+    throw new Error("Core not initialized. Call initialize() or initializeLazy() first.");
   }
 }
