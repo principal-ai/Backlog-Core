@@ -10,13 +10,13 @@ This document tracks which features from [Backlog.md](../../../Backlog.md) are c
 | --------------------- | ----------- | ------ | -------- |
 | Core Infrastructure   | 6           | 6      | 100%     |
 | Task Reading          | 8           | 8      | 100%     |
-| Task Writing          | 3           | 6      | 50%      |
+| Task Writing          | 6           | 6      | 100%     |
 | Milestones            | 12          | 12     | 100%     |
 | Git Operations        | 0           | 8      | 0%       |
 | Search & Query        | 1           | 4      | 25%      |
 | Documents & Decisions | 0           | 4      | 0%       |
 | Advanced Features     | 0           | 6      | 0%       |
-| **Total**             | **30**      | **54** | **56%**  |
+| **Total**             | **33**      | **54** | **61%**  |
 
 ---
 
@@ -65,6 +65,17 @@ This document tracks which features from [Backlog.md](../../../Backlog.md) are c
 | Sort by ordinal/priority/date | Done   | `sortTasks()`                                           |
 | Sort by specific field        | Done   | `sortTasksBy()` - title, createdDate, priority, ordinal |
 | Group by status               | Done   | `groupTasksByStatus()`                                  |
+
+### Task Writing (6/6) ✅ Complete
+
+| Feature          | Status | Notes                                                   |
+| ---------------- | ------ | ------------------------------------------------------- |
+| Create task      | Done   | `createTask()` with milestone sync                      |
+| Update task      | Done   | `updateTask()` with bidirectional sync                  |
+| Delete task      | Done   | `deleteTask()` with milestone sync                      |
+| Archive task     | Done   | `archiveTask()` - move to `completed/`                  |
+| Restore task     | Done   | `restoreTask()` - move from `completed/`                |
+| Rename task file | Done   | Handled automatically by `updateTask()` on title change |
 
 ---
 
@@ -129,17 +140,6 @@ interface MilestoneSummary {
 ---
 
 ## Not Yet Implemented
-
-### Task Writing (3/6)
-
-| Feature          | Status      | Priority | Notes                                      |
-| ---------------- | ----------- | -------- | ------------------------------------------ |
-| Create task      | Done        | -        | `createTask()` with milestone sync         |
-| Update task      | Done        | -        | `updateTask()` with bidirectional sync     |
-| Delete task      | Done        | -        | `deleteTask()` with milestone sync         |
-| Archive task     | Not Started | Medium   | Move to `completed/`                       |
-| Restore task     | Not Started | Medium   | Move from `completed/`                     |
-| Rename task file | Not Started | Low      | Title change = file rename                 |
 
 ### Git Operations (0/8)
 
@@ -219,15 +219,15 @@ Based on current implementation and common use cases:
 2. ~~`updateTask()` - Modify existing tasks~~ Done
 3. ~~`deleteTask()` - Delete tasks~~ Done
 
-### Phase 2: Search
+### Phase 2: Lifecycle Operations ✅ Complete
 
-4. `SearchService` - Full-text search with Fuse.js
-5. Integrate search with existing filters
+4. ~~`archiveTask()` - Move to completed~~ Done
+5. ~~`restoreTask()` - Move from completed~~ Done
 
-### Phase 3: Lifecycle Operations
+### Phase 3: Search
 
-6. `archiveTask()` - Move to completed
-7. `restoreTask()` - Move from completed
+6. `SearchService` - Full-text search with Fuse.js
+7. Integrate search with existing filters
 
 ### Phase 4: Git Integration
 
@@ -240,13 +240,13 @@ Based on current implementation and common use cases:
 
 Key completed tasks in Backlog.md that should map to Core:
 
-| Backlog.md Task                     | Core Equivalent                          | Status          |
-| ----------------------------------- | ---------------------------------------- | --------------- |
-| task-2 (Core Logic Library)         | This package                             | In Progress     |
-| task-3 (Init Command)               | `initProject()`                          | Done            |
-| task-4 (Task Management)            | `createTask()`, `updateTask()`, `deleteTask()` | Done      |
-| task-52 (Filter by status/assignee) | `listTasks()`                            | Done            |
-| task-82 (Plain view for agents)     | `getTaskBodyMarkdown()`                  | Done            |
-| task-95 (Priority field)            | Priority in types/parsing                | Done            |
-| task-89 (Dependency parameter)      | Types defined                            | Not Implemented |
-| task-112 (Tab switching)            | Pagination for lazy loading              | Done            |
+| Backlog.md Task                     | Core Equivalent                                | Status          |
+| ----------------------------------- | ---------------------------------------------- | --------------- |
+| task-2 (Core Logic Library)         | This package                                   | In Progress     |
+| task-3 (Init Command)               | `initProject()`                                | Done            |
+| task-4 (Task Management)            | `createTask()`, `updateTask()`, `deleteTask()` | Done            |
+| task-52 (Filter by status/assignee) | `listTasks()`                                  | Done            |
+| task-82 (Plain view for agents)     | `getTaskBodyMarkdown()`                        | Done            |
+| task-95 (Priority field)            | Priority in types/parsing                      | Done            |
+| task-89 (Dependency parameter)      | Types defined                                  | Not Implemented |
+| task-112 (Tab switching)            | Pagination for lazy loading                    | Done            |

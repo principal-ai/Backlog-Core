@@ -1054,6 +1054,13 @@ export class Core {
     return this.fs.join(this.projectRoot, "backlog", "tasks");
   }
 
+  /**
+   * Get the completed directory path
+   */
+  private getCompletedDir(): string {
+    return this.fs.join(this.projectRoot, "backlog", "completed");
+  }
+
   // =========================================================================
   // Task CRUD Operations
   // =========================================================================
@@ -1275,6 +1282,140 @@ export class Core {
     this.tasks.delete(id);
 
     return true;
+  }
+
+  /**
+   * Archive a task (move from tasks/ to completed/)
+   *
+   * @param id - Task ID to archive
+   * @returns Archived task or null if not found or already archived
+   */
+  async archiveTask(id: string): Promise<Task | null> {
+    this.ensureInitialized();
+
+    const task = this.tasks.get(id);
+    if (!task) {
+      return null;
+    }
+
+    // Check if already in completed
+    if (task.source === "completed") {
+      return null;
+    }
+
+    const completedDir = this.getCompletedDir();
+
+    // Ensure completed directory exists
+    await this.fs.createDir(completedDir, { recursive: true });
+
+    // Build new filepath in completed/
+    const safeTitle = task.title
+      .replace(/[<>:"/\\|?*]/g, "")
+      .replace(/\s+/g, " ")
+      .slice(0, 50);
+    const filename = `${id} - ${safeTitle}.md`;
+    const newFilepath = this.fs.join(completedDir, filename);
+
+    // Delete old file
+    if (task.filePath) {
+      try {
+        await this.fs.deleteFile(task.filePath);
+      } catch {
+        // File may not exist
+      }
+    }
+
+    // Update task
+    const archived: Task = {
+      ...task,
+      source: "completed",
+      filePath: newFilepath,
+    };
+
+    // Write to new location
+    const content = serializeTaskMarkdown(archived);
+    await this.fs.writeFile(newFilepath, content);
+
+    // Update in-memory cache
+    this.tasks.set(id, archived);
+
+    // Update task index if lazy initialized
+    if (this.lazyInitialized) {
+      const entry = this.taskIndex.get(id);
+      if (entry) {
+        entry.source = "completed";
+        entry.filePath = newFilepath;
+      }
+    }
+
+    return archived;
+  }
+
+  /**
+   * Restore a task (move from completed/ to tasks/)
+   *
+   * @param id - Task ID to restore
+   * @returns Restored task or null if not found or not archived
+   */
+  async restoreTask(id: string): Promise<Task | null> {
+    this.ensureInitialized();
+
+    const task = this.tasks.get(id);
+    if (!task) {
+      return null;
+    }
+
+    // Check if in completed
+    if (task.source !== "completed") {
+      return null;
+    }
+
+    const tasksDir = this.getTasksDir();
+
+    // Ensure tasks directory exists
+    await this.fs.createDir(tasksDir, { recursive: true });
+
+    // Build new filepath in tasks/
+    const safeTitle = task.title
+      .replace(/[<>:"/\\|?*]/g, "")
+      .replace(/\s+/g, " ")
+      .slice(0, 50);
+    const filename = `${id} - ${safeTitle}.md`;
+    const newFilepath = this.fs.join(tasksDir, filename);
+
+    // Delete old file
+    if (task.filePath) {
+      try {
+        await this.fs.deleteFile(task.filePath);
+      } catch {
+        // File may not exist
+      }
+    }
+
+    // Update task
+    const restored: Task = {
+      ...task,
+      source: "local",
+      filePath: newFilepath,
+    };
+
+    // Write to new location
+    const content = serializeTaskMarkdown(restored);
+    await this.fs.writeFile(newFilepath, content);
+
+    // Update in-memory cache
+    this.tasks.set(id, restored);
+
+    // Update task index if lazy initialized
+    if (this.lazyInitialized) {
+      const entry = this.taskIndex.get(id);
+      if (entry) {
+        entry.source = "tasks";
+        entry.filePath = newFilepath;
+      }
+    }
+
+    return restored;
   }
 
   /**
