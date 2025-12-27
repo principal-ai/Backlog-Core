@@ -2,7 +2,7 @@
 
 This document tracks which features from [Backlog.md](../../../Backlog.md) are currently implemented in Backlog-Core.
 
-**Last Updated:** 2024-12-22
+**Last Updated:** 2025-12-27
 
 ## Summary
 
@@ -10,13 +10,13 @@ This document tracks which features from [Backlog.md](../../../Backlog.md) are c
 | --------------------- | ----------- | ------ | -------- |
 | Core Infrastructure   | 6           | 6      | 100%     |
 | Task Reading          | 8           | 8      | 100%     |
-| Task Writing          | 0           | 6      | 0%       |
+| Task Writing          | 3           | 6      | 50%      |
 | Milestones            | 12          | 12     | 100%     |
 | Git Operations        | 0           | 8      | 0%       |
 | Search & Query        | 1           | 4      | 25%      |
 | Documents & Decisions | 0           | 4      | 0%       |
 | Advanced Features     | 0           | 6      | 0%       |
-| **Total**             | **27**      | **54** | **50%**  |
+| **Total**             | **30**      | **54** | **56%**  |
 
 ---
 
@@ -130,16 +130,16 @@ interface MilestoneSummary {
 
 ## Not Yet Implemented
 
-### Task Writing (0/6)
+### Task Writing (3/6)
 
-| Feature          | Status      | Priority | Notes                      |
-| ---------------- | ----------- | -------- | -------------------------- |
-| Create task      | Not Started | **High** | `createTaskFromData()`     |
-| Update task      | Not Started | **High** | `updateTask()`             |
-| Archive task     | Not Started | Medium   | Move to `completed/`       |
-| Restore task     | Not Started | Medium   | Move from `completed/`     |
-| Delete task      | Not Started | Low      | Permanent deletion         |
-| Rename task file | Not Started | Low      | Title change = file rename |
+| Feature          | Status      | Priority | Notes                                      |
+| ---------------- | ----------- | -------- | ------------------------------------------ |
+| Create task      | Done        | -        | `createTask()` with milestone sync         |
+| Update task      | Done        | -        | `updateTask()` with bidirectional sync     |
+| Delete task      | Done        | -        | `deleteTask()` with milestone sync         |
+| Archive task     | Not Started | Medium   | Move to `completed/`                       |
+| Restore task     | Not Started | Medium   | Move from `completed/`                     |
+| Rename task file | Not Started | Low      | Title change = file rename                 |
 
 ### Git Operations (0/8)
 
@@ -213,11 +213,11 @@ All core types are defined and exported:
 
 Based on current implementation and common use cases:
 
-### Phase 1: Write Operations (Core CRUD)
+### Phase 1: Write Operations (Core CRUD) ✅ Complete
 
-1. `createTaskFromData()` - Create new tasks
-2. `updateTask()` - Modify existing tasks
-3. ID generation / sequence management
+1. ~~`createTask()` - Create new tasks~~ Done
+2. ~~`updateTask()` - Modify existing tasks~~ Done
+3. ~~`deleteTask()` - Delete tasks~~ Done
 
 ### Phase 2: Search
 
@@ -240,13 +240,13 @@ Based on current implementation and common use cases:
 
 Key completed tasks in Backlog.md that should map to Core:
 
-| Backlog.md Task                     | Core Equivalent             | Status          |
-| ----------------------------------- | --------------------------- | --------------- |
-| task-2 (Core Logic Library)         | This package                | In Progress     |
-| task-3 (Init Command)               | `initProject()`             | Done            |
-| task-4 (Task Management)            | CRUD operations             | Partial         |
-| task-52 (Filter by status/assignee) | `listTasks()`               | Done            |
-| task-82 (Plain view for agents)     | `getTaskBodyMarkdown()`     | Done            |
-| task-95 (Priority field)            | Priority in types/parsing   | Done            |
-| task-89 (Dependency parameter)      | Types defined               | Not Implemented |
-| task-112 (Tab switching)            | Pagination for lazy loading | Done            |
+| Backlog.md Task                     | Core Equivalent                          | Status          |
+| ----------------------------------- | ---------------------------------------- | --------------- |
+| task-2 (Core Logic Library)         | This package                             | In Progress     |
+| task-3 (Init Command)               | `initProject()`                          | Done            |
+| task-4 (Task Management)            | `createTask()`, `updateTask()`, `deleteTask()` | Done      |
+| task-52 (Filter by status/assignee) | `listTasks()`                            | Done            |
+| task-82 (Plain view for agents)     | `getTaskBodyMarkdown()`                  | Done            |
+| task-95 (Priority field)            | Priority in types/parsing                | Done            |
+| task-89 (Dependency parameter)      | Types defined                            | Not Implemented |
+| task-112 (Tab switching)            | Pagination for lazy loading              | Done            |
