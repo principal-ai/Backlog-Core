@@ -279,9 +279,9 @@ function extractDescription(content: string, title: string): string {
   }
 
   // Remove known sections
-  body = body.replace(/^##\s+Acceptance Criteria[\s\S]*?(?=^##|\z)/m, "");
-  body = body.replace(/^##\s+Implementation Plan[\s\S]*?(?=^##|\z)/m, "");
-  body = body.replace(/^##\s+Implementation Notes[\s\S]*?(?=^##|\z)/m, "");
+  body = body.replace(/^##\s+Acceptance Criteria[\s\S]*?(?=^##|$)/m, "");
+  body = body.replace(/^##\s+Implementation Plan[\s\S]*?(?=^##|$)/m, "");
+  body = body.replace(/^##\s+Implementation Notes[\s\S]*?(?=^##|$)/m, "");
 
   return body.trim();
 }

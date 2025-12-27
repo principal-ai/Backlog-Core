@@ -47,10 +47,11 @@ export function sortTasksBy(
       });
     case "priority":
     case "ordinal":
-    default:
+    default: {
       // Use existing sortTasks for priority/ordinal
       const sorted = sortTasks(tasks);
       return direction === "desc" ? sorted.reverse() : sorted;
+    }
   }
 }
 

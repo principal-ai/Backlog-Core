@@ -358,8 +358,13 @@ export class Core {
       entries = entries.sort((a, b) => {
         const aNum = parseInt(a.id.replace(/\D/g, ""), 10) || 0;
         const bNum = parseInt(b.id.replace(/\D/g, ""), 10) || 0;
-        // Completed: descending (most recent first), Active: ascending
-        return source === "completed" && completedSortByIdDesc ? bNum - aNum : aNum - bNum;
+        if (source === "completed") {
+          // Completed: use completedSortByIdDesc option
+          return completedSortByIdDesc ? bNum - aNum : aNum - bNum;
+        } else {
+          // Tasks: use tasksSortDirection option
+          return tasksSortDirection === "desc" ? bNum - aNum : aNum - bNum;
+        }
       });
 
       const total = entries.length;
@@ -415,8 +420,13 @@ export class Core {
     entries = entries.sort((a, b) => {
       const aNum = parseInt(a.id.replace(/\D/g, ""), 10) || 0;
       const bNum = parseInt(b.id.replace(/\D/g, ""), 10) || 0;
-      // Completed: descending (most recent first), Active: ascending
-      return source === "completed" && completedSortByIdDesc ? bNum - aNum : aNum - bNum;
+      if (source === "completed") {
+        // Completed: use completedSortByIdDesc option
+        return completedSortByIdDesc ? bNum - aNum : aNum - bNum;
+      } else {
+        // Tasks: use sortDirection option
+        return sortDirection === "desc" ? bNum - aNum : aNum - bNum;
+      }
     });
 
     const total = entries.length;
