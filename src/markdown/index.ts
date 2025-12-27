@@ -4,7 +4,7 @@
  * This module handles conversion between markdown files and Task objects.
  */
 
-import type { Task, AcceptanceCriterion, TaskIndexEntry, Milestone } from "../types";
+import type { AcceptanceCriterion, Milestone, Task, TaskIndexEntry } from "../types";
 
 /**
  * Parsed frontmatter from a task markdown file
@@ -256,10 +256,10 @@ function parseAcceptanceCriteria(content: string): AcceptanceCriterion[] {
 
   // Look for AC section or just checkbox items
   const checkboxPattern = /^-\s*\[([ xX])\]\s*(.+)$/gm;
-  let match;
+  const matches = content.matchAll(checkboxPattern);
   let index = 1; // 1-based index as per AcceptanceCriterion
 
-  while ((match = checkboxPattern.exec(content)) !== null) {
+  for (const match of matches) {
     criteria.push({
       index: index++,
       checked: match[1].toLowerCase() === "x",

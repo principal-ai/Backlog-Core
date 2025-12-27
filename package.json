@@ -46,10 +46,12 @@
     "test": "bun test",
     "test:coverage": "bun test --coverage",
     "test:watch": "bun test --watch",
-    "lint": "eslint src --max-warnings 0",
-    "lint:fix": "eslint src --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"
   },
@@ -58,25 +60,15 @@
     "yaml": "^2.8.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.15.0",
+    "@biomejs/biome": "^2.3.10",
     "@types/bun": "^1.1.20",
-    "@typescript-eslint/eslint-plugin": "^8.15.0",
-    "@typescript-eslint/parser": "^8.15.0",
-    "eslint": "^9.15.0",
-    "eslint-config-prettier": "^10.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.2.0",
-    "prettier": "^3.4.0",
     "typescript": "^5.6.3"
   },
   "lint-staged": {
-    "src/**/*.{ts,js}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "tests/**/*.{ts,js}": [
-      "eslint --fix",
-      "prettier --write"
+    "*.{ts,js,json}": [
+      "biome check --write --no-errors-on-unmatched"
     ]
   },
   "engines": {

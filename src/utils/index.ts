@@ -2,17 +2,16 @@
  * Utility functions for @backlog-md/core
  */
 
-export { sortTasks, sortTasksByTitle, sortTasksBy, groupTasksByStatus } from "./sorting";
-
 export {
-  normalizeMilestoneName,
-  milestoneKey,
-  isDoneStatus,
-  getMilestoneLabel,
-  collectMilestoneIds,
-  collectMilestones,
   buildMilestoneBuckets,
   buildMilestoneBucketsFromConfig,
   buildMilestoneSummary,
+  collectMilestoneIds,
+  collectMilestones,
+  getMilestoneLabel,
   groupTasksByMilestone,
+  isDoneStatus,
+  milestoneKey,
+  normalizeMilestoneName,
 } from "./milestones";
+export { groupTasksByStatus, sortTasks, sortTasksBy, sortTasksByTitle } from "./sorting";

@@ -11,14 +11,14 @@
 // ============================================================================
 
 export type {
-  FileSystemAdapter,
   FileStats,
+  FileSystemAdapter,
+  GitAdapter,
+  GitExecOptions,
+  GitExecResult,
+  GitOperationsInterface,
   GlobAdapter,
   GlobOptions,
-  GitAdapter,
-  GitExecResult,
-  GitExecOptions,
-  GitOperationsInterface,
 } from "./abstractions";
 
 // ============================================================================
@@ -26,47 +26,42 @@ export type {
 // ============================================================================
 
 export type {
-  // Core task types
-  Task,
-  TaskStatus,
-  TaskCreateInput,
-  TaskUpdateInput,
-  TaskListFilter,
   AcceptanceCriterion,
   AcceptanceCriterionInput,
-
-  // Pagination types
-  PaginationOptions,
-  PaginatedResult,
-  PaginatedTasksByStatus,
-  PaginatedTasksBySource,
-  TaskIndexEntry,
-  SourcePaginationOptions,
-
+  BacklogConfig,
+  Decision,
+  DecisionSearchResult,
   // Document types
   Document,
-  Decision,
-
+  DocumentSearchResult,
   // Milestone types
   Milestone,
   MilestoneBucket,
   MilestoneSummary,
-
+  PaginatedResult,
+  PaginatedTasksBySource,
+  PaginatedTasksByStatus,
+  // Pagination types
+  PaginationOptions,
+  ParsedMarkdown,
+  SearchFilters,
+  SearchMatch,
+  SearchOptions,
+  SearchPriorityFilter,
   // Search types
   SearchResult,
   SearchResultType,
-  SearchOptions,
-  SearchFilters,
-  SearchMatch,
-  SearchPriorityFilter,
-  TaskSearchResult,
-  DocumentSearchResult,
-  DecisionSearchResult,
-
   // Other types
   Sequence,
-  BacklogConfig,
-  ParsedMarkdown,
+  SourcePaginationOptions,
+  // Core task types
+  Task,
+  TaskCreateInput,
+  TaskIndexEntry,
+  TaskListFilter,
+  TaskSearchResult,
+  TaskStatus,
+  TaskUpdateInput,
 } from "./types";
 
 // Export helper functions
@@ -77,18 +72,18 @@ export { isLocalEditableTask } from "./types";
 // ============================================================================
 
 export {
-  parseTaskMarkdown,
-  serializeTaskMarkdown,
+  extractMilestoneIdFromFilename,
   extractTaskIndexFromPath,
+  getMilestoneFilename,
   getTaskBodyMarkdown,
+  type MilestoneFrontmatter,
   // Milestone parsing
   parseMilestoneMarkdown,
+  parseTaskMarkdown,
   serializeMilestoneMarkdown,
-  getMilestoneFilename,
-  extractMilestoneIdFromFilename,
-  type TaskFrontmatter,
+  serializeTaskMarkdown,
   type TaskBodyMarkdownOptions,
-  type MilestoneFrontmatter,
+  type TaskFrontmatter,
 } from "./markdown";
 
 // ============================================================================
@@ -101,29 +96,30 @@ export {
   type InitProjectOptions,
   type MilestoneCreateInput,
   type MilestoneUpdateInput,
+  parseBacklogConfig,
+  serializeBacklogConfig,
 } from "./core";
-export { parseBacklogConfig, serializeBacklogConfig } from "./core";
 
 // ============================================================================
 // Utilities
 // ============================================================================
 
 export {
-  sortTasks,
-  sortTasksByTitle,
-  sortTasksBy,
-  groupTasksByStatus,
-  // Milestone utilities
-  normalizeMilestoneName,
-  milestoneKey,
-  isDoneStatus,
-  getMilestoneLabel,
-  collectMilestoneIds,
-  collectMilestones,
   buildMilestoneBuckets,
   buildMilestoneBucketsFromConfig,
   buildMilestoneSummary,
+  collectMilestoneIds,
+  collectMilestones,
+  getMilestoneLabel,
   groupTasksByMilestone,
+  groupTasksByStatus,
+  isDoneStatus,
+  milestoneKey,
+  // Milestone utilities
+  normalizeMilestoneName,
+  sortTasks,
+  sortTasksBy,
+  sortTasksByTitle,
 } from "./utils";
 
 // ============================================================================

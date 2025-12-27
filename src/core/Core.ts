@@ -6,38 +6,38 @@
  */
 
 import type { FileSystemAdapter } from "@principal-ai/repository-abstraction";
+import {
+  extractMilestoneIdFromFilename,
+  extractTaskIndexFromPath,
+  getMilestoneFilename,
+  parseMilestoneMarkdown,
+  parseTaskMarkdown,
+  serializeMilestoneMarkdown,
+  serializeTaskMarkdown,
+} from "../markdown";
 import type {
-  Task,
   BacklogConfig,
-  TaskListFilter,
-  PaginationOptions,
-  PaginatedResult,
-  PaginatedTasksByStatus,
-  PaginatedTasksBySource,
-  TaskIndexEntry,
-  SourcePaginationOptions,
+  Milestone,
   MilestoneSummary,
+  PaginatedResult,
+  PaginatedTasksBySource,
+  PaginatedTasksByStatus,
+  PaginationOptions,
+  SourcePaginationOptions,
+  Task,
   TaskCreateInput,
+  TaskIndexEntry,
+  TaskListFilter,
   TaskUpdateInput,
 } from "../types";
-import { parseBacklogConfig, serializeBacklogConfig } from "./config-parser";
 import {
-  parseTaskMarkdown,
-  serializeTaskMarkdown,
-  extractTaskIndexFromPath,
-  parseMilestoneMarkdown,
-  serializeMilestoneMarkdown,
-  getMilestoneFilename,
-  extractMilestoneIdFromFilename,
-} from "../markdown";
-import {
+  groupTasksByMilestone,
+  groupTasksByStatus,
+  milestoneKey,
   sortTasks,
   sortTasksBy,
-  groupTasksByStatus,
-  groupTasksByMilestone,
-  milestoneKey,
 } from "../utils";
-import type { Milestone } from "../types";
+import { parseBacklogConfig, serializeBacklogConfig } from "./config-parser";
 
 /**
  * Options for initializing a new Backlog.md project
@@ -478,7 +478,7 @@ export class Core {
       tasks = tasks.filter((t) => milestoneKey(t.milestone) === filterKey);
     }
     if (filter?.labels && filter.labels.length > 0) {
-      tasks = tasks.filter((t) => filter.labels!.some((label) => t.labels.includes(label)));
+      tasks = tasks.filter((t) => filter.labels?.some((label) => t.labels.includes(label)));
     }
     if (filter?.parentTaskId) {
       tasks = tasks.filter((t) => t.parentTaskId === filter.parentTaskId);
@@ -935,7 +935,7 @@ export class Core {
       result = result.filter((t) => milestoneKey(t.milestone) === filterKey);
     }
     if (filter.labels && filter.labels.length > 0) {
-      result = result.filter((t) => filter.labels!.some((label) => t.labels.includes(label)));
+      result = result.filter((t) => filter.labels?.some((label) => t.labels.includes(label)));
     }
     if (filter.parentTaskId) {
       result = result.filter((t) => t.parentTaskId === filter.parentTaskId);
@@ -1092,7 +1092,7 @@ export class Core {
     // Generate next task ID
     const existingIds = Array.from(this.tasks.keys())
       .map((id) => parseInt(id.replace(/\D/g, ""), 10))
-      .filter((n) => !isNaN(n));
+      .filter((n) => !Number.isNaN(n));
     const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
     const taskId = String(nextId);
 
@@ -1101,7 +1101,7 @@ export class Core {
     const task: Task = {
       id: taskId,
       title: input.title,
-      status: input.status || this.config!.defaultStatus || "To Do",
+      status: input.status || this.config?.defaultStatus || "To Do",
       priority: input.priority,
       assignee: input.assignee || [],
       createdDate: now,
@@ -1194,7 +1194,7 @@ export class Core {
         updated.labels = [...new Set([...updated.labels, ...input.addLabels])];
       }
       if (input.removeLabels) {
-        updated.labels = updated.labels.filter((l) => !input.removeLabels!.includes(l));
+        updated.labels = updated.labels.filter((l) => !input.removeLabels?.includes(l));
       }
     }
 
@@ -1209,7 +1209,7 @@ export class Core {
     }
     if (input.removeDependencies) {
       updated.dependencies = updated.dependencies.filter(
-        (d) => !input.removeDependencies!.includes(d)
+        (d) => !input.removeDependencies?.includes(d)
       );
     }
 

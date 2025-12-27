@@ -5,7 +5,7 @@
  * that records command history and allows setting up responses.
  */
 
-import type { GitAdapter, GitExecResult, GitExecOptions } from "../abstractions";
+import type { GitAdapter, GitExecOptions, GitExecResult } from "../abstractions";
 
 interface MockConfig {
   currentBranch: string;

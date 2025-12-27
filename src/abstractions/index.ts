@@ -7,8 +7,8 @@
 
 // Re-export filesystem and glob adapters from repository-abstraction
 export type {
-  FileSystemAdapter,
   FileStats,
+  FileSystemAdapter,
   GlobAdapter,
   GlobOptions,
 } from "@principal-ai/repository-abstraction";
@@ -16,7 +16,7 @@ export type {
 // Backlog-specific git adapter
 export type {
   GitAdapter,
-  GitExecResult,
   GitExecOptions,
+  GitExecResult,
   GitOperationsInterface,
 } from "./GitAdapter";

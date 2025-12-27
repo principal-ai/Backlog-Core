@@ -45,8 +45,6 @@ export function sortTasksBy(
         const cmp = a.createdDate.localeCompare(b.createdDate);
         return direction === "asc" ? cmp : -cmp;
       });
-    case "priority":
-    case "ordinal":
     default: {
       // Use existing sortTasks for priority/ordinal
       const sorted = sortTasks(tasks);
