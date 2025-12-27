@@ -161,9 +161,9 @@
     {
       "id": "constants",
       "type": "text",
-      "x": 800,
+      "x": 709,
       "y": 250,
-      "width": 100,
+      "width": 126,
       "height": 60,
       "text": "Constants",
       "pv": {
@@ -175,8 +175,8 @@
     {
       "id": "bun-adapters",
       "type": "text",
-      "x": 100,
-      "y": 550,
+      "x": 78,
+      "y": 588,
       "width": 180,
       "height": 60,
       "text": "Bun Adapters",
@@ -189,8 +189,8 @@
     {
       "id": "test-adapters",
       "type": "text",
-      "x": 309,
-      "y": 633,
+      "x": 284,
+      "y": 587,
       "width": 180,
       "height": 60,
       "text": "Test Adapters",
@@ -203,8 +203,8 @@
     {
       "id": "node-adapters",
       "type": "text",
-      "x": 488,
-      "y": 636,
+      "x": 489,
+      "y": 589,
       "width": 160,
       "height": 60,
       "text": "Node Adapters",

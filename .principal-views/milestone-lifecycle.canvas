@@ -1,0 +1,277 @@
+{
+  "pv": {
+    "name": "Milestone Lifecycle",
+    "version": "1.1.0"
+  },
+  "nodes": [
+    {
+      "id": "create",
+      "type": "text",
+      "x": 300,
+      "y": 0,
+      "width": 140,
+      "height": 50,
+      "text": "CREATE",
+      "pv": {
+        "nodeType": "CoreAPI",
+        "shape": "rectangle",
+        "description": "Entry point - createMilestone({ title, description })"
+      }
+    },
+    {
+      "id": "milestone-file",
+      "type": "text",
+      "x": 280,
+      "y": 100,
+      "width": 180,
+      "height": 80,
+      "text": "MILESTONE FILE",
+      "pv": {
+        "nodeType": "FileSystemService",
+        "shape": "rectangle",
+        "description": "backlog/milestones/m-{id}-{slug}.md - Stores id, title, description, and tasks[] array"
+      }
+    },
+    {
+      "id": "task-assign",
+      "type": "text",
+      "x": 50,
+      "y": 220,
+      "width": 160,
+      "height": 70,
+      "text": "TASK ASSIGNED",
+      "pv": {
+        "nodeType": "Utils",
+        "shape": "rectangle",
+        "description": "Task created/updated with milestone field. Syncs task ID to milestone's tasks[] array."
+      }
+    },
+    {
+      "id": "task-remove",
+      "type": "text",
+      "x": 280,
+      "y": 220,
+      "width": 180,
+      "height": 70,
+      "text": "TASK UNASSIGNED",
+      "pv": {
+        "nodeType": "Utils",
+        "shape": "rectangle",
+        "description": "Task milestone changed or task deleted. Removes task ID from milestone's tasks[] array."
+      }
+    },
+    {
+      "id": "progress",
+      "type": "text",
+      "x": 520,
+      "y": 220,
+      "width": 160,
+      "height": 70,
+      "text": "PROGRESS TRACKED",
+      "pv": {
+        "nodeType": "Types",
+        "shape": "rectangle",
+        "description": "MilestoneBucket: doneCount, total, progress %. Calculated from task statuses in the milestone."
+      }
+    },
+    {
+      "id": "update",
+      "type": "text",
+      "x": 520,
+      "y": 100,
+      "width": 160,
+      "height": 80,
+      "text": "UPDATE",
+      "pv": {
+        "nodeType": "CoreAPI",
+        "shape": "rectangle",
+        "description": "updateMilestone(id, { title?, description?, tasks? }) - Modify milestone properties"
+      }
+    },
+    {
+      "id": "delete",
+      "type": "text",
+      "x": 280,
+      "y": 340,
+      "width": 180,
+      "height": 60,
+      "text": "DELETE",
+      "pv": {
+        "nodeType": "CoreAPI",
+        "shape": "rectangle",
+        "description": "deleteMilestone(id) - Removes milestone file. Tasks keep their milestone field but become orphaned."
+      }
+    },
+    {
+      "id": "bucket",
+      "type": "text",
+      "x": 520,
+      "y": 340,
+      "width": 160,
+      "height": 60,
+      "text": "MILESTONE BUCKET",
+      "pv": {
+        "nodeType": "Types",
+        "shape": "rectangle",
+        "description": "getTasksByMilestone() returns MilestoneSummary with buckets for UI display (kanban, progress bars)"
+      }
+    },
+    {
+      "id": "legend-title",
+      "type": "text",
+      "x": 720,
+      "y": 100,
+      "width": 140,
+      "height": 30,
+      "text": "Legend",
+      "pv": {
+        "nodeType": "Types",
+        "shape": "rectangle",
+        "description": "Node types"
+      }
+    },
+    {
+      "id": "legend-api",
+      "type": "text",
+      "x": 720,
+      "y": 140,
+      "width": 140,
+      "height": 30,
+      "text": "API Method",
+      "pv": {
+        "nodeType": "CoreAPI",
+        "shape": "rectangle",
+        "description": "Core class methods"
+      }
+    },
+    {
+      "id": "legend-fs",
+      "type": "text",
+      "x": 720,
+      "y": 180,
+      "width": 140,
+      "height": 30,
+      "text": "File Storage",
+      "pv": {
+        "nodeType": "FileSystemService",
+        "shape": "rectangle",
+        "description": "Filesystem operations"
+      }
+    },
+    {
+      "id": "legend-sync",
+      "type": "text",
+      "x": 720,
+      "y": 220,
+      "width": 140,
+      "height": 30,
+      "text": "Sync Operation",
+      "pv": {
+        "nodeType": "Utils",
+        "shape": "rectangle",
+        "description": "Task-milestone synchronization"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "create-file",
+      "fromNode": "create",
+      "fromSide": "bottom",
+      "toNode": "milestone-file",
+      "toSide": "top",
+      "label": "writes m-{id}.md",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "file-assign",
+      "fromNode": "milestone-file",
+      "fromSide": "bottom",
+      "toNode": "task-assign",
+      "toSide": "top",
+      "label": "addTaskToMilestone()",
+      "pv": {
+        "edgeType": "Uses"
+      }
+    },
+    {
+      "id": "file-remove",
+      "fromNode": "milestone-file",
+      "fromSide": "bottom",
+      "toNode": "task-remove",
+      "toSide": "top",
+      "label": "removeTaskFromMilestone()",
+      "pv": {
+        "edgeType": "Uses"
+      }
+    },
+    {
+      "id": "file-progress",
+      "fromNode": "milestone-file",
+      "fromSide": "right",
+      "toNode": "progress",
+      "toSide": "left",
+      "label": "calculates",
+      "pv": {
+        "edgeType": "Uses"
+      }
+    },
+    {
+      "id": "update-file",
+      "fromNode": "update",
+      "fromSide": "left",
+      "toNode": "milestone-file",
+      "toSide": "right",
+      "label": "modifies",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "file-delete",
+      "fromNode": "milestone-file",
+      "fromSide": "bottom",
+      "toNode": "delete",
+      "toSide": "top",
+      "label": "deleteMilestone()",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "progress-bucket",
+      "fromNode": "progress",
+      "fromSide": "bottom",
+      "toNode": "bucket",
+      "toSide": "top",
+      "label": "builds",
+      "pv": {
+        "edgeType": "Uses"
+      }
+    },
+    {
+      "id": "assign-file",
+      "fromNode": "task-assign",
+      "fromSide": "top",
+      "toNode": "milestone-file",
+      "toSide": "left",
+      "label": "updates tasks[]",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    },
+    {
+      "id": "remove-file",
+      "fromNode": "task-remove",
+      "fromSide": "top",
+      "toNode": "milestone-file",
+      "toSide": "bottom",
+      "label": "updates tasks[]",
+      "pv": {
+        "edgeType": "Dependency"
+      }
+    }
+  ]
+}
