@@ -451,7 +451,7 @@ export class Core {
    */
   getConfig(): BacklogConfig {
     this.ensureInitialized();
-    return this.config!;
+    return this.config;
   }
 
   /**
@@ -468,7 +468,8 @@ export class Core {
       tasks = tasks.filter((t) => t.status === filter.status);
     }
     if (filter?.assignee) {
-      tasks = tasks.filter((t) => t.assignee.includes(filter.assignee!));
+      const assignee = filter.assignee;
+      tasks = tasks.filter((t) => t.assignee.includes(assignee));
     }
     if (filter?.priority) {
       tasks = tasks.filter((t) => t.priority === filter.priority);
@@ -497,7 +498,7 @@ export class Core {
   getTasksByStatus(): Map<string, Task[]> {
     this.ensureInitialized();
     const tasks = Array.from(this.tasks.values());
-    return groupTasksByStatus(tasks, this.config!.statuses);
+    return groupTasksByStatus(tasks, this.config.statuses);
   }
 
   /**
@@ -522,7 +523,7 @@ export class Core {
   getTasksByMilestone(): MilestoneSummary {
     this.ensureInitialized();
     const tasks = Array.from(this.tasks.values());
-    return groupTasksByMilestone(tasks, this.config!.milestones, this.config!.statuses);
+    return groupTasksByMilestone(tasks, this.config.milestones, this.config.statuses);
   }
 
   // =========================================================================
@@ -828,7 +829,7 @@ export class Core {
 
     // Group all tasks by status first (without sorting)
     const allGrouped = new Map<string, Task[]>();
-    for (const status of this.config!.statuses) {
+    for (const status of this.config.statuses) {
       allGrouped.set(status, []);
     }
     for (const task of this.tasks.values()) {
@@ -841,7 +842,7 @@ export class Core {
     }
 
     // Paginate each status column
-    for (const status of this.config!.statuses) {
+    for (const status of this.config.statuses) {
       let tasks = allGrouped.get(status) ?? [];
       tasks = sortTasksBy(tasks, sortBy, sortDirection);
 
@@ -859,7 +860,7 @@ export class Core {
 
     return {
       byStatus,
-      statuses: this.config!.statuses,
+      statuses: this.config.statuses,
     };
   }
 
@@ -910,8 +911,8 @@ export class Core {
 
   // --- Private methods ---
 
-  private ensureInitialized(): void {
-    if (!this.initialized) {
+  private ensureInitialized(): asserts this is this & { config: BacklogConfig } {
+    if (!this.initialized || !this.config) {
       throw new Error("Core not initialized. Call initialize() first.");
     }
   }
@@ -925,7 +926,8 @@ export class Core {
       result = result.filter((t) => t.status === filter.status);
     }
     if (filter.assignee) {
-      result = result.filter((t) => t.assignee.includes(filter.assignee!));
+      const assignee = filter.assignee;
+      result = result.filter((t) => t.assignee.includes(assignee));
     }
     if (filter.priority) {
       result = result.filter((t) => t.priority === filter.priority);
