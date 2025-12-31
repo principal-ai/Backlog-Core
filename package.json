@@ -1,6 +1,6 @@
 {
   "name": "@backlog-md/core",
-  "version": "0.3.0",
+  "version": "0.3.2",
   "description": "Runtime-agnostic core package for Backlog.md task management",
   "author": "Backlog.md Team",
   "license": "MIT",

@@ -451,7 +451,7 @@ export class Core {
    */
   getConfig(): BacklogConfig {
     this.ensureInitialized();
-    return this.config;
+    return this.safeConfig;
   }
 
   /**
@@ -498,7 +498,7 @@ export class Core {
   getTasksByStatus(): Map<string, Task[]> {
     this.ensureInitialized();
     const tasks = Array.from(this.tasks.values());
-    return groupTasksByStatus(tasks, this.config.statuses);
+    return groupTasksByStatus(tasks, this.safeConfig.statuses);
   }
 
   /**
@@ -523,7 +523,7 @@ export class Core {
   getTasksByMilestone(): MilestoneSummary {
     this.ensureInitialized();
     const tasks = Array.from(this.tasks.values());
-    return groupTasksByMilestone(tasks, this.config.milestones, this.config.statuses);
+    return groupTasksByMilestone(tasks, this.safeConfig.milestones, this.safeConfig.statuses);
   }
 
   // =========================================================================
@@ -829,7 +829,7 @@ export class Core {
 
     // Group all tasks by status first (without sorting)
     const allGrouped = new Map<string, Task[]>();
-    for (const status of this.config.statuses) {
+    for (const status of this.safeConfig.statuses) {
       allGrouped.set(status, []);
     }
     for (const task of this.tasks.values()) {
@@ -842,7 +842,7 @@ export class Core {
     }
 
     // Paginate each status column
-    for (const status of this.config.statuses) {
+    for (const status of this.safeConfig.statuses) {
       let tasks = allGrouped.get(status) ?? [];
       tasks = sortTasksBy(tasks, sortBy, sortDirection);
 
@@ -860,7 +860,7 @@ export class Core {
 
     return {
       byStatus,
-      statuses: this.config.statuses,
+      statuses: this.safeConfig.statuses,
     };
   }
 
@@ -911,10 +911,17 @@ export class Core {
 
   // --- Private methods ---
 
-  private ensureInitialized(): asserts this is this & { config: BacklogConfig } {
-    if (!this.initialized || !this.config) {
-      throw new Error("Core not initialized. Call initialize() first.");
+  private ensureInitialized(): void {
+    if ((!this.initialized && !this.lazyInitialized) || !this.config) {
+      throw new Error("Core not initialized. Call initialize() or initializeLazy() first.");
     }
+  }
+
+  /**
+   * Get config with type safety (use after ensureInitialized)
+   */
+  private get safeConfig(): BacklogConfig {
+    return this.config as BacklogConfig;
   }
 
   private applyFilters(tasks: Task[], filter?: TaskListFilter): Task[] {
