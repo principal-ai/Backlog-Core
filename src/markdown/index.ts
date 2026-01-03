@@ -271,19 +271,38 @@ function parseAcceptanceCriteria(content: string): AcceptanceCriterion[] {
 }
 
 function extractDescription(content: string, title: string): string {
+  // First, try to extract content from a ## Description section
+  const descriptionSection = extractSection(content, "Description");
+  if (descriptionSection) {
+    // Remove HTML comments (<!-- ... -->)
+    return stripHtmlComments(descriptionSection).trim();
+  }
+
+  // Fallback: extract body content between title and first ## section
   let body = content;
 
   // Remove title line
   if (title) {
-    body = body.replace(new RegExp(`^#\\s+${escapeRegex(title)}\\s*$`, "m"), "");
+    body = body.replace(new RegExp(`^#\\s+${escapeRegex(title)}\\s*\\n?`, "m"), "");
   }
 
-  // Remove known sections
-  body = body.replace(/^##\s+Acceptance Criteria[\s\S]*?(?=^##|$)/m, "");
-  body = body.replace(/^##\s+Implementation Plan[\s\S]*?(?=^##|$)/m, "");
-  body = body.replace(/^##\s+Implementation Notes[\s\S]*?(?=^##|$)/m, "");
+  // Extract only content before the first ## heading
+  const firstSectionMatch = body.match(/^##\s+/m);
+  if (firstSectionMatch && firstSectionMatch.index !== undefined) {
+    body = body.slice(0, firstSectionMatch.index);
+  }
+
+  // Remove HTML comments
+  body = stripHtmlComments(body);
 
   return body.trim();
+}
+
+/**
+ * Remove HTML comments from content
+ */
+function stripHtmlComments(content: string): string {
+  return content.replace(/<!--[\s\S]*?-->/g, "").trim();
 }
 
 function extractIdFromPath(filePath: string): string {
