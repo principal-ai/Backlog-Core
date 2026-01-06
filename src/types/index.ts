@@ -3,7 +3,25 @@
  * These types match the Backlog.md codebase exactly for compatibility
  */
 
-export type TaskStatus = string;
+/**
+ * Default task statuses used by Backlog.md
+ * Projects can configure custom statuses, but these are the defaults
+ */
+export const DEFAULT_TASK_STATUSES = {
+  TODO: "To Do",
+  IN_PROGRESS: "In Progress",
+  DONE: "Done",
+} as const;
+
+/**
+ * Default task status type (type-safe)
+ */
+export type DefaultTaskStatus = typeof DEFAULT_TASK_STATUSES[keyof typeof DEFAULT_TASK_STATUSES];
+
+/**
+ * Task status can be any string (for custom statuses), but defaults are type-safe
+ */
+export type TaskStatus = DefaultTaskStatus | string;
 
 // Structured Acceptance Criterion (domain-level)
 export interface AcceptanceCriterion {
@@ -28,6 +46,8 @@ export interface Task {
   labels: string[];
   milestone?: string;
   dependencies: string[];
+  /** References to external URLs or local file paths relevant to this task */
+  references?: string[];
   readonly rawContent?: string; // Raw markdown content without frontmatter (read-only: do not modify directly)
   description?: string;
   implementationPlan?: string;
@@ -63,6 +83,8 @@ export interface TaskCreateInput {
   labels?: string[];
   assignee?: string[];
   dependencies?: string[];
+  /** References to external URLs or local file paths relevant to this task */
+  references?: string[];
   parentTaskId?: string;
   implementationPlan?: string;
   implementationNotes?: string;
@@ -84,6 +106,12 @@ export interface TaskUpdateInput {
   dependencies?: string[];
   addDependencies?: string[];
   removeDependencies?: string[];
+  /** Set references (replaces existing) */
+  references?: string[];
+  /** Add references to existing list */
+  addReferences?: string[];
+  /** Remove references from existing list */
+  removeReferences?: string[];
   implementationPlan?: string;
   appendImplementationPlan?: string[];
   clearImplementationPlan?: boolean;

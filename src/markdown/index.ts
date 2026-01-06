@@ -17,6 +17,8 @@ export interface TaskFrontmatter {
   labels?: string[];
   milestone?: string;
   dependencies?: string[];
+  /** References to external URLs or local file paths relevant to this task */
+  references?: string[];
   parentTaskId?: string;
   subtasks?: string[];
   branch?: string;
@@ -49,6 +51,7 @@ export function parseTaskMarkdown(content: string, filePath: string): Task {
     labels: frontmatter.labels || [],
     milestone: frontmatter.milestone,
     dependencies: frontmatter.dependencies || [],
+    references: frontmatter.references || [],
     parentTaskId: frontmatter.parentTaskId,
     subtasks: frontmatter.subtasks,
     branch: frontmatter.branch,
@@ -95,6 +98,10 @@ export function serializeTaskMarkdown(task: Task): string {
 
   if (task.dependencies && task.dependencies.length > 0) {
     lines.push(`dependencies: [${task.dependencies.join(", ")}]`);
+  }
+
+  if (task.references && task.references.length > 0) {
+    lines.push(`references: [${task.references.join(", ")}]`);
   }
 
   if (task.parentTaskId) {
@@ -232,6 +239,7 @@ function parseFrontmatter(raw: string): TaskFrontmatter {
       case "assignee":
       case "labels":
       case "dependencies":
+      case "references":
       case "subtasks":
         result[key] = parseArrayValue(value);
         break;

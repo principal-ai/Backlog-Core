@@ -30,6 +30,7 @@ import type {
   TaskListFilter,
   TaskUpdateInput,
 } from "../types";
+import { DEFAULT_TASK_STATUSES } from "../types";
 import {
   groupTasksByMilestone,
   groupTasksByStatus,
@@ -45,7 +46,7 @@ import { parseBacklogConfig, serializeBacklogConfig } from "./config-parser";
 export interface InitProjectOptions {
   /** Project name (defaults to directory name) */
   projectName?: string;
-  /** Initial statuses (defaults to ["To Do", "In Progress", "Done"]) */
+  /** Initial statuses (defaults to [DEFAULT_TASK_STATUSES.TODO, DEFAULT_TASK_STATUSES.IN_PROGRESS, DEFAULT_TASK_STATUSES.DONE]) */
   statuses?: string[];
   /** Initial labels (defaults to []) */
   labels?: string[];
@@ -164,7 +165,11 @@ export class Core {
     const projectName = options.projectName || dirName;
 
     // Build config with defaults
-    const statuses = options.statuses || ["To Do", "In Progress", "Done"];
+    const statuses = options.statuses || [
+      DEFAULT_TASK_STATUSES.TODO,
+      DEFAULT_TASK_STATUSES.IN_PROGRESS,
+      DEFAULT_TASK_STATUSES.DONE,
+    ];
     const config: BacklogConfig = {
       projectName,
       statuses,
@@ -1099,24 +1104,45 @@ export class Core {
     await this.fs.createDir(tasksDir, { recursive: true });
 
     // Generate next task ID
-    const existingIds = Array.from(this.tasks.keys())
+    // Use taskIndex as source of truth (works for both lazy and full initialization)
+    const existingIds = Array.from(
+      this.lazyInitialized ? this.taskIndex.keys() : this.tasks.keys()
+    )
       .map((id) => parseInt(id.replace(/\D/g, ""), 10))
       .filter((n) => !Number.isNaN(n));
     const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
     const taskId = String(nextId);
+
+    // Validate and normalize status
+    const configStatuses = this.config?.statuses || [
+      DEFAULT_TASK_STATUSES.TODO,
+      DEFAULT_TASK_STATUSES.IN_PROGRESS,
+      DEFAULT_TASK_STATUSES.DONE,
+    ];
+    let status = input.status || this.config?.defaultStatus || DEFAULT_TASK_STATUSES.TODO;
+
+    // Validate status against configured statuses
+    if (!configStatuses.includes(status)) {
+      console.warn(
+        `Warning: Status "${status}" is not in configured statuses [${configStatuses.join(", ")}]. ` +
+        `Using default status "${this.config?.defaultStatus || DEFAULT_TASK_STATUSES.TODO}" instead.`
+      );
+      status = this.config?.defaultStatus || DEFAULT_TASK_STATUSES.TODO;
+    }
 
     // Build task object
     const now = new Date().toISOString().split("T")[0];
     const task: Task = {
       id: taskId,
       title: input.title,
-      status: input.status || this.config?.defaultStatus || "To Do",
+      status,
       priority: input.priority,
       assignee: input.assignee || [],
       createdDate: now,
       labels: input.labels || [],
       milestone: input.milestone,
       dependencies: input.dependencies || [],
+      references: input.references || [],
       parentTaskId: input.parentTaskId,
       description: input.description,
       implementationPlan: input.implementationPlan,
@@ -1143,6 +1169,17 @@ export class Core {
     // Update in-memory cache
     task.filePath = filepath;
     this.tasks.set(taskId, task);
+
+    // Also update taskIndex if in lazy mode
+    if (this.lazyInitialized) {
+      const relativePath = filepath.replace(this.projectRoot + "/", "");
+      this.taskIndex.set(taskId, {
+        id: taskId,
+        filePath: relativePath,
+        title: task.title,
+        source: "tasks",
+      });
+    }
 
     // Sync milestone if specified
     if (input.milestone) {
@@ -1193,6 +1230,7 @@ export class Core {
         : (input.implementationNotes ?? existing.implementationNotes),
       ordinal: input.ordinal ?? existing.ordinal,
       dependencies: input.dependencies ?? existing.dependencies,
+      references: input.references ?? existing.references ?? [],
     };
 
     // Handle label operations
@@ -1219,6 +1257,16 @@ export class Core {
     if (input.removeDependencies) {
       updated.dependencies = updated.dependencies.filter(
         (d) => !input.removeDependencies?.includes(d)
+      );
+    }
+
+    // Handle references operations
+    if (input.addReferences) {
+      updated.references = [...new Set([...(updated.references || []), ...input.addReferences])];
+    }
+    if (input.removeReferences) {
+      updated.references = (updated.references || []).filter(
+        (r) => !input.removeReferences?.includes(r)
       );
     }
 

@@ -31,6 +31,8 @@ export type {
   BacklogConfig,
   Decision,
   DecisionSearchResult,
+  // Default task status type (type-safe)
+  DefaultTaskStatus,
   // Document types
   Document,
   DocumentSearchResult,
@@ -64,8 +66,8 @@ export type {
   TaskUpdateInput,
 } from "./types";
 
-// Export helper functions
-export { isLocalEditableTask } from "./types";
+// Export constants and helper functions
+export { DEFAULT_TASK_STATUSES, isLocalEditableTask } from "./types";
 
 // ============================================================================
 // Markdown Parsing & Serialization
