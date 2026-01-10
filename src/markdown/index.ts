@@ -10,6 +10,8 @@ import type { AcceptanceCriterion, Milestone, Task, TaskIndexEntry } from "../ty
  * Parsed frontmatter from a task markdown file
  */
 export interface TaskFrontmatter {
+  id?: string;
+  title?: string;
   status?: string;
   priority?: "high" | "medium" | "low";
   assignee?: string[];
@@ -37,11 +39,14 @@ export interface TaskFrontmatter {
 export function parseTaskMarkdown(content: string, filePath: string): Task {
   const { frontmatter, title, rawContent, acceptanceCriteria, description } =
     parseMarkdownContent(content);
-  const id = extractIdFromPath(filePath);
+  // Prefer frontmatter id, fallback to filename
+  const id = frontmatter.id || extractIdFromPath(filePath);
+  // Prefer frontmatter title, then H1 title, then generate from id
+  const taskTitle = frontmatter.title || title || `Task ${id}`;
 
   return {
     id,
-    title: title || `Task ${id}`,
+    title: taskTitle,
     status: frontmatter.status || "backlog",
     priority: frontmatter.priority,
     assignee: frontmatter.assignee || [],
@@ -217,16 +222,29 @@ function parseFrontmatter(raw: string): TaskFrontmatter {
     if (!match) continue;
 
     const [, key, value] = match;
+    let cleanValue = value.trim();
+
+    // Remove surrounding quotes if present
+    if (
+      (cleanValue.startsWith('"') && cleanValue.endsWith('"')) ||
+      (cleanValue.startsWith("'") && cleanValue.endsWith("'"))
+    ) {
+      cleanValue = cleanValue.slice(1, -1);
+    }
 
     switch (key) {
+      case "id":
+      case "title":
+        result[key] = cleanValue;
+        break;
       case "status":
-        result.status = value.trim();
+        result.status = cleanValue;
         break;
       case "priority":
-        result.priority = value.trim() as "high" | "medium" | "low";
+        result.priority = cleanValue as "high" | "medium" | "low";
         break;
       case "ordinal":
-        result.ordinal = parseInt(value.trim(), 10);
+        result.ordinal = parseInt(cleanValue, 10);
         break;
       case "reporter":
       case "milestone":
@@ -234,7 +252,7 @@ function parseFrontmatter(raw: string): TaskFrontmatter {
       case "branch":
       case "createdDate":
       case "updatedDate":
-        result[key] = value.trim();
+        result[key] = cleanValue;
         break;
       case "assignee":
       case "labels":
