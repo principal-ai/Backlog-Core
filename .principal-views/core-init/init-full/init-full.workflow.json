@@ -1,0 +1,36 @@
+{
+	"version": "1.0.0",
+	"canvas": ".principal-views/core-init/core-init.otel.canvas",
+	"mode": "span-tree",
+	"name": "Core Full Initialization",
+	"description": "Full initialization loading config and all tasks into memory",
+	"spanPattern": "core.init",
+	"scenarios": [
+		{
+			"id": "success",
+			"priority": 1,
+			"description": "Successful full initialization with config and tasks loaded",
+			"template": {
+				"summary": "Initialized with {{taskCount}} tasks in {{duration.ms}}ms",
+				"events": {
+					"core.init.started": "Started initialization (mode: {{mode}})",
+					"core.init.config.loaded": "Loaded config: {{projectName}} with {{statusCount}} statuses",
+					"core.init.tasks.loaded": "Discovered {{localTaskCount}} active, {{completedTaskCount}} completed tasks",
+					"core.init.complete": "Completed in {{duration.ms}}ms with {{taskCount}} total tasks"
+				}
+			}
+		},
+		{
+			"id": "config-error",
+			"priority": 2,
+			"description": "Initialization failed at config loading stage",
+			"template": {
+				"summary": "Failed: {{error.message}}",
+				"events": {
+					"core.init.started": "Started initialization (mode: {{mode}})",
+					"core.init.error": "Error ({{error.type}}): {{error.message}}"
+				}
+			}
+		}
+	]
+}

@@ -1,0 +1,275 @@
+{
+	"nodes": [
+		{
+			"id": "init-started",
+			"type": "text",
+			"x": 100,
+			"y": 50,
+			"width": 200,
+			"height": 100,
+			"text": "# Init Started\n\nCore initialization begins.",
+			"pv": {
+				"event": {
+					"name": "core.init.started",
+					"attributes": {
+						"projectRoot": {
+							"type": "string",
+							"required": true
+						},
+						"mode": {
+							"type": "string",
+							"required": true,
+							"description": "Initialization mode: 'full' or 'lazy'"
+						}
+					}
+				},
+				"sources": [
+					"src/core/Core.ts"
+				],
+				"otel": {
+					"kind": "event",
+					"category": "lifecycle"
+				},
+				"shape": "rectangle",
+				"fill": "#22c55e",
+				"stroke": "#16a34a",
+				"status": "draft"
+			},
+			"color": "#22c55e"
+		},
+		{
+			"id": "config-loaded",
+			"type": "text",
+			"x": 100,
+			"y": 250,
+			"width": 200,
+			"height": 100,
+			"text": "# Config Loaded\n\nconfig.yml parsed successfully.",
+			"pv": {
+				"event": {
+					"name": "core.init.config.loaded",
+					"attributes": {
+						"projectName": {
+							"type": "string",
+							"required": true
+						},
+						"statusCount": {
+							"type": "number",
+							"required": true
+						},
+						"labelCount": {
+							"type": "number",
+							"required": false
+						}
+					}
+				},
+				"sources": [
+					"src/core/Core.ts",
+					"src/core/config-parser.ts"
+				],
+				"otel": {
+					"kind": "event",
+					"category": "operation"
+				},
+				"shape": "rectangle",
+				"fill": "#3b82f6",
+				"stroke": "#1d4ed8",
+				"status": "draft"
+			},
+			"color": "#3b82f6"
+		},
+		{
+			"id": "tasks-loaded",
+			"type": "text",
+			"x": 100,
+			"y": 450,
+			"width": 200,
+			"height": 100,
+			"text": "# Tasks Loaded\n\nTasks discovered from directories.",
+			"pv": {
+				"event": {
+					"name": "core.init.tasks.loaded",
+					"attributes": {
+						"localTaskCount": {
+							"type": "number",
+							"required": true
+						},
+						"completedTaskCount": {
+							"type": "number",
+							"required": true
+						},
+						"totalTaskCount": {
+							"type": "number",
+							"required": true
+						}
+					}
+				},
+				"sources": [
+					"src/core/Core.ts"
+				],
+				"otel": {
+					"kind": "event",
+					"category": "operation"
+				},
+				"shape": "rectangle",
+				"fill": "#3b82f6",
+				"stroke": "#1d4ed8",
+				"status": "draft"
+			},
+			"color": "#3b82f6"
+		},
+		{
+			"id": "init-complete",
+			"type": "text",
+			"x": 100,
+			"y": 650,
+			"width": 200,
+			"height": 100,
+			"text": "# Init Complete\n\nInitialization completed successfully.",
+			"pv": {
+				"event": {
+					"name": "core.init.complete",
+					"attributes": {
+						"success": {
+							"type": "boolean",
+							"required": true
+						},
+						"duration.ms": {
+							"type": "number",
+							"required": true
+						},
+						"taskCount": {
+							"type": "number",
+							"required": true
+						}
+					}
+				},
+				"sources": [
+					"src/core/Core.ts"
+				],
+				"otel": {
+					"kind": "event",
+					"category": "lifecycle"
+				},
+				"shape": "rectangle",
+				"fill": "#22c55e",
+				"stroke": "#16a34a",
+				"status": "draft"
+			},
+			"color": "#22c55e"
+		},
+		{
+			"id": "init-error",
+			"type": "text",
+			"x": 450,
+			"y": 250,
+			"width": 200,
+			"height": 100,
+			"text": "# Init Error\n\nInitialization failed with error.",
+			"pv": {
+				"event": {
+					"name": "core.init.error",
+					"attributes": {
+						"error.type": {
+							"type": "string",
+							"required": true
+						},
+						"error.message": {
+							"type": "string",
+							"required": true
+						},
+						"stage": {
+							"type": "string",
+							"required": false,
+							"description": "Stage where error occurred: config, tasks, etc."
+						}
+					}
+				},
+				"sources": [
+					"src/core/Core.ts"
+				],
+				"otel": {
+					"kind": "event",
+					"category": "error"
+				},
+				"shape": "rectangle",
+				"fill": "#ef4444",
+				"stroke": "#dc2626",
+				"status": "draft"
+			},
+			"color": "#ef4444"
+		}
+	],
+	"edges": [
+		{
+			"id": "started-to-config",
+			"fromNode": "init-started",
+			"fromSide": "bottom",
+			"toNode": "config-loaded",
+			"toSide": "top",
+			"pv": {
+				"edgeType": "flow"
+			}
+		},
+		{
+			"id": "config-to-tasks",
+			"fromNode": "config-loaded",
+			"fromSide": "bottom",
+			"toNode": "tasks-loaded",
+			"toSide": "top",
+			"pv": {
+				"edgeType": "flow"
+			}
+		},
+		{
+			"id": "tasks-to-complete",
+			"fromNode": "tasks-loaded",
+			"fromSide": "bottom",
+			"toNode": "init-complete",
+			"toSide": "top",
+			"pv": {
+				"edgeType": "flow"
+			}
+		},
+		{
+			"id": "started-to-error",
+			"fromNode": "init-started",
+			"fromSide": "right",
+			"toNode": "init-error",
+			"toSide": "left",
+			"pv": {
+				"edgeType": "error"
+			}
+		},
+		{
+			"id": "config-to-error",
+			"fromNode": "config-loaded",
+			"fromSide": "right",
+			"toNode": "init-error",
+			"toSide": "left",
+			"pv": {
+				"edgeType": "error"
+			}
+		}
+	],
+	"pv": {
+		"name": "Core Initialization",
+		"version": "1.0.0",
+		"description": "OpenTelemetry events for Backlog-Core initialization workflow",
+		"markdown": ".principal-views/core-init/core-init.md",
+		"edgeTypes": {
+			"flow": {
+				"label": "Flow",
+				"style": "solid",
+				"width": 2,
+				"color": "#64748b"
+			},
+			"error": {
+				"label": "Error Path",
+				"style": "dashed",
+				"width": 2,
+				"color": "#ef4444"
+			}
+		}
+	}
+}

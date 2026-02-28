@@ -16,7 +16,7 @@ export const DEFAULT_TASK_STATUSES = {
 /**
  * Default task status type (type-safe)
  */
-export type DefaultTaskStatus = typeof DEFAULT_TASK_STATUSES[keyof typeof DEFAULT_TASK_STATUSES];
+export type DefaultTaskStatus = (typeof DEFAULT_TASK_STATUSES)[keyof typeof DEFAULT_TASK_STATUSES];
 
 /**
  * Task status can be any string (for custom statuses), but defaults are type-safe

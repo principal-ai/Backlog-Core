@@ -5,6 +5,7 @@
  * by accepting adapter implementations for I/O operations.
  */
 
+import { context, SpanStatusCode, type Tracer, trace } from "@opentelemetry/api";
 import type { FileSystemAdapter } from "@principal-ai/repository-abstraction";
 import {
   extractMilestoneIdFromFilename,
@@ -15,6 +16,7 @@ import {
   serializeMilestoneMarkdown,
   serializeTaskMarkdown,
 } from "../markdown";
+import { getTracer } from "../telemetry";
 import type {
   BacklogConfig,
   Milestone,
@@ -106,6 +108,7 @@ export interface MilestoneUpdateInput {
 export class Core {
   private readonly projectRoot: string;
   private readonly fs: FileSystemAdapter;
+  private readonly tracer: Tracer;
 
   private config: BacklogConfig | null = null;
   private tasks: Map<string, Task> = new Map();
@@ -118,6 +121,9 @@ export class Core {
   constructor(options: CoreOptions) {
     this.projectRoot = options.projectRoot;
     this.fs = options.adapters.fs;
+    // Get tracer from global provider (set up by the application)
+    // Returns no-op tracer if no provider is registered
+    this.tracer = getTracer();
   }
 
   /**
@@ -198,30 +204,95 @@ export class Core {
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
-    // Load config
-    const configPath = this.fs.join(this.projectRoot, "backlog", "config.yml");
-    const configExists = await this.fs.exists(configPath);
+    const span = this.tracer.startSpan("core.init", {
+      attributes: {
+        projectRoot: this.projectRoot,
+        mode: "full",
+      },
+    });
 
-    if (!configExists) {
-      throw new Error(`Not a Backlog.md project: config.yml not found at ${configPath}`);
-    }
+    return await context.with(trace.setSpan(context.active(), span), async () => {
+      const startTime = Date.now();
 
-    const configContent = await this.fs.readFile(configPath);
-    this.config = parseBacklogConfig(configContent);
+      try {
+        span.addEvent("core.init.started", {
+          projectRoot: this.projectRoot,
+          mode: "full",
+        });
 
-    // Load tasks from tasks/ directory
-    const tasksDir = this.fs.join(this.projectRoot, "backlog", "tasks");
-    if (await this.fs.exists(tasksDir)) {
-      await this.loadTasksFromDirectory(tasksDir, "local");
-    }
+        // Load config
+        const configPath = this.fs.join(this.projectRoot, "backlog", "config.yml");
+        const configExists = await this.fs.exists(configPath);
 
-    // Load tasks from completed/ directory
-    const completedDir = this.fs.join(this.projectRoot, "backlog", "completed");
-    if (await this.fs.exists(completedDir)) {
-      await this.loadTasksFromDirectory(completedDir, "completed");
-    }
+        if (!configExists) {
+          const error = new Error(
+            `Not a Backlog.md project: config.yml not found at ${configPath}`
+          );
+          span.addEvent("core.init.error", {
+            "error.type": "ConfigNotFoundError",
+            "error.message": error.message,
+            stage: "config",
+          });
+          span.recordException(error);
+          span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+          throw error;
+        }
 
-    this.initialized = true;
+        const configContent = await this.fs.readFile(configPath);
+        this.config = parseBacklogConfig(configContent);
+
+        span.addEvent("core.init.config.loaded", {
+          projectName: this.config.projectName,
+          statusCount: this.config.statuses.length,
+          labelCount: this.config.labels?.length ?? 0,
+        });
+
+        // Load tasks from tasks/ directory
+        let localTaskCount = 0;
+        const tasksDir = this.fs.join(this.projectRoot, "backlog", "tasks");
+        if (await this.fs.exists(tasksDir)) {
+          await this.loadTasksFromDirectory(tasksDir, "local");
+          localTaskCount = Array.from(this.tasks.values()).filter(
+            (t) => t.source === "local"
+          ).length;
+        }
+
+        // Load tasks from completed/ directory
+        let completedTaskCount = 0;
+        const completedDir = this.fs.join(this.projectRoot, "backlog", "completed");
+        if (await this.fs.exists(completedDir)) {
+          await this.loadTasksFromDirectory(completedDir, "completed");
+          completedTaskCount = Array.from(this.tasks.values()).filter(
+            (t) => t.source === "completed"
+          ).length;
+        }
+
+        const totalTaskCount = this.tasks.size;
+        span.addEvent("core.init.tasks.loaded", {
+          localTaskCount,
+          completedTaskCount,
+          totalTaskCount,
+        });
+
+        this.initialized = true;
+
+        const duration = Date.now() - startTime;
+        span.addEvent("core.init.complete", {
+          success: true,
+          "duration.ms": duration,
+          taskCount: totalTaskCount,
+        });
+        span.setStatus({ code: SpanStatusCode.OK });
+      } catch (error) {
+        if (error instanceof Error) {
+          span.recordException(error);
+          span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+        }
+        throw error;
+      } finally {
+        span.end();
+      }
+    });
   }
 
   /**
@@ -1105,9 +1176,7 @@ export class Core {
 
     // Generate next task ID
     // Use taskIndex as source of truth (works for both lazy and full initialization)
-    const existingIds = Array.from(
-      this.lazyInitialized ? this.taskIndex.keys() : this.tasks.keys()
-    )
+    const existingIds = Array.from(this.lazyInitialized ? this.taskIndex.keys() : this.tasks.keys())
       .map((id) => parseInt(id.replace(/\D/g, ""), 10))
       .filter((n) => !Number.isNaN(n));
     const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
@@ -1125,7 +1194,7 @@ export class Core {
     if (!configStatuses.includes(status)) {
       console.warn(
         `Warning: Status "${status}" is not in configured statuses [${configStatuses.join(", ")}]. ` +
-        `Using default status "${this.config?.defaultStatus || DEFAULT_TASK_STATUSES.TODO}" instead.`
+          `Using default status "${this.config?.defaultStatus || DEFAULT_TASK_STATUSES.TODO}" instead.`
       );
       status = this.config?.defaultStatus || DEFAULT_TASK_STATUSES.TODO;
     }
@@ -1172,7 +1241,7 @@ export class Core {
 
     // Also update taskIndex if in lazy mode
     if (this.lazyInitialized) {
-      const relativePath = filepath.replace(this.projectRoot + "/", "");
+      const relativePath = filepath.replace(`${this.projectRoot}/`, "");
       this.taskIndex.set(taskId, {
         id: taskId,
         filePath: relativePath,
