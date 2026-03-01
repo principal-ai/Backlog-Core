@@ -1,0 +1,84 @@
+name: Register Schematic
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  register:
+    name: Register Version Schematic
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version from package.json
+        id: package-version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Package version: $VERSION"
+
+      - name: Register version schematic
+        id: register
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RESPONSE=$(curl -X POST "https://app.principal-ade.com/api/versions" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -d "{
+              \"serviceName\": \"@backlog-md/core\",
+              \"version\": \"${{ steps.package-version.outputs.version }}\",
+              \"gitSHA\": \"${{ github.sha }}\",
+              \"repositoryUrl\": \"${{ github.server_url }}/${{ github.repository }}\",
+              \"environment\": \"production\",
+              \"gitRef\": \"${{ github.ref }}\",
+              \"deployedBy\": \"github-actions\",
+              \"metadata\": {
+                \"workflow\": \"${{ github.workflow }}\",
+                \"run_id\": \"${{ github.run_id }}\",
+                \"actor\": \"${{ github.actor }}\",
+                \"event\": \"${{ github.event_name }}\"
+              }
+            }" \
+            -w "\n%{http_code}" -s)
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "HTTP Status: $HTTP_CODE"
+          echo "$BODY" | jq '.'
+
+          if [ "$HTTP_CODE" -ne 201 ]; then
+            echo "❌ Registration failed with status $HTTP_CODE"
+            echo "$BODY" | jq -r '.message // .error // "Unknown error"'
+            exit 1
+          fi
+
+          SUCCESS=$(echo "$BODY" | jq -r '.success')
+          if [ "$SUCCESS" != "true" ]; then
+            echo "❌ Registration unsuccessful"
+            echo "$BODY" | jq -r '.message // "Unknown error"'
+            exit 1
+          fi
+
+          SCHEMATIC_ID=$(echo "$BODY" | jq -r '.schematicId')
+          REGISTRATION_ID=$(echo "$BODY" | jq -r '.registrationId')
+
+          echo "✅ Registration successful!"
+          echo "📋 Schematic ID: $SCHEMATIC_ID"
+          echo "🔑 Registration ID: $REGISTRATION_ID"
+
+          echo "schematic_id=$SCHEMATIC_ID" >> $GITHUB_OUTPUT
+          echo "registration_id=$REGISTRATION_ID" >> $GITHUB_OUTPUT
+
+      - name: Comment on commit (if available)
+        if: success() && github.event_name == 'push'
+        continue-on-error: true
+        run: |
+          echo "Schematic registered: ${{ steps.register.outputs.schematic_id }}"
+          echo "Version: ${{ steps.package-version.outputs.version }}"
+          echo "Registration ID: ${{ steps.register.outputs.registration_id }}"
