@@ -6,10 +6,12 @@ description: "Core library for backlog.md - markdown-based project backlog manag
 resources:
   core-test:
     service.name: "@backlog-md/core-test"
-    service.version: "0.3.7"
+    service.version: "0.3.8"
     deployment.environment: "test"
     test.framework: "bun"
     library.name: "@backlog-md/core"
+    owned-scopes:
+      - "@backlog-md/core"
 
 nodeComponents:
   # Core Package Modules
