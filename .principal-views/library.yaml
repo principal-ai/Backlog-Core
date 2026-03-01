@@ -1,11 +1,21 @@
 version: "1.1.0"
-name: "Backlog Core Component Library"
+name: "@backlog-md/core"
+description: "Core library for backlog.md - markdown-based project backlog management"
+
+# Service resource registry for OTEL trace routing
+resources:
+  core-test:
+    service.name: "@backlog-md/core-test"
+    service.version: "0.3.7"
+    deployment.environment: "test"
+    test.framework: "bun"
+    library.name: "@backlog-md/core"
 
 nodeComponents:
   # Core Package Modules
   CoreAPI:
     description: "Main Core class - entry point for all backlog operations"
-    icon: "Core"
+    icon: "Cpu"
     color: "#FF6B35"
 
   FileSystemService:
@@ -15,7 +25,7 @@ nodeComponents:
 
   GitService:
     description: "GitOperations service - git commands via adapters"
-    icon: "Git"
+    icon: "GitBranch"
     color: "#27AE60"
 
   ContentStore:
@@ -30,17 +40,17 @@ nodeComponents:
 
   MarkdownParser:
     description: "Parse/serialize task markdown (pure functions)"
-    icon: "Document"
+    icon: "FileText"
     color: "#45B7D1"
 
   Types:
     description: "TypeScript type definitions (Task, Config, etc.)"
-    icon: "Code"
+    icon: "Code2"
     color: "#E74C3C"
 
   Utils:
     description: "Pure utility functions (task-path, status, sorting)"
-    icon: "Tools"
+    icon: "Wrench"
     color: "#95A5A6"
 
   Constants:
@@ -51,44 +61,44 @@ nodeComponents:
   # Abstractions Layer
   Abstractions:
     description: "Adapter interface definitions"
-    icon: "Interface"
+    icon: "Layers"
     color: "#8E44AD"
 
   FileSystemAdapter:
     description: "Interface: exists, readFile, writeFile, createDir"
-    icon: "Interface"
+    icon: "Layers"
     color: "#8E44AD"
 
   GlobAdapter:
     description: "Interface: scan, scanSync, match"
-    icon: "Interface"
+    icon: "Layers"
     color: "#8E44AD"
 
   GitAdapter:
     description: "Interface: exec, isGitRepository, initRepository"
-    icon: "Interface"
+    icon: "Layers"
     color: "#8E44AD"
 
   # Adapter Implementations
   BunAdapters:
     description: "Bun runtime adapter implementations"
-    icon: "Bun"
+    icon: "Zap"
     color: "#FBF0DF"
 
   TestAdapters:
     description: "In-memory adapters for testing"
-    icon: "Test"
+    icon: "FlaskConical"
     color: "#2ECC71"
 
   NodeAdapters:
     description: "Node.js adapter implementations (future)"
-    icon: "Node"
+    icon: "Hexagon"
     color: "#68A063"
 
   # External Consumers
   CLI:
     description: "backlog.md CLI (consumes core)"
-    icon: "Terminal"
+    icon: "TerminalSquare"
     color: "#007ACC"
 
   MCP:
@@ -98,7 +108,7 @@ nodeComponents:
 
   WebServer:
     description: "Web server (consumes core)"
-    icon: "Web"
+    icon: "Globe"
     color: "#E67E22"
 
   # Package Boundaries
@@ -111,6 +121,52 @@ nodeComponents:
     description: "backlog.md CLI package boundary"
     icon: "Package"
     color: "#007ACC"
+
+  # File Architecture Components
+  Header:
+    description: "Section header for visual organization"
+    icon: "Heading"
+    color: "#64748B"
+
+  EntryPoint:
+    description: "Package entry point (index.ts, main exports)"
+    icon: "LogIn"
+    color: "#FF6B35"
+
+  FolderLabel:
+    description: "Folder path label for context"
+    icon: "FolderOpen"
+    color: "#94A3B8"
+
+  Folder:
+    description: "Directory/folder grouping"
+    icon: "Folder"
+    color: "#64748B"
+
+  File:
+    description: "Source code file"
+    icon: "File"
+    color: "#3498DB"
+
+  External:
+    description: "External dependency or package"
+    icon: "ExternalLink"
+    color: "#9B59B6"
+
+  Dependency:
+    description: "External npm package dependency"
+    icon: "Package"
+    color: "#E67E22"
+
+  SectionLabel:
+    description: "Section label for documentation areas"
+    icon: "Tag"
+    color: "#94A3B8"
+
+  Documentation:
+    description: "Documentation or explanatory note"
+    icon: "BookOpen"
+    color: "#10B981"
 
 edgeComponents:
   Dependency:
@@ -142,3 +198,8 @@ edgeComponents:
     description: "External package consumes"
     style: "double"
     color: "#E74C3C"
+
+  Export:
+    description: "Module exports/re-exports"
+    style: "solid"
+    color: "#FF6B35"

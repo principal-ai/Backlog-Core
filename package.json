@@ -62,6 +62,10 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.10",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.212.0",
+    "@opentelemetry/resources": "^2.5.1",
+    "@opentelemetry/sdk-trace-node": "^2.5.1",
+    "@opentelemetry/semantic-conventions": "^1.40.0",
     "@types/bun": "^1.1.20",
     "husky": "^9.1.7",
     "lint-staged": "^15.2.0",
