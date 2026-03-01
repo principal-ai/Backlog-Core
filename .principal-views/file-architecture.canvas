@@ -2,7 +2,8 @@
   "pv": {
     "name": "File-to-Concept Architecture",
     "version": "1.0.0",
-    "description": "Visual mapping of source files to architectural concepts"
+    "description": "Visual mapping of source files to architectural concepts",
+    "markdown": ".principal-views/file-architecture.md"
   },
   "nodes": [
     {
@@ -15,8 +16,7 @@
       "text": "@backlog-md/core - File Architecture",
       "pv": {
         "nodeType": "Header",
-        "shape": "rectangle",
-        "style": "header"
+        "shape": "rectangle"
       }
     },
     {
@@ -30,9 +30,7 @@
       "pv": {
         "nodeType": "EntryPoint",
         "shape": "rectangle",
-        "style": "primary",
-        "description": "Main export barrel. Re-exports all public APIs: Core class, types, markdown utilities, sorting functions. Also re-exports InMemoryFileSystemAdapter from @principal-ai/repository-abstraction.",
-        "exports": ["Core", "CoreOptions", "Task", "BacklogConfig", "parseTaskMarkdown", "serializeTaskMarkdown", "sortTasks"]
+        "description": "Main export barrel. Re-exports all public APIs: Core class, types, markdown utilities, sorting functions. Also re-exports InMemoryFileSystemAdapter from @principal-ai/repository-abstraction."
       }
     },
     {
@@ -45,8 +43,7 @@
       "text": "src/",
       "pv": {
         "nodeType": "FolderLabel",
-        "shape": "text",
-        "style": "folder-label"
+        "shape": "text"
       }
     },
     {
@@ -73,8 +70,6 @@
       "pv": {
         "nodeType": "File",
         "shape": "file",
-        "style": "core-file",
-        "filePath": "src/core/Core.ts",
         "description": "Runtime-agnostic Core class. Accepts FileSystemAdapter via constructor. Manages task loading, caching, filtering, and pagination. Supports both eager and lazy initialization modes."
       }
     },
@@ -89,8 +84,6 @@
       "pv": {
         "nodeType": "File",
         "shape": "file",
-        "style": "core-file",
-        "filePath": "src/core/config-parser.ts",
         "description": "Parses backlog/config.yml files into BacklogConfig objects. Uses js-yaml for YAML parsing."
       }
     },
@@ -118,8 +111,6 @@
       "pv": {
         "nodeType": "File",
         "shape": "file",
-        "style": "util-file",
-        "filePath": "src/markdown/index.ts",
         "description": "Pure functions for converting between markdown files and Task objects. Handles frontmatter extraction, acceptance criteria parsing, and serialization back to markdown format."
       }
     },
@@ -147,8 +138,6 @@
       "pv": {
         "nodeType": "File",
         "shape": "file",
-        "style": "type-file",
-        "filePath": "src/types/index.ts",
         "description": "All TypeScript interfaces and types. Compatible with original Backlog.md types. Includes Task, BacklogConfig, pagination types, search types, and helper functions like isLocalEditableTask()."
       }
     },
@@ -176,8 +165,6 @@
       "pv": {
         "nodeType": "File",
         "shape": "file",
-        "style": "util-file",
-        "filePath": "src/utils/sorting.ts",
         "description": "Pure sorting utilities. sortTasks() provides default sorting by priority then title. sortTasksBy() allows custom sort fields. groupTasksByStatus() groups tasks into a Map preserving status order from config."
       }
     },
@@ -205,8 +192,6 @@
       "pv": {
         "nodeType": "File",
         "shape": "file",
-        "style": "adapter-file",
-        "filePath": "src/abstractions/index.ts",
         "description": "Barrel export for adapter interfaces. Re-exports FileSystemAdapter, GlobAdapter from @principal-ai/repository-abstraction."
       }
     },
@@ -221,8 +206,6 @@
       "pv": {
         "nodeType": "File",
         "shape": "file",
-        "style": "adapter-file",
-        "filePath": "src/abstractions/GitAdapter.ts",
         "description": "Interface for git operations: exec(), isGitRepository(), getCurrentBranch(). Allows different git implementations (shell, isomorphic-git, etc)."
       }
     },
@@ -250,8 +233,6 @@
       "pv": {
         "nodeType": "File",
         "shape": "file",
-        "style": "test-file",
-        "filePath": "src/test-adapters/MockGitAdapter.ts",
         "description": "In-memory mock implementation of GitAdapter for unit testing. Returns configurable responses without making real git calls."
       }
     },
@@ -279,7 +260,6 @@
       "pv": {
         "nodeType": "Dependency",
         "shape": "rectangle",
-        "style": "external",
         "description": "Provides adapter interfaces and InMemoryFileSystemAdapter for testing. Core depends on these for all file I/O."
       }
     },
@@ -294,7 +274,6 @@
       "pv": {
         "nodeType": "Dependency",
         "shape": "rectangle",
-        "style": "external",
         "description": "YAML parsing for config.yml files."
       }
     },
@@ -308,8 +287,7 @@
       "text": "Data Flow",
       "pv": {
         "nodeType": "SectionLabel",
-        "shape": "text",
-        "style": "section-label"
+        "shape": "text"
       }
     },
     {
@@ -322,8 +300,7 @@
       "text": "1. Consumer creates Core\n   with FileSystemAdapter\n\n2. Core.initialize()\n   - Reads config.yml\n   - Uses config-parser\n\n3. Core loads tasks/\n   - Reads .md files\n   - Uses markdown parser\n   - Caches in Map<id, Task>\n\n4. Consumer queries:\n   - listTasks(filter)\n   - getTasksByStatus()\n   - Pagination methods\n\n5. Results use:\n   - sorting utilities\n   - groupTasksByStatus()",
       "pv": {
         "nodeType": "Documentation",
-        "shape": "note",
-        "style": "flow-note"
+        "shape": "note"
       }
     },
     {
@@ -336,8 +313,7 @@
       "text": "Backlog Project Structure\n\nproject/\n  backlog/\n    config.yml     <- BacklogConfig\n    tasks/\n      001 - Task.md  <- Task\n      002 - Task.md  <- Task\n    completed/\n      003 - Done.md  <- Task (source=completed)",
       "pv": {
         "nodeType": "Documentation",
-        "shape": "note",
-        "style": "structure-note"
+        "shape": "note"
       }
     }
   ],

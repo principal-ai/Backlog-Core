@@ -1,7 +1,8 @@
 {
   "pv": {
     "name": "Core Package Architecture",
-    "version": "1.1.0"
+    "version": "1.1.0",
+    "markdown": ".principal-views/architecture.md"
   },
   "nodes": [
     {
