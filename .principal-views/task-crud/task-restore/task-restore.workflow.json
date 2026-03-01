@@ -1,0 +1,47 @@
+{
+	"version": "1.0.0",
+	"canvas": ".principal-views/task-crud/task-crud.otel.canvas",
+	"scope": "@backlog-md/core",
+	"mode": "span-tree",
+	"name": "Task Restore",
+	"description": "Restoring a task from completed",
+	"spanPattern": "task.restore",
+	"scenarios": [
+		{
+			"id": "success",
+			"priority": 1,
+			"description": "Task restored successfully",
+			"template": {
+				"summary": "Restored task {{output.taskId}}",
+				"events": {
+					"task.restore.started": "Restoring task {{input.taskId}}",
+					"task.restore.complete": "Restored to {{output.newPath}} in {{duration.ms}}ms"
+				}
+			}
+		},
+		{
+			"id": "not-found",
+			"priority": 10,
+			"description": "Task not found in completed",
+			"template": {
+				"summary": "Task {{input.taskId}} not found in completed",
+				"events": {
+					"task.restore.started": "Restoring task {{input.taskId}}",
+					"task.restore.error": "Error: Task not found in completed"
+				}
+			}
+		},
+		{
+			"id": "error",
+			"priority": 11,
+			"description": "Task restore failed",
+			"template": {
+				"summary": "Failed to restore task: {{error.message}}",
+				"events": {
+					"task.restore.started": "Restoring task {{input.taskId}}",
+					"task.restore.error": "Error ({{error.type}}): {{error.message}}"
+				}
+			}
+		}
+	]
+}

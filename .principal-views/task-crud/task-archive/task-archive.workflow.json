@@ -1,0 +1,47 @@
+{
+	"version": "1.0.0",
+	"canvas": ".principal-views/task-crud/task-crud.otel.canvas",
+	"scope": "@backlog-md/core",
+	"mode": "span-tree",
+	"name": "Task Archive",
+	"description": "Archiving a task to completed",
+	"spanPattern": "task.archive",
+	"scenarios": [
+		{
+			"id": "success",
+			"priority": 1,
+			"description": "Task archived successfully",
+			"template": {
+				"summary": "Archived task {{output.taskId}}",
+				"events": {
+					"task.archive.started": "Archiving task {{input.taskId}}",
+					"task.archive.complete": "Archived to {{output.newPath}} in {{duration.ms}}ms"
+				}
+			}
+		},
+		{
+			"id": "not-found",
+			"priority": 10,
+			"description": "Task not found",
+			"template": {
+				"summary": "Task {{input.taskId}} not found",
+				"events": {
+					"task.archive.started": "Archiving task {{input.taskId}}",
+					"task.archive.error": "Error: Task not found"
+				}
+			}
+		},
+		{
+			"id": "error",
+			"priority": 11,
+			"description": "Task archive failed",
+			"template": {
+				"summary": "Failed to archive task: {{error.message}}",
+				"events": {
+					"task.archive.started": "Archiving task {{input.taskId}}",
+					"task.archive.error": "Error ({{error.type}}): {{error.message}}"
+				}
+			}
+		}
+	]
+}

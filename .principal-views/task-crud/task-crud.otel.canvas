@@ -1,0 +1,652 @@
+{
+	"nodes": [
+		{
+			"id": "create-started",
+			"type": "text",
+			"x": 100,
+			"y": 50,
+			"width": 220,
+			"height": 100,
+			"text": "# Create Started\n\nTask creation begins.",
+			"pv": {
+				"event": {
+					"name": "task.create.started",
+					"attributes": {
+						"input.title": {
+							"type": "string",
+							"required": true
+						},
+						"input.status": {
+							"type": "string",
+							"required": false
+						},
+						"input.milestoneId": {
+							"type": "string",
+							"required": false
+						}
+					}
+				},
+				"sources": ["src/core/Core.ts"],
+				"otel": {
+					"kind": "event",
+					"category": "lifecycle"
+				},
+				"shape": "rectangle",
+				"fill": "#22c55e",
+				"stroke": "#16a34a",
+				"status": "draft"
+			},
+			"color": "#22c55e"
+		},
+		{
+			"id": "create-complete",
+			"type": "text",
+			"x": 100,
+			"y": 200,
+			"width": 220,
+			"height": 100,
+			"text": "# Create Complete\n\nTask created successfully.",
+			"pv": {
+				"event": {
+					"name": "task.create.complete",
+					"attributes": {
+						"output.taskId": {
+							"type": "string",
+							"required": true
+						},
+						"output.taskIndex": {
+							"type": "number",
+							"required": true
+						},
+						"duration.ms": {
+							"type": "number",
+							"required": true
+						}
+					}
+				},
+				"sources": ["src/core/Core.ts"],
+				"otel": {
+					"kind": "event",
+					"category": "lifecycle"
+				},
+				"shape": "rectangle",
+				"fill": "#22c55e",
+				"stroke": "#16a34a",
+				"status": "draft"
+			},
+			"color": "#22c55e"
+		},
+		{
+			"id": "create-error",
+			"type": "text",
+			"x": 400,
+			"y": 125,
+			"width": 220,
+			"height": 100,
+			"text": "# Create Error\n\nTask creation failed.",
+			"pv": {
+				"event": {
+					"name": "task.create.error",
+					"attributes": {
+						"error.type": {
+							"type": "string",
+							"required": true
+						},
+						"error.message": {
+							"type": "string",
+							"required": true
+						}
+					}
+				},
+				"sources": ["src/core/Core.ts"],
+				"otel": {
+					"kind": "event",
+					"category": "error"
+				},
+				"shape": "rectangle",
+				"fill": "#ef4444",
+				"stroke": "#dc2626",
+				"status": "draft"
+			},
+			"color": "#ef4444"
+		},
+		{
+			"id": "update-started",
+			"type": "text",
+			"x": 100,
+			"y": 400,
+			"width": 220,
+			"height": 100,
+			"text": "# Update Started\n\nTask update begins.",
+			"pv": {
+				"event": {
+					"name": "task.update.started",
+					"attributes": {
+						"input.taskId": {
+							"type": "string",
+							"required": true
+						},
+						"input.hasTitle": {
+							"type": "boolean",
+							"required": false
+						},
+						"input.hasStatus": {
+							"type": "boolean",
+							"required": false
+						},
+						"input.hasMilestone": {
+							"type": "boolean",
+							"required": false
+						}
+					}
+				},
+				"sources": ["src/core/Core.ts"],
+				"otel": {
+					"kind": "event",
+					"category": "lifecycle"
+				},
+				"shape": "rectangle",
+				"fill": "#3b82f6",
+				"stroke": "#1d4ed8",
+				"status": "draft"
+			},
+			"color": "#3b82f6"
+		},
+		{
+			"id": "update-complete",
+			"type": "text",
+			"x": 100,
+			"y": 550,
+			"width": 220,
+			"height": 100,
+			"text": "# Update Complete\n\nTask updated successfully.",
+			"pv": {
+				"event": {
+					"name": "task.update.complete",
+					"attributes": {
+						"output.taskId": {
+							"type": "string",
+							"required": true
+						},
+						"output.statusChanged": {
+							"type": "boolean",
+							"required": false
+						},
+						"duration.ms": {
+							"type": "number",
+							"required": true
+						}
+					}
+				},
+				"sources": ["src/core/Core.ts"],
+				"otel": {
+					"kind": "event",
+					"category": "lifecycle"
+				},
+				"shape": "rectangle",
+				"fill": "#3b82f6",
+				"stroke": "#1d4ed8",
+				"status": "draft"
+			},
+			"color": "#3b82f6"
+		},
+		{
+			"id": "update-error",
+			"type": "text",
+			"x": 400,
+			"y": 475,
+			"width": 220,
+			"height": 100,
+			"text": "# Update Error\n\nTask update failed.",
+			"pv": {
+				"event": {
+					"name": "task.update.error",
+					"attributes": {
+						"error.type": {
+							"type": "string",
+							"required": true
+						},
+						"error.message": {
+							"type": "string",
+							"required": true
+						},
+						"input.taskId": {
+							"type": "string",
+							"required": true
+						}
+					}
+				},
+				"sources": ["src/core/Core.ts"],
+				"otel": {
+					"kind": "event",
+					"category": "error"
+				},
+				"shape": "rectangle",
+				"fill": "#ef4444",
+				"stroke": "#dc2626",
+				"status": "draft"
+			},
+			"color": "#ef4444"
+		},
+		{
+			"id": "delete-started",
+			"type": "text",
+			"x": 100,
+			"y": 750,
+			"width": 220,
+			"height": 100,
+			"text": "# Delete Started\n\nTask deletion begins.",
+			"pv": {
+				"event": {
+					"name": "task.delete.started",
+					"attributes": {
+						"input.taskId": {
+							"type": "string",
+							"required": true
+						}
+					}
+				},
+				"sources": ["src/core/Core.ts"],
+				"otel": {
+					"kind": "event",
+					"category": "lifecycle"
+				},
+				"shape": "rectangle",
+				"fill": "#f97316",
+				"stroke": "#ea580c",
+				"status": "draft"
+			},
+			"color": "#f97316"
+		},
+		{
+			"id": "delete-complete",
+			"type": "text",
+			"x": 100,
+			"y": 900,
+			"width": 220,
+			"height": 100,
+			"text": "# Delete Complete\n\nTask deleted successfully.",
+			"pv": {
+				"event": {
+					"name": "task.delete.complete",
+					"attributes": {
+						"output.taskId": {
+							"type": "string",
+							"required": true
+						},
+						"output.deleted": {
+							"type": "boolean",
+							"required": true
+						},
+						"duration.ms": {
+							"type": "number",
+							"required": true
+						}
+					}
+				},
+				"sources": ["src/core/Core.ts"],
+				"otel": {
+					"kind": "event",
+					"category": "lifecycle"
+				},
+				"shape": "rectangle",
+				"fill": "#f97316",
+				"stroke": "#ea580c",
+				"status": "draft"
+			},
+			"color": "#f97316"
+		},
+		{
+			"id": "delete-error",
+			"type": "text",
+			"x": 400,
+			"y": 825,
+			"width": 220,
+			"height": 100,
+			"text": "# Delete Error\n\nTask deletion failed.",
+			"pv": {
+				"event": {
+					"name": "task.delete.error",
+					"attributes": {
+						"error.type": {
+							"type": "string",
+							"required": true
+						},
+						"error.message": {
+							"type": "string",
+							"required": true
+						},
+						"input.taskId": {
+							"type": "string",
+							"required": true
+						}
+					}
+				},
+				"sources": ["src/core/Core.ts"],
+				"otel": {
+					"kind": "event",
+					"category": "error"
+				},
+				"shape": "rectangle",
+				"fill": "#ef4444",
+				"stroke": "#dc2626",
+				"status": "draft"
+			},
+			"color": "#ef4444"
+		},
+		{
+			"id": "archive-started",
+			"type": "text",
+			"x": 700,
+			"y": 50,
+			"width": 220,
+			"height": 100,
+			"text": "# Archive Started\n\nTask archival begins.",
+			"pv": {
+				"event": {
+					"name": "task.archive.started",
+					"attributes": {
+						"input.taskId": {
+							"type": "string",
+							"required": true
+						}
+					}
+				},
+				"sources": ["src/core/Core.ts"],
+				"otel": {
+					"kind": "event",
+					"category": "lifecycle"
+				},
+				"shape": "rectangle",
+				"fill": "#8b5cf6",
+				"stroke": "#7c3aed",
+				"status": "draft"
+			},
+			"color": "#8b5cf6"
+		},
+		{
+			"id": "archive-complete",
+			"type": "text",
+			"x": 700,
+			"y": 200,
+			"width": 220,
+			"height": 100,
+			"text": "# Archive Complete\n\nTask archived to completed.",
+			"pv": {
+				"event": {
+					"name": "task.archive.complete",
+					"attributes": {
+						"output.taskId": {
+							"type": "string",
+							"required": true
+						},
+						"output.newPath": {
+							"type": "string",
+							"required": true
+						},
+						"duration.ms": {
+							"type": "number",
+							"required": true
+						}
+					}
+				},
+				"sources": ["src/core/Core.ts"],
+				"otel": {
+					"kind": "event",
+					"category": "lifecycle"
+				},
+				"shape": "rectangle",
+				"fill": "#8b5cf6",
+				"stroke": "#7c3aed",
+				"status": "draft"
+			},
+			"color": "#8b5cf6"
+		},
+		{
+			"id": "archive-error",
+			"type": "text",
+			"x": 1000,
+			"y": 125,
+			"width": 220,
+			"height": 100,
+			"text": "# Archive Error\n\nTask archival failed.",
+			"pv": {
+				"event": {
+					"name": "task.archive.error",
+					"attributes": {
+						"error.type": {
+							"type": "string",
+							"required": true
+						},
+						"error.message": {
+							"type": "string",
+							"required": true
+						},
+						"input.taskId": {
+							"type": "string",
+							"required": true
+						}
+					}
+				},
+				"sources": ["src/core/Core.ts"],
+				"otel": {
+					"kind": "event",
+					"category": "error"
+				},
+				"shape": "rectangle",
+				"fill": "#ef4444",
+				"stroke": "#dc2626",
+				"status": "draft"
+			},
+			"color": "#ef4444"
+		},
+		{
+			"id": "restore-started",
+			"type": "text",
+			"x": 700,
+			"y": 400,
+			"width": 220,
+			"height": 100,
+			"text": "# Restore Started\n\nTask restore begins.",
+			"pv": {
+				"event": {
+					"name": "task.restore.started",
+					"attributes": {
+						"input.taskId": {
+							"type": "string",
+							"required": true
+						}
+					}
+				},
+				"sources": ["src/core/Core.ts"],
+				"otel": {
+					"kind": "event",
+					"category": "lifecycle"
+				},
+				"shape": "rectangle",
+				"fill": "#06b6d4",
+				"stroke": "#0891b2",
+				"status": "draft"
+			},
+			"color": "#06b6d4"
+		},
+		{
+			"id": "restore-complete",
+			"type": "text",
+			"x": 700,
+			"y": 550,
+			"width": 220,
+			"height": 100,
+			"text": "# Restore Complete\n\nTask restored from completed.",
+			"pv": {
+				"event": {
+					"name": "task.restore.complete",
+					"attributes": {
+						"output.taskId": {
+							"type": "string",
+							"required": true
+						},
+						"output.newPath": {
+							"type": "string",
+							"required": true
+						},
+						"duration.ms": {
+							"type": "number",
+							"required": true
+						}
+					}
+				},
+				"sources": ["src/core/Core.ts"],
+				"otel": {
+					"kind": "event",
+					"category": "lifecycle"
+				},
+				"shape": "rectangle",
+				"fill": "#06b6d4",
+				"stroke": "#0891b2",
+				"status": "draft"
+			},
+			"color": "#06b6d4"
+		},
+		{
+			"id": "restore-error",
+			"type": "text",
+			"x": 1000,
+			"y": 475,
+			"width": 220,
+			"height": 100,
+			"text": "# Restore Error\n\nTask restore failed.",
+			"pv": {
+				"event": {
+					"name": "task.restore.error",
+					"attributes": {
+						"error.type": {
+							"type": "string",
+							"required": true
+						},
+						"error.message": {
+							"type": "string",
+							"required": true
+						},
+						"input.taskId": {
+							"type": "string",
+							"required": true
+						}
+					}
+				},
+				"sources": ["src/core/Core.ts"],
+				"otel": {
+					"kind": "event",
+					"category": "error"
+				},
+				"shape": "rectangle",
+				"fill": "#ef4444",
+				"stroke": "#dc2626",
+				"status": "draft"
+			},
+			"color": "#ef4444"
+		}
+	],
+	"edges": [
+		{
+			"id": "create-started-to-complete",
+			"fromNode": "create-started",
+			"fromSide": "bottom",
+			"toNode": "create-complete",
+			"toSide": "top",
+			"pv": { "edgeType": "flow" }
+		},
+		{
+			"id": "create-started-to-error",
+			"fromNode": "create-started",
+			"fromSide": "right",
+			"toNode": "create-error",
+			"toSide": "left",
+			"pv": { "edgeType": "error" }
+		},
+		{
+			"id": "update-started-to-complete",
+			"fromNode": "update-started",
+			"fromSide": "bottom",
+			"toNode": "update-complete",
+			"toSide": "top",
+			"pv": { "edgeType": "flow" }
+		},
+		{
+			"id": "update-started-to-error",
+			"fromNode": "update-started",
+			"fromSide": "right",
+			"toNode": "update-error",
+			"toSide": "left",
+			"pv": { "edgeType": "error" }
+		},
+		{
+			"id": "delete-started-to-complete",
+			"fromNode": "delete-started",
+			"fromSide": "bottom",
+			"toNode": "delete-complete",
+			"toSide": "top",
+			"pv": { "edgeType": "flow" }
+		},
+		{
+			"id": "delete-started-to-error",
+			"fromNode": "delete-started",
+			"fromSide": "right",
+			"toNode": "delete-error",
+			"toSide": "left",
+			"pv": { "edgeType": "error" }
+		},
+		{
+			"id": "archive-started-to-complete",
+			"fromNode": "archive-started",
+			"fromSide": "bottom",
+			"toNode": "archive-complete",
+			"toSide": "top",
+			"pv": { "edgeType": "flow" }
+		},
+		{
+			"id": "archive-started-to-error",
+			"fromNode": "archive-started",
+			"fromSide": "right",
+			"toNode": "archive-error",
+			"toSide": "left",
+			"pv": { "edgeType": "error" }
+		},
+		{
+			"id": "restore-started-to-complete",
+			"fromNode": "restore-started",
+			"fromSide": "bottom",
+			"toNode": "restore-complete",
+			"toSide": "top",
+			"pv": { "edgeType": "flow" }
+		},
+		{
+			"id": "restore-started-to-error",
+			"fromNode": "restore-started",
+			"fromSide": "right",
+			"toNode": "restore-error",
+			"toSide": "left",
+			"pv": { "edgeType": "error" }
+		}
+	],
+	"pv": {
+		"name": "Task CRUD Operations",
+		"version": "1.0.0",
+		"description": "OpenTelemetry events for task create, update, delete, archive, and restore operations",
+		"markdown": ".principal-views/task-crud/task-crud.md",
+		"edgeTypes": {
+			"flow": {
+				"label": "Flow",
+				"style": "solid",
+				"width": 2,
+				"color": "#64748b"
+			},
+			"error": {
+				"label": "Error Path",
+				"style": "dashed",
+				"width": 2,
+				"color": "#ef4444"
+			}
+		}
+	}
+}

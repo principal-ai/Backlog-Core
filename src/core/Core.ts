@@ -1169,93 +1169,133 @@ export class Core {
   async createTask(input: TaskCreateInput): Promise<Task> {
     this.ensureInitialized();
 
-    const tasksDir = this.getTasksDir();
+    const startTime = Date.now();
+    const span = this.tracer.startSpan("task.create", {
+      attributes: {
+        "input.title": input.title,
+        "input.status": input.status,
+        "input.milestoneId": input.milestone,
+      },
+    });
 
-    // Ensure tasks directory exists
-    await this.fs.createDir(tasksDir, { recursive: true });
+    return await context.with(trace.setSpan(context.active(), span), async () => {
+      try {
+        span.addEvent("task.create.started", {
+          "input.title": input.title,
+          "input.status": input.status,
+          "input.milestoneId": input.milestone,
+        });
 
-    // Generate next task ID
-    // Use taskIndex as source of truth (works for both lazy and full initialization)
-    const existingIds = Array.from(this.lazyInitialized ? this.taskIndex.keys() : this.tasks.keys())
-      .map((id) => parseInt(id.replace(/\D/g, ""), 10))
-      .filter((n) => !Number.isNaN(n));
-    const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
-    const taskId = String(nextId);
+        const tasksDir = this.getTasksDir();
 
-    // Validate and normalize status
-    const configStatuses = this.config?.statuses || [
-      DEFAULT_TASK_STATUSES.TODO,
-      DEFAULT_TASK_STATUSES.IN_PROGRESS,
-      DEFAULT_TASK_STATUSES.DONE,
-    ];
-    let status = input.status || this.config?.defaultStatus || DEFAULT_TASK_STATUSES.TODO;
+        // Ensure tasks directory exists
+        await this.fs.createDir(tasksDir, { recursive: true });
 
-    // Validate status against configured statuses
-    if (!configStatuses.includes(status)) {
-      console.warn(
-        `Warning: Status "${status}" is not in configured statuses [${configStatuses.join(", ")}]. ` +
-          `Using default status "${this.config?.defaultStatus || DEFAULT_TASK_STATUSES.TODO}" instead.`
-      );
-      status = this.config?.defaultStatus || DEFAULT_TASK_STATUSES.TODO;
-    }
+        // Generate next task ID
+        // Use taskIndex as source of truth (works for both lazy and full initialization)
+        const existingIds = Array.from(
+          this.lazyInitialized ? this.taskIndex.keys() : this.tasks.keys()
+        )
+          .map((id) => parseInt(id.replace(/\D/g, ""), 10))
+          .filter((n) => !Number.isNaN(n));
+        const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+        const taskId = String(nextId);
 
-    // Build task object
-    const now = new Date().toISOString().split("T")[0];
-    const task: Task = {
-      id: taskId,
-      title: input.title,
-      status,
-      priority: input.priority,
-      assignee: input.assignee || [],
-      createdDate: now,
-      labels: input.labels || [],
-      milestone: input.milestone,
-      dependencies: input.dependencies || [],
-      references: input.references || [],
-      parentTaskId: input.parentTaskId,
-      description: input.description,
-      implementationPlan: input.implementationPlan,
-      implementationNotes: input.implementationNotes,
-      acceptanceCriteriaItems: input.acceptanceCriteria?.map((ac, i) => ({
-        index: i + 1,
-        text: ac.text,
-        checked: ac.checked || false,
-      })),
-      rawContent: input.rawContent,
-      source: "local",
-    };
+        // Validate and normalize status
+        const configStatuses = this.config?.statuses || [
+          DEFAULT_TASK_STATUSES.TODO,
+          DEFAULT_TASK_STATUSES.IN_PROGRESS,
+          DEFAULT_TASK_STATUSES.DONE,
+        ];
+        let status = input.status || this.config?.defaultStatus || DEFAULT_TASK_STATUSES.TODO;
 
-    // Serialize and write file
-    const content = serializeTaskMarkdown(task);
-    const safeTitle = input.title
-      .replace(/[<>:"/\\|?*]/g, "")
-      .replace(/\s+/g, " ")
-      .slice(0, 50);
-    const filename = `${taskId} - ${safeTitle}.md`;
-    const filepath = this.fs.join(tasksDir, filename);
-    await this.fs.writeFile(filepath, content);
+        // Validate status against configured statuses
+        if (!configStatuses.includes(status)) {
+          console.warn(
+            `Warning: Status "${status}" is not in configured statuses [${configStatuses.join(", ")}]. ` +
+              `Using default status "${this.config?.defaultStatus || DEFAULT_TASK_STATUSES.TODO}" instead.`
+          );
+          status = this.config?.defaultStatus || DEFAULT_TASK_STATUSES.TODO;
+        }
 
-    // Update in-memory cache
-    task.filePath = filepath;
-    this.tasks.set(taskId, task);
+        // Build task object
+        const now = new Date().toISOString().split("T")[0];
+        const task: Task = {
+          id: taskId,
+          title: input.title,
+          status,
+          priority: input.priority,
+          assignee: input.assignee || [],
+          createdDate: now,
+          labels: input.labels || [],
+          milestone: input.milestone,
+          dependencies: input.dependencies || [],
+          references: input.references || [],
+          parentTaskId: input.parentTaskId,
+          description: input.description,
+          implementationPlan: input.implementationPlan,
+          implementationNotes: input.implementationNotes,
+          acceptanceCriteriaItems: input.acceptanceCriteria?.map((ac, i) => ({
+            index: i + 1,
+            text: ac.text,
+            checked: ac.checked || false,
+          })),
+          rawContent: input.rawContent,
+          source: "local",
+        };
 
-    // Also update taskIndex if in lazy mode
-    if (this.lazyInitialized) {
-      const relativePath = filepath.replace(`${this.projectRoot}/`, "");
-      this.taskIndex.set(taskId, {
-        id: taskId,
-        filePath: relativePath,
-        title: task.title,
-        source: "tasks",
-      });
-    }
+        // Serialize and write file
+        const content = serializeTaskMarkdown(task);
+        const safeTitle = input.title
+          .replace(/[<>:"/\\|?*]/g, "")
+          .replace(/\s+/g, " ")
+          .slice(0, 50);
+        const filename = `${taskId} - ${safeTitle}.md`;
+        const filepath = this.fs.join(tasksDir, filename);
+        await this.fs.writeFile(filepath, content);
 
-    // Sync milestone if specified
-    if (input.milestone) {
-      await this.addTaskToMilestone(taskId, input.milestone);
-    }
+        // Update in-memory cache
+        task.filePath = filepath;
+        this.tasks.set(taskId, task);
 
-    return task;
+        // Also update taskIndex if in lazy mode
+        if (this.lazyInitialized) {
+          const relativePath = filepath.replace(`${this.projectRoot}/`, "");
+          this.taskIndex.set(taskId, {
+            id: taskId,
+            filePath: relativePath,
+            title: task.title,
+            source: "tasks",
+          });
+        }
+
+        // Sync milestone if specified
+        if (input.milestone) {
+          await this.addTaskToMilestone(taskId, input.milestone);
+        }
+
+        span.addEvent("task.create.complete", {
+          "output.taskId": taskId,
+          "output.taskIndex": nextId,
+          "duration.ms": Date.now() - startTime,
+        });
+        span.setStatus({ code: SpanStatusCode.OK });
+        span.end();
+
+        return task;
+      } catch (error) {
+        span.addEvent("task.create.error", {
+          "error.type": error instanceof Error ? error.name : "UnknownError",
+          "error.message": error instanceof Error ? error.message : String(error),
+        });
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: error instanceof Error ? error.message : String(error),
+        });
+        span.end();
+        throw error;
+      }
+    });
   }
 
   /**
@@ -1268,122 +1308,172 @@ export class Core {
   async updateTask(id: string, input: TaskUpdateInput): Promise<Task | null> {
     this.ensureInitialized();
 
-    const existing = this.tasks.get(id);
-    if (!existing) {
-      return null;
-    }
+    const startTime = Date.now();
+    const span = this.tracer.startSpan("task.update", {
+      attributes: {
+        "input.taskId": id,
+        "input.hasTitle": input.title !== undefined,
+        "input.hasStatus": input.status !== undefined,
+        "input.hasMilestone": input.milestone !== undefined,
+      },
+    });
 
-    const oldMilestone = existing.milestone;
-    const newMilestone =
-      input.milestone === null
-        ? undefined
-        : input.milestone !== undefined
-          ? input.milestone
-          : oldMilestone;
+    return await context.with(trace.setSpan(context.active(), span), async () => {
+      try {
+        span.addEvent("task.update.started", {
+          "input.taskId": id,
+          "input.hasTitle": input.title !== undefined,
+          "input.hasStatus": input.status !== undefined,
+          "input.hasMilestone": input.milestone !== undefined,
+        });
 
-    // Build updated task
-    const now = new Date().toISOString().split("T")[0];
-    const updated: Task = {
-      ...existing,
-      title: input.title ?? existing.title,
-      status: input.status ?? existing.status,
-      priority: input.priority ?? existing.priority,
-      milestone: newMilestone,
-      updatedDate: now,
-      description: input.description ?? existing.description,
-      implementationPlan: input.clearImplementationPlan
-        ? undefined
-        : (input.implementationPlan ?? existing.implementationPlan),
-      implementationNotes: input.clearImplementationNotes
-        ? undefined
-        : (input.implementationNotes ?? existing.implementationNotes),
-      ordinal: input.ordinal ?? existing.ordinal,
-      dependencies: input.dependencies ?? existing.dependencies,
-      references: input.references ?? existing.references ?? [],
-    };
+        const existing = this.tasks.get(id);
+        if (!existing) {
+          span.addEvent("task.update.error", {
+            "error.type": "NotFoundError",
+            "error.message": "Task not found",
+            "input.taskId": id,
+          });
+          span.setStatus({ code: SpanStatusCode.OK }); // Not found is not an error
+          span.end();
+          return null;
+        }
 
-    // Handle label operations
-    if (input.labels) {
-      updated.labels = input.labels;
-    } else {
-      if (input.addLabels) {
-        updated.labels = [...new Set([...updated.labels, ...input.addLabels])];
+        const oldMilestone = existing.milestone;
+        const newMilestone =
+          input.milestone === null
+            ? undefined
+            : input.milestone !== undefined
+              ? input.milestone
+              : oldMilestone;
+
+        // Build updated task
+        const now = new Date().toISOString().split("T")[0];
+        const updated: Task = {
+          ...existing,
+          title: input.title ?? existing.title,
+          status: input.status ?? existing.status,
+          priority: input.priority ?? existing.priority,
+          milestone: newMilestone,
+          updatedDate: now,
+          description: input.description ?? existing.description,
+          implementationPlan: input.clearImplementationPlan
+            ? undefined
+            : (input.implementationPlan ?? existing.implementationPlan),
+          implementationNotes: input.clearImplementationNotes
+            ? undefined
+            : (input.implementationNotes ?? existing.implementationNotes),
+          ordinal: input.ordinal ?? existing.ordinal,
+          dependencies: input.dependencies ?? existing.dependencies,
+          references: input.references ?? existing.references ?? [],
+        };
+
+        // Handle label operations
+        if (input.labels) {
+          updated.labels = input.labels;
+        } else {
+          if (input.addLabels) {
+            updated.labels = [...new Set([...updated.labels, ...input.addLabels])];
+          }
+          if (input.removeLabels) {
+            updated.labels = updated.labels.filter((l) => !input.removeLabels?.includes(l));
+          }
+        }
+
+        // Handle assignee
+        if (input.assignee) {
+          updated.assignee = input.assignee;
+        }
+
+        // Handle dependency operations
+        if (input.addDependencies) {
+          updated.dependencies = [...new Set([...updated.dependencies, ...input.addDependencies])];
+        }
+        if (input.removeDependencies) {
+          updated.dependencies = updated.dependencies.filter(
+            (d) => !input.removeDependencies?.includes(d)
+          );
+        }
+
+        // Handle references operations
+        if (input.addReferences) {
+          updated.references = [
+            ...new Set([...(updated.references || []), ...input.addReferences]),
+          ];
+        }
+        if (input.removeReferences) {
+          updated.references = (updated.references || []).filter(
+            (r) => !input.removeReferences?.includes(r)
+          );
+        }
+
+        // Handle acceptance criteria
+        if (input.acceptanceCriteria) {
+          updated.acceptanceCriteriaItems = input.acceptanceCriteria.map((ac, i) => ({
+            index: i + 1,
+            text: ac.text,
+            checked: ac.checked || false,
+          }));
+        }
+
+        // Serialize and write file
+        const content = serializeTaskMarkdown(updated);
+
+        // Delete old file if exists
+        if (existing.filePath) {
+          await this.fs.deleteFile(existing.filePath).catch(() => {});
+        }
+
+        // Write new file
+        const tasksDir = this.getTasksDir();
+        const safeTitle = updated.title
+          .replace(/[<>:"/\\|?*]/g, "")
+          .replace(/\s+/g, " ")
+          .slice(0, 50);
+        const filename = `${id} - ${safeTitle}.md`;
+        const filepath = this.fs.join(tasksDir, filename);
+        await this.fs.writeFile(filepath, content);
+
+        // Update in-memory cache
+        updated.filePath = filepath;
+        this.tasks.set(id, updated);
+
+        // Handle milestone sync
+        const milestoneChanged = milestoneKey(oldMilestone) !== milestoneKey(newMilestone);
+        if (milestoneChanged) {
+          // Remove from old milestone
+          if (oldMilestone) {
+            await this.removeTaskFromMilestone(id, oldMilestone);
+          }
+          // Add to new milestone
+          if (newMilestone) {
+            await this.addTaskToMilestone(id, newMilestone);
+          }
+        }
+
+        span.addEvent("task.update.complete", {
+          "output.taskId": id,
+          "output.statusChanged": input.status !== undefined,
+          "duration.ms": Date.now() - startTime,
+        });
+        span.setStatus({ code: SpanStatusCode.OK });
+        span.end();
+
+        return updated;
+      } catch (error) {
+        span.addEvent("task.update.error", {
+          "error.type": error instanceof Error ? error.name : "UnknownError",
+          "error.message": error instanceof Error ? error.message : String(error),
+          "input.taskId": id,
+        });
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: error instanceof Error ? error.message : String(error),
+        });
+        span.end();
+        throw error;
       }
-      if (input.removeLabels) {
-        updated.labels = updated.labels.filter((l) => !input.removeLabels?.includes(l));
-      }
-    }
-
-    // Handle assignee
-    if (input.assignee) {
-      updated.assignee = input.assignee;
-    }
-
-    // Handle dependency operations
-    if (input.addDependencies) {
-      updated.dependencies = [...new Set([...updated.dependencies, ...input.addDependencies])];
-    }
-    if (input.removeDependencies) {
-      updated.dependencies = updated.dependencies.filter(
-        (d) => !input.removeDependencies?.includes(d)
-      );
-    }
-
-    // Handle references operations
-    if (input.addReferences) {
-      updated.references = [...new Set([...(updated.references || []), ...input.addReferences])];
-    }
-    if (input.removeReferences) {
-      updated.references = (updated.references || []).filter(
-        (r) => !input.removeReferences?.includes(r)
-      );
-    }
-
-    // Handle acceptance criteria
-    if (input.acceptanceCriteria) {
-      updated.acceptanceCriteriaItems = input.acceptanceCriteria.map((ac, i) => ({
-        index: i + 1,
-        text: ac.text,
-        checked: ac.checked || false,
-      }));
-    }
-
-    // Serialize and write file
-    const content = serializeTaskMarkdown(updated);
-
-    // Delete old file if exists
-    if (existing.filePath) {
-      await this.fs.deleteFile(existing.filePath).catch(() => {});
-    }
-
-    // Write new file
-    const tasksDir = this.getTasksDir();
-    const safeTitle = updated.title
-      .replace(/[<>:"/\\|?*]/g, "")
-      .replace(/\s+/g, " ")
-      .slice(0, 50);
-    const filename = `${id} - ${safeTitle}.md`;
-    const filepath = this.fs.join(tasksDir, filename);
-    await this.fs.writeFile(filepath, content);
-
-    // Update in-memory cache
-    updated.filePath = filepath;
-    this.tasks.set(id, updated);
-
-    // Handle milestone sync
-    const milestoneChanged = milestoneKey(oldMilestone) !== milestoneKey(newMilestone);
-    if (milestoneChanged) {
-      // Remove from old milestone
-      if (oldMilestone) {
-        await this.removeTaskFromMilestone(id, oldMilestone);
-      }
-      // Add to new milestone
-      if (newMilestone) {
-        await this.addTaskToMilestone(id, newMilestone);
-      }
-    }
-
-    return updated;
+    });
   }
 
   /**
@@ -1395,29 +1485,67 @@ export class Core {
   async deleteTask(id: string): Promise<boolean> {
     this.ensureInitialized();
 
-    const task = this.tasks.get(id);
-    if (!task) {
-      return false;
-    }
+    const startTime = Date.now();
+    const span = this.tracer.startSpan("task.delete", {
+      attributes: { "input.taskId": id },
+    });
 
-    // Remove from milestone if assigned
-    if (task.milestone) {
-      await this.removeTaskFromMilestone(id, task.milestone);
-    }
-
-    // Delete file
-    if (task.filePath) {
+    return await context.with(trace.setSpan(context.active(), span), async () => {
       try {
-        await this.fs.deleteFile(task.filePath);
-      } catch {
-        // File may already be deleted
+        span.addEvent("task.delete.started", { "input.taskId": id });
+
+        const task = this.tasks.get(id);
+        if (!task) {
+          span.addEvent("task.delete.complete", {
+            "output.taskId": id,
+            "output.deleted": false,
+            "duration.ms": Date.now() - startTime,
+          });
+          span.setStatus({ code: SpanStatusCode.OK });
+          span.end();
+          return false;
+        }
+
+        // Remove from milestone if assigned
+        if (task.milestone) {
+          await this.removeTaskFromMilestone(id, task.milestone);
+        }
+
+        // Delete file
+        if (task.filePath) {
+          try {
+            await this.fs.deleteFile(task.filePath);
+          } catch {
+            // File may already be deleted
+          }
+        }
+
+        // Remove from in-memory cache
+        this.tasks.delete(id);
+
+        span.addEvent("task.delete.complete", {
+          "output.taskId": id,
+          "output.deleted": true,
+          "duration.ms": Date.now() - startTime,
+        });
+        span.setStatus({ code: SpanStatusCode.OK });
+        span.end();
+
+        return true;
+      } catch (error) {
+        span.addEvent("task.delete.error", {
+          "error.type": error instanceof Error ? error.name : "UnknownError",
+          "error.message": error instanceof Error ? error.message : String(error),
+          "input.taskId": id,
+        });
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: error instanceof Error ? error.message : String(error),
+        });
+        span.end();
+        throw error;
       }
-    }
-
-    // Remove from in-memory cache
-    this.tasks.delete(id);
-
-    return true;
+    });
   }
 
   /**
@@ -1429,62 +1557,107 @@ export class Core {
   async archiveTask(id: string): Promise<Task | null> {
     this.ensureInitialized();
 
-    const task = this.tasks.get(id);
-    if (!task) {
-      return null;
-    }
+    const startTime = Date.now();
+    const span = this.tracer.startSpan("task.archive", {
+      attributes: { "input.taskId": id },
+    });
 
-    // Check if already in completed
-    if (task.source === "completed") {
-      return null;
-    }
-
-    const completedDir = this.getCompletedDir();
-
-    // Ensure completed directory exists
-    await this.fs.createDir(completedDir, { recursive: true });
-
-    // Build new filepath in completed/
-    const safeTitle = task.title
-      .replace(/[<>:"/\\|?*]/g, "")
-      .replace(/\s+/g, " ")
-      .slice(0, 50);
-    const filename = `${id} - ${safeTitle}.md`;
-    const newFilepath = this.fs.join(completedDir, filename);
-
-    // Delete old file
-    if (task.filePath) {
+    return await context.with(trace.setSpan(context.active(), span), async () => {
       try {
-        await this.fs.deleteFile(task.filePath);
-      } catch {
-        // File may not exist
+        span.addEvent("task.archive.started", { "input.taskId": id });
+
+        const task = this.tasks.get(id);
+        if (!task) {
+          span.addEvent("task.archive.error", {
+            "error.type": "NotFoundError",
+            "error.message": "Task not found",
+            "input.taskId": id,
+          });
+          span.setStatus({ code: SpanStatusCode.OK }); // Not found is not an error
+          span.end();
+          return null;
+        }
+
+        // Check if already in completed
+        if (task.source === "completed") {
+          span.addEvent("task.archive.error", {
+            "error.type": "InvalidStateError",
+            "error.message": "Task already archived",
+            "input.taskId": id,
+          });
+          span.setStatus({ code: SpanStatusCode.OK });
+          span.end();
+          return null;
+        }
+
+        const completedDir = this.getCompletedDir();
+
+        // Ensure completed directory exists
+        await this.fs.createDir(completedDir, { recursive: true });
+
+        // Build new filepath in completed/
+        const safeTitle = task.title
+          .replace(/[<>:"/\\|?*]/g, "")
+          .replace(/\s+/g, " ")
+          .slice(0, 50);
+        const filename = `${id} - ${safeTitle}.md`;
+        const newFilepath = this.fs.join(completedDir, filename);
+
+        // Delete old file
+        if (task.filePath) {
+          try {
+            await this.fs.deleteFile(task.filePath);
+          } catch {
+            // File may not exist
+          }
+        }
+
+        // Update task
+        const archived: Task = {
+          ...task,
+          source: "completed",
+          filePath: newFilepath,
+        };
+
+        // Write to new location
+        const content = serializeTaskMarkdown(archived);
+        await this.fs.writeFile(newFilepath, content);
+
+        // Update in-memory cache
+        this.tasks.set(id, archived);
+
+        // Update task index if lazy initialized
+        if (this.lazyInitialized) {
+          const entry = this.taskIndex.get(id);
+          if (entry) {
+            entry.source = "completed";
+            entry.filePath = newFilepath;
+          }
+        }
+
+        span.addEvent("task.archive.complete", {
+          "output.taskId": id,
+          "output.newPath": newFilepath,
+          "duration.ms": Date.now() - startTime,
+        });
+        span.setStatus({ code: SpanStatusCode.OK });
+        span.end();
+
+        return archived;
+      } catch (error) {
+        span.addEvent("task.archive.error", {
+          "error.type": error instanceof Error ? error.name : "UnknownError",
+          "error.message": error instanceof Error ? error.message : String(error),
+          "input.taskId": id,
+        });
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: error instanceof Error ? error.message : String(error),
+        });
+        span.end();
+        throw error;
       }
-    }
-
-    // Update task
-    const archived: Task = {
-      ...task,
-      source: "completed",
-      filePath: newFilepath,
-    };
-
-    // Write to new location
-    const content = serializeTaskMarkdown(archived);
-    await this.fs.writeFile(newFilepath, content);
-
-    // Update in-memory cache
-    this.tasks.set(id, archived);
-
-    // Update task index if lazy initialized
-    if (this.lazyInitialized) {
-      const entry = this.taskIndex.get(id);
-      if (entry) {
-        entry.source = "completed";
-        entry.filePath = newFilepath;
-      }
-    }
-
-    return archived;
+    });
   }
 
   /**
@@ -1496,62 +1669,107 @@ export class Core {
   async restoreTask(id: string): Promise<Task | null> {
     this.ensureInitialized();
 
-    const task = this.tasks.get(id);
-    if (!task) {
-      return null;
-    }
+    const startTime = Date.now();
+    const span = this.tracer.startSpan("task.restore", {
+      attributes: { "input.taskId": id },
+    });
 
-    // Check if in completed
-    if (task.source !== "completed") {
-      return null;
-    }
-
-    const tasksDir = this.getTasksDir();
-
-    // Ensure tasks directory exists
-    await this.fs.createDir(tasksDir, { recursive: true });
-
-    // Build new filepath in tasks/
-    const safeTitle = task.title
-      .replace(/[<>:"/\\|?*]/g, "")
-      .replace(/\s+/g, " ")
-      .slice(0, 50);
-    const filename = `${id} - ${safeTitle}.md`;
-    const newFilepath = this.fs.join(tasksDir, filename);
-
-    // Delete old file
-    if (task.filePath) {
+    return await context.with(trace.setSpan(context.active(), span), async () => {
       try {
-        await this.fs.deleteFile(task.filePath);
-      } catch {
-        // File may not exist
+        span.addEvent("task.restore.started", { "input.taskId": id });
+
+        const task = this.tasks.get(id);
+        if (!task) {
+          span.addEvent("task.restore.error", {
+            "error.type": "NotFoundError",
+            "error.message": "Task not found",
+            "input.taskId": id,
+          });
+          span.setStatus({ code: SpanStatusCode.OK }); // Not found is not an error
+          span.end();
+          return null;
+        }
+
+        // Check if in completed
+        if (task.source !== "completed") {
+          span.addEvent("task.restore.error", {
+            "error.type": "InvalidStateError",
+            "error.message": "Task not in completed",
+            "input.taskId": id,
+          });
+          span.setStatus({ code: SpanStatusCode.OK });
+          span.end();
+          return null;
+        }
+
+        const tasksDir = this.getTasksDir();
+
+        // Ensure tasks directory exists
+        await this.fs.createDir(tasksDir, { recursive: true });
+
+        // Build new filepath in tasks/
+        const safeTitle = task.title
+          .replace(/[<>:"/\\|?*]/g, "")
+          .replace(/\s+/g, " ")
+          .slice(0, 50);
+        const filename = `${id} - ${safeTitle}.md`;
+        const newFilepath = this.fs.join(tasksDir, filename);
+
+        // Delete old file
+        if (task.filePath) {
+          try {
+            await this.fs.deleteFile(task.filePath);
+          } catch {
+            // File may not exist
+          }
+        }
+
+        // Update task
+        const restored: Task = {
+          ...task,
+          source: "local",
+          filePath: newFilepath,
+        };
+
+        // Write to new location
+        const content = serializeTaskMarkdown(restored);
+        await this.fs.writeFile(newFilepath, content);
+
+        // Update in-memory cache
+        this.tasks.set(id, restored);
+
+        // Update task index if lazy initialized
+        if (this.lazyInitialized) {
+          const entry = this.taskIndex.get(id);
+          if (entry) {
+            entry.source = "tasks";
+            entry.filePath = newFilepath;
+          }
+        }
+
+        span.addEvent("task.restore.complete", {
+          "output.taskId": id,
+          "output.newPath": newFilepath,
+          "duration.ms": Date.now() - startTime,
+        });
+        span.setStatus({ code: SpanStatusCode.OK });
+        span.end();
+
+        return restored;
+      } catch (error) {
+        span.addEvent("task.restore.error", {
+          "error.type": error instanceof Error ? error.name : "UnknownError",
+          "error.message": error instanceof Error ? error.message : String(error),
+          "input.taskId": id,
+        });
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: error instanceof Error ? error.message : String(error),
+        });
+        span.end();
+        throw error;
       }
-    }
-
-    // Update task
-    const restored: Task = {
-      ...task,
-      source: "local",
-      filePath: newFilepath,
-    };
-
-    // Write to new location
-    const content = serializeTaskMarkdown(restored);
-    await this.fs.writeFile(newFilepath, content);
-
-    // Update in-memory cache
-    this.tasks.set(id, restored);
-
-    // Update task index if lazy initialized
-    if (this.lazyInitialized) {
-      const entry = this.taskIndex.get(id);
-      if (entry) {
-        entry.source = "tasks";
-        entry.filePath = newFilepath;
-      }
-    }
-
-    return restored;
+    });
   }
 
   /**

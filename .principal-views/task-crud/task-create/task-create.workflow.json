@@ -1,0 +1,47 @@
+{
+	"version": "1.0.0",
+	"canvas": ".principal-views/task-crud/task-crud.otel.canvas",
+	"scope": "@backlog-md/core",
+	"mode": "span-tree",
+	"name": "Task Create",
+	"description": "Creating a new task in the backlog",
+	"spanPattern": "task.create",
+	"scenarios": [
+		{
+			"id": "success",
+			"priority": 1,
+			"description": "Task created successfully",
+			"template": {
+				"summary": "Created task #{{output.taskIndex}}: {{input.title}}",
+				"events": {
+					"task.create.started": "Creating task: {{input.title}}",
+					"task.create.complete": "Created task {{output.taskId}} (#{{output.taskIndex}}) in {{duration.ms}}ms"
+				}
+			}
+		},
+		{
+			"id": "with-milestone",
+			"priority": 2,
+			"description": "Task created with milestone assignment",
+			"template": {
+				"summary": "Created task #{{output.taskIndex}} in milestone {{input.milestoneId}}",
+				"events": {
+					"task.create.started": "Creating task: {{input.title}} (milestone: {{input.milestoneId}})",
+					"task.create.complete": "Created task {{output.taskId}} in {{duration.ms}}ms"
+				}
+			}
+		},
+		{
+			"id": "error",
+			"priority": 10,
+			"description": "Task creation failed",
+			"template": {
+				"summary": "Failed to create task: {{error.message}}",
+				"events": {
+					"task.create.started": "Creating task: {{input.title}}",
+					"task.create.error": "Error ({{error.type}}): {{error.message}}"
+				}
+			}
+		}
+	]
+}

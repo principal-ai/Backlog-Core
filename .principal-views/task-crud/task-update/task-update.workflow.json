@@ -1,0 +1,59 @@
+{
+	"version": "1.0.0",
+	"canvas": ".principal-views/task-crud/task-crud.otel.canvas",
+	"scope": "@backlog-md/core",
+	"mode": "span-tree",
+	"name": "Task Update",
+	"description": "Updating an existing task",
+	"spanPattern": "task.update",
+	"scenarios": [
+		{
+			"id": "success",
+			"priority": 1,
+			"description": "Task updated successfully",
+			"template": {
+				"summary": "Updated task {{output.taskId}}",
+				"events": {
+					"task.update.started": "Updating task {{input.taskId}}",
+					"task.update.complete": "Updated task {{output.taskId}} in {{duration.ms}}ms"
+				}
+			}
+		},
+		{
+			"id": "status-change",
+			"priority": 2,
+			"description": "Task status changed",
+			"template": {
+				"summary": "Changed status for task {{output.taskId}}",
+				"events": {
+					"task.update.started": "Updating task {{input.taskId}} (status change)",
+					"task.update.complete": "Status updated for {{output.taskId}} in {{duration.ms}}ms"
+				}
+			}
+		},
+		{
+			"id": "not-found",
+			"priority": 10,
+			"description": "Task not found",
+			"template": {
+				"summary": "Task {{input.taskId}} not found",
+				"events": {
+					"task.update.started": "Updating task {{input.taskId}}",
+					"task.update.error": "Error: Task not found"
+				}
+			}
+		},
+		{
+			"id": "error",
+			"priority": 11,
+			"description": "Task update failed",
+			"template": {
+				"summary": "Failed to update task: {{error.message}}",
+				"events": {
+					"task.update.started": "Updating task {{input.taskId}}",
+					"task.update.error": "Error ({{error.type}}): {{error.message}}"
+				}
+			}
+		}
+	]
+}

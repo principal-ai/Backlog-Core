@@ -1,0 +1,47 @@
+{
+	"version": "1.0.0",
+	"canvas": ".principal-views/task-crud/task-crud.otel.canvas",
+	"scope": "@backlog-md/core",
+	"mode": "span-tree",
+	"name": "Task Delete",
+	"description": "Permanently deleting a task",
+	"spanPattern": "task.delete",
+	"scenarios": [
+		{
+			"id": "success",
+			"priority": 1,
+			"description": "Task deleted successfully",
+			"template": {
+				"summary": "Deleted task {{output.taskId}}",
+				"events": {
+					"task.delete.started": "Deleting task {{input.taskId}}",
+					"task.delete.complete": "Deleted task {{output.taskId}} in {{duration.ms}}ms"
+				}
+			}
+		},
+		{
+			"id": "not-found",
+			"priority": 10,
+			"description": "Task not found (already deleted or never existed)",
+			"template": {
+				"summary": "Task {{input.taskId}} not found",
+				"events": {
+					"task.delete.started": "Deleting task {{input.taskId}}",
+					"task.delete.complete": "Task not found (deleted=false)"
+				}
+			}
+		},
+		{
+			"id": "error",
+			"priority": 11,
+			"description": "Task deletion failed",
+			"template": {
+				"summary": "Failed to delete task: {{error.message}}",
+				"events": {
+					"task.delete.started": "Deleting task {{input.taskId}}",
+					"task.delete.error": "Error ({{error.type}}): {{error.message}}"
+				}
+			}
+		}
+	]
+}
