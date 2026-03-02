@@ -204,21 +204,22 @@ export class Core {
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
-    const span = this.tracer.startSpan("core.init", {
-      attributes: {
-        projectRoot: this.projectRoot,
-        mode: "full",
-      },
-    });
-
-    return await context.with(trace.setSpan(context.active(), span), async () => {
-      const startTime = Date.now();
-
-      try {
-        span.addEvent("core.init.started", {
+    return this.tracer.startActiveSpan(
+      "core.init",
+      {
+        attributes: {
           projectRoot: this.projectRoot,
           mode: "full",
-        });
+        },
+      },
+      async (span) => {
+        const startTime = Date.now();
+
+        try {
+          span.addEvent("core.init.started", {
+            projectRoot: this.projectRoot,
+            mode: "full",
+          });
 
         // Load config
         const configPath = this.fs.join(this.projectRoot, "backlog", "config.yml");
@@ -307,22 +308,23 @@ export class Core {
   async initializeLazy(filePaths: string[]): Promise<void> {
     if (this.lazyInitialized) return;
 
-    const span = this.tracer.startSpan("core.init", {
-      attributes: {
-        projectRoot: this.projectRoot,
-        mode: "lazy",
-        "input.filePathCount": filePaths.length,
-      },
-    });
-
-    return await context.with(trace.setSpan(context.active(), span), async () => {
-      const startTime = Date.now();
-
-      try {
-        span.addEvent("core.init.started", {
+    return this.tracer.startActiveSpan(
+      "core.init",
+      {
+        attributes: {
           projectRoot: this.projectRoot,
           mode: "lazy",
-        });
+          "input.filePathCount": filePaths.length,
+        },
+      },
+      async (span) => {
+        const startTime = Date.now();
+
+        try {
+          span.addEvent("core.init.started", {
+            projectRoot: this.projectRoot,
+            mode: "lazy",
+          });
 
         // Load config
         const configPath = this.fs.join(this.projectRoot, "backlog", "config.yml");
