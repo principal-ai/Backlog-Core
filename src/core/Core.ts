@@ -307,35 +307,94 @@ export class Core {
   async initializeLazy(filePaths: string[]): Promise<void> {
     if (this.lazyInitialized) return;
 
-    // Load config
-    const configPath = this.fs.join(this.projectRoot, "backlog", "config.yml");
-    const configExists = await this.fs.exists(configPath);
+    const span = this.tracer.startSpan("core.init", {
+      attributes: {
+        projectRoot: this.projectRoot,
+        mode: "lazy",
+        "input.filePathCount": filePaths.length,
+      },
+    });
 
-    if (!configExists) {
-      throw new Error(`Not a Backlog.md project: config.yml not found at ${configPath}`);
-    }
+    return await context.with(trace.setSpan(context.active(), span), async () => {
+      const startTime = Date.now();
 
-    const configContent = await this.fs.readFile(configPath);
-    this.config = parseBacklogConfig(configContent);
+      try {
+        span.addEvent("core.init.started", {
+          projectRoot: this.projectRoot,
+          mode: "lazy",
+        });
 
-    // Build task index from file paths only (no file reads)
-    this.taskIndex.clear();
-    for (const filePath of filePaths) {
-      if (!filePath.endsWith(".md")) continue;
-      // Check for backlog/tasks or backlog/completed (with or without leading slash)
-      const isTaskFile =
-        filePath.includes("backlog/tasks/") || filePath.includes("backlog\\tasks\\");
-      const isCompletedFile =
-        filePath.includes("backlog/completed/") || filePath.includes("backlog\\completed\\");
-      if (!isTaskFile && !isCompletedFile) continue;
-      // Skip config.yml
-      if (filePath.endsWith("config.yml")) continue;
+        // Load config
+        const configPath = this.fs.join(this.projectRoot, "backlog", "config.yml");
+        const configExists = await this.fs.exists(configPath);
 
-      const indexEntry = extractTaskIndexFromPath(filePath);
-      this.taskIndex.set(indexEntry.id, indexEntry);
-    }
+        if (!configExists) {
+          const error = new Error(
+            `Not a Backlog.md project: config.yml not found at ${configPath}`
+          );
+          span.addEvent("core.init.error", {
+            "error.type": "ConfigNotFoundError",
+            "error.message": error.message,
+            stage: "config",
+          });
+          span.recordException(error);
+          span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+          throw error;
+        }
 
-    this.lazyInitialized = true;
+        const configContent = await this.fs.readFile(configPath);
+        this.config = parseBacklogConfig(configContent);
+
+        span.addEvent("core.init.config.loaded", {
+          projectName: this.config.projectName,
+          statusCount: this.config.statuses.length,
+          labelCount: this.config.labels?.length ?? 0,
+        });
+
+        // Build task index from file paths only (no file reads)
+        this.taskIndex.clear();
+        let tasksIndexed = 0;
+        let completedIndexed = 0;
+
+        for (const filePath of filePaths) {
+          if (!filePath.endsWith(".md")) continue;
+          // Check for backlog/tasks or backlog/completed (with or without leading slash)
+          const isTaskFile =
+            filePath.includes("backlog/tasks/") || filePath.includes("backlog\\tasks\\");
+          const isCompletedFile =
+            filePath.includes("backlog/completed/") || filePath.includes("backlog\\completed\\");
+          if (!isTaskFile && !isCompletedFile) continue;
+          // Skip config.yml
+          if (filePath.endsWith("config.yml")) continue;
+
+          const indexEntry = extractTaskIndexFromPath(filePath);
+          this.taskIndex.set(indexEntry.id, indexEntry);
+
+          if (isTaskFile) tasksIndexed++;
+          if (isCompletedFile) completedIndexed++;
+        }
+
+        this.lazyInitialized = true;
+
+        const duration = Date.now() - startTime;
+        span.addEvent("core.init.complete", {
+          success: true,
+          "duration.ms": duration,
+          tasksIndexed,
+          completedIndexed,
+          totalIndexed: this.taskIndex.size,
+        });
+        span.setStatus({ code: SpanStatusCode.OK });
+      } catch (error) {
+        if (error instanceof Error) {
+          span.recordException(error);
+          span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+        }
+        throw error;
+      } finally {
+        span.end();
+      }
+    });
   }
 
   /**
