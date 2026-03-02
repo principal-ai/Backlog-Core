@@ -696,52 +696,87 @@ export class Core {
    * @returns Created milestone
    */
   async createMilestone(input: MilestoneCreateInput): Promise<Milestone> {
-    const milestonesDir = this.getMilestonesDir();
+    const startTime = Date.now();
+    const span = this.tracer.startSpan("milestone.create", {
+      attributes: {
+        "input.title": input.title,
+        "input.hasDescription": input.description !== undefined,
+      },
+    });
 
-    // Ensure milestones directory exists
-    await this.fs.createDir(milestonesDir, { recursive: true });
+    return await context.with(trace.setSpan(context.active(), span), async () => {
+      try {
+        span.addEvent("milestone.create.started", {
+          "input.title": input.title,
+          "input.hasDescription": input.description !== undefined,
+        });
 
-    // Find next available milestone ID
-    const entries = await this.fs.readDir(milestonesDir).catch(() => []);
-    const existingIds = entries
-      .map((f) => {
-        const match = f.match(/^m-(\d+)/);
-        return match?.[1] ? parseInt(match[1], 10) : -1;
-      })
-      .filter((id) => id >= 0);
+        const milestonesDir = this.getMilestonesDir();
 
-    const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 0;
-    const id = `m-${nextId}`;
+        // Ensure milestones directory exists
+        await this.fs.createDir(milestonesDir, { recursive: true });
 
-    const description = input.description || `Milestone: ${input.title}`;
+        // Find next available milestone ID
+        const entries = await this.fs.readDir(milestonesDir).catch(() => []);
+        const existingIds = entries
+          .map((f) => {
+            const match = f.match(/^m-(\d+)/);
+            return match?.[1] ? parseInt(match[1], 10) : -1;
+          })
+          .filter((id) => id >= 0);
 
-    // Create a temporary milestone to generate content
-    const tempMilestone: Milestone = {
-      id,
-      title: input.title,
-      description,
-      rawContent: "",
-      tasks: [],
-    };
+        const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 0;
+        const id = `m-${nextId}`;
 
-    // Generate content
-    const content = serializeMilestoneMarkdown(tempMilestone);
+        const description = input.description || `Milestone: ${input.title}`;
 
-    // Create the final milestone with correct rawContent
-    const milestone: Milestone = {
-      id,
-      title: input.title,
-      description,
-      rawContent: content,
-      tasks: [],
-    };
+        // Create a temporary milestone to generate content
+        const tempMilestone: Milestone = {
+          id,
+          title: input.title,
+          description,
+          rawContent: "",
+          tasks: [],
+        };
 
-    // Write file
-    const filename = getMilestoneFilename(id, input.title);
-    const filepath = this.fs.join(milestonesDir, filename);
-    await this.fs.writeFile(filepath, content);
+        // Generate content
+        const content = serializeMilestoneMarkdown(tempMilestone);
 
-    return milestone;
+        // Create the final milestone with correct rawContent
+        const milestone: Milestone = {
+          id,
+          title: input.title,
+          description,
+          rawContent: content,
+          tasks: [],
+        };
+
+        // Write file
+        const filename = getMilestoneFilename(id, input.title);
+        const filepath = this.fs.join(milestonesDir, filename);
+        await this.fs.writeFile(filepath, content);
+
+        span.addEvent("milestone.create.complete", {
+          "output.milestoneId": id,
+          "duration.ms": Date.now() - startTime,
+        });
+        span.setStatus({ code: SpanStatusCode.OK });
+        span.end();
+
+        return milestone;
+      } catch (error) {
+        span.addEvent("milestone.create.error", {
+          "error.type": error instanceof Error ? error.name : "UnknownError",
+          "error.message": error instanceof Error ? error.message : String(error),
+        });
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: error instanceof Error ? error.message : String(error),
+        });
+        span.end();
+        throw error;
+      }
+    });
   }
 
   /**
@@ -752,59 +787,113 @@ export class Core {
    * @returns Updated milestone or null if not found
    */
   async updateMilestone(id: string, input: MilestoneUpdateInput): Promise<Milestone | null> {
-    const existing = await this.loadMilestone(id);
-    if (!existing) {
-      return null;
-    }
-
-    const milestonesDir = this.getMilestonesDir();
-    const entries = await this.fs.readDir(milestonesDir);
-
-    // Find the current file
-    const currentFile = entries.find((entry) => {
-      const fileId = extractMilestoneIdFromFilename(entry);
-      return fileId === id;
+    const startTime = Date.now();
+    const span = this.tracer.startSpan("milestone.update", {
+      attributes: {
+        "input.milestoneId": id,
+        "input.hasTitle": input.title !== undefined,
+        "input.hasDescription": input.description !== undefined,
+      },
     });
 
-    if (!currentFile) {
-      return null;
-    }
+    return await context.with(trace.setSpan(context.active(), span), async () => {
+      try {
+        span.addEvent("milestone.update.started", {
+          "input.milestoneId": id,
+          "input.hasTitle": input.title !== undefined,
+          "input.hasDescription": input.description !== undefined,
+        });
 
-    // Build updated values
-    const newTitle = input.title ?? existing.title;
-    const newDescription = input.description ?? existing.description;
+        const existing = await this.loadMilestone(id);
+        if (!existing) {
+          span.addEvent("milestone.update.error", {
+            "error.type": "NotFoundError",
+            "error.message": "Milestone not found",
+            "input.milestoneId": id,
+          });
+          span.setStatus({ code: SpanStatusCode.OK });
+          span.end();
+          return null;
+        }
 
-    // Create a temporary milestone to generate content
-    const tempMilestone: Milestone = {
-      id: existing.id,
-      title: newTitle,
-      description: newDescription,
-      rawContent: "",
-      tasks: existing.tasks,
-    };
+        const milestonesDir = this.getMilestonesDir();
+        const entries = await this.fs.readDir(milestonesDir);
 
-    // Generate new content
-    const content = serializeMilestoneMarkdown(tempMilestone);
+        // Find the current file
+        const currentFile = entries.find((entry) => {
+          const fileId = extractMilestoneIdFromFilename(entry);
+          return fileId === id;
+        });
 
-    // Create the final updated milestone
-    const updated: Milestone = {
-      id: existing.id,
-      title: newTitle,
-      description: newDescription,
-      rawContent: content,
-      tasks: existing.tasks,
-    };
+        if (!currentFile) {
+          span.addEvent("milestone.update.error", {
+            "error.type": "NotFoundError",
+            "error.message": "Milestone file not found",
+            "input.milestoneId": id,
+          });
+          span.setStatus({ code: SpanStatusCode.OK });
+          span.end();
+          return null;
+        }
 
-    // Delete old file
-    const oldPath = this.fs.join(milestonesDir, currentFile);
-    await this.fs.deleteFile(oldPath);
+        // Build updated values
+        const newTitle = input.title ?? existing.title;
+        const newDescription = input.description ?? existing.description;
+        const titleChanged = input.title !== undefined && input.title !== existing.title;
 
-    // Write new file (with potentially new filename if title changed)
-    const newFilename = getMilestoneFilename(id, updated.title);
-    const newPath = this.fs.join(milestonesDir, newFilename);
-    await this.fs.writeFile(newPath, content);
+        // Create a temporary milestone to generate content
+        const tempMilestone: Milestone = {
+          id: existing.id,
+          title: newTitle,
+          description: newDescription,
+          rawContent: "",
+          tasks: existing.tasks,
+        };
 
-    return updated;
+        // Generate new content
+        const content = serializeMilestoneMarkdown(tempMilestone);
+
+        // Create the final updated milestone
+        const updated: Milestone = {
+          id: existing.id,
+          title: newTitle,
+          description: newDescription,
+          rawContent: content,
+          tasks: existing.tasks,
+        };
+
+        // Delete old file
+        const oldPath = this.fs.join(milestonesDir, currentFile);
+        await this.fs.deleteFile(oldPath);
+
+        // Write new file (with potentially new filename if title changed)
+        const newFilename = getMilestoneFilename(id, updated.title);
+        const newPath = this.fs.join(milestonesDir, newFilename);
+        await this.fs.writeFile(newPath, content);
+
+        span.addEvent("milestone.update.complete", {
+          "output.milestoneId": id,
+          "output.titleChanged": titleChanged,
+          "duration.ms": Date.now() - startTime,
+        });
+        span.setStatus({ code: SpanStatusCode.OK });
+        span.end();
+
+        return updated;
+      } catch (error) {
+        span.addEvent("milestone.update.error", {
+          "error.type": error instanceof Error ? error.name : "UnknownError",
+          "error.message": error instanceof Error ? error.message : String(error),
+          "input.milestoneId": id,
+        });
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: error instanceof Error ? error.message : String(error),
+        });
+        span.end();
+        throw error;
+      }
+    });
   }
 
   /**
@@ -814,32 +903,78 @@ export class Core {
    * @returns true if deleted, false if not found
    */
   async deleteMilestone(id: string): Promise<boolean> {
-    const milestonesDir = this.getMilestonesDir();
-
-    if (!(await this.fs.exists(milestonesDir))) {
-      return false;
-    }
-
-    const entries = await this.fs.readDir(milestonesDir);
-
-    // Find file matching the ID
-    const milestoneFile = entries.find((entry) => {
-      const fileId = extractMilestoneIdFromFilename(entry);
-      return fileId === id;
+    const startTime = Date.now();
+    const span = this.tracer.startSpan("milestone.delete", {
+      attributes: {
+        "input.milestoneId": id,
+      },
     });
 
-    if (!milestoneFile) {
-      return false;
-    }
+    return await context.with(trace.setSpan(context.active(), span), async () => {
+      try {
+        span.addEvent("milestone.delete.started", {
+          "input.milestoneId": id,
+        });
 
-    const filepath = this.fs.join(milestonesDir, milestoneFile);
+        const milestonesDir = this.getMilestonesDir();
 
-    try {
-      await this.fs.deleteFile(filepath);
-      return true;
-    } catch {
-      return false;
-    }
+        if (!(await this.fs.exists(milestonesDir))) {
+          span.addEvent("milestone.delete.error", {
+            "error.type": "NotFoundError",
+            "error.message": "Milestones directory not found",
+            "input.milestoneId": id,
+          });
+          span.setStatus({ code: SpanStatusCode.OK });
+          span.end();
+          return false;
+        }
+
+        const entries = await this.fs.readDir(milestonesDir);
+
+        // Find file matching the ID
+        const milestoneFile = entries.find((entry) => {
+          const fileId = extractMilestoneIdFromFilename(entry);
+          return fileId === id;
+        });
+
+        if (!milestoneFile) {
+          span.addEvent("milestone.delete.error", {
+            "error.type": "NotFoundError",
+            "error.message": "Milestone not found",
+            "input.milestoneId": id,
+          });
+          span.setStatus({ code: SpanStatusCode.OK });
+          span.end();
+          return false;
+        }
+
+        const filepath = this.fs.join(milestonesDir, milestoneFile);
+
+        await this.fs.deleteFile(filepath);
+
+        span.addEvent("milestone.delete.complete", {
+          "output.milestoneId": id,
+          "output.deleted": true,
+          "duration.ms": Date.now() - startTime,
+        });
+        span.setStatus({ code: SpanStatusCode.OK });
+        span.end();
+
+        return true;
+      } catch (error) {
+        span.addEvent("milestone.delete.error", {
+          "error.type": error instanceof Error ? error.name : "UnknownError",
+          "error.message": error instanceof Error ? error.message : String(error),
+          "input.milestoneId": id,
+        });
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: error instanceof Error ? error.message : String(error),
+        });
+        span.end();
+        throw error;
+      }
+    });
   }
 
   /**
@@ -1496,10 +1631,10 @@ export class Core {
 
         const task = this.tasks.get(id);
         if (!task) {
-          span.addEvent("task.delete.complete", {
-            "output.taskId": id,
-            "output.deleted": false,
-            "duration.ms": Date.now() - startTime,
+          span.addEvent("task.delete.error", {
+            "error.type": "NotFoundError",
+            "error.message": "Task not found",
+            "input.taskId": id,
           });
           span.setStatus({ code: SpanStatusCode.OK });
           span.end();

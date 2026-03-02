@@ -1,0 +1,59 @@
+{
+	"version": "1.0.0",
+	"canvas": ".principal-views/milestone-crud/milestone-crud.otel.canvas",
+	"scope": "@backlog-md/core",
+	"mode": "span-tree",
+	"name": "Milestone Update",
+	"description": "Updating an existing milestone",
+	"spanPattern": "milestone.update",
+	"scenarios": [
+		{
+			"id": "success",
+			"priority": 1,
+			"description": "Milestone updated successfully",
+			"template": {
+				"summary": "Updated milestone {{output.milestoneId}}",
+				"events": {
+					"milestone.update.started": "Updating milestone {{input.milestoneId}}",
+					"milestone.update.complete": "Updated milestone {{output.milestoneId}} in {{duration.ms}}ms"
+				}
+			}
+		},
+		{
+			"id": "title-change",
+			"priority": 2,
+			"description": "Milestone title changed",
+			"template": {
+				"summary": "Changed title for milestone {{output.milestoneId}}",
+				"events": {
+					"milestone.update.started": "Updating milestone {{input.milestoneId}} (title change)",
+					"milestone.update.complete": "Title updated for {{output.milestoneId}} in {{duration.ms}}ms"
+				}
+			}
+		},
+		{
+			"id": "not-found",
+			"priority": 10,
+			"description": "Milestone not found",
+			"template": {
+				"summary": "Milestone {{input.milestoneId}} not found",
+				"events": {
+					"milestone.update.started": "Updating milestone {{input.milestoneId}}",
+					"milestone.update.error": "Error: Milestone not found"
+				}
+			}
+		},
+		{
+			"id": "error",
+			"priority": 11,
+			"description": "Milestone update failed",
+			"template": {
+				"summary": "Failed to update milestone: {{error.message}}",
+				"events": {
+					"milestone.update.started": "Updating milestone {{input.milestoneId}}",
+					"milestone.update.error": "Error ({{error.type}}): {{error.message}}"
+				}
+			}
+		}
+	]
+}

@@ -1,0 +1,47 @@
+{
+	"version": "1.0.0",
+	"canvas": ".principal-views/milestone-crud/milestone-crud.otel.canvas",
+	"scope": "@backlog-md/core",
+	"mode": "span-tree",
+	"name": "Milestone Delete",
+	"description": "Permanently deleting a milestone",
+	"spanPattern": "milestone.delete",
+	"scenarios": [
+		{
+			"id": "success",
+			"priority": 1,
+			"description": "Milestone deleted successfully",
+			"template": {
+				"summary": "Deleted milestone {{output.milestoneId}}",
+				"events": {
+					"milestone.delete.started": "Deleting milestone {{input.milestoneId}}",
+					"milestone.delete.complete": "Deleted milestone {{output.milestoneId}} in {{duration.ms}}ms"
+				}
+			}
+		},
+		{
+			"id": "not-found",
+			"priority": 10,
+			"description": "Milestone not found (already deleted or never existed)",
+			"template": {
+				"summary": "Milestone {{input.milestoneId}} not found",
+				"events": {
+					"milestone.delete.started": "Deleting milestone {{input.milestoneId}}",
+					"milestone.delete.error": "Error: Milestone not found"
+				}
+			}
+		},
+		{
+			"id": "error",
+			"priority": 11,
+			"description": "Milestone deletion failed",
+			"template": {
+				"summary": "Failed to delete milestone: {{error.message}}",
+				"events": {
+					"milestone.delete.started": "Deleting milestone {{input.milestoneId}}",
+					"milestone.delete.error": "Error ({{error.type}}): {{error.message}}"
+				}
+			}
+		}
+	]
+}

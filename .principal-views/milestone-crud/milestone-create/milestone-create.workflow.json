@@ -1,0 +1,35 @@
+{
+	"version": "1.0.0",
+	"canvas": ".principal-views/milestone-crud/milestone-crud.otel.canvas",
+	"scope": "@backlog-md/core",
+	"mode": "span-tree",
+	"name": "Milestone Create",
+	"description": "Creating a new milestone in the backlog",
+	"spanPattern": "milestone.create",
+	"scenarios": [
+		{
+			"id": "success",
+			"priority": 1,
+			"description": "Milestone created successfully",
+			"template": {
+				"summary": "Created milestone {{output.milestoneId}}: {{input.title}}",
+				"events": {
+					"milestone.create.started": "Creating milestone: {{input.title}}",
+					"milestone.create.complete": "Created milestone {{output.milestoneId}} in {{duration.ms}}ms"
+				}
+			}
+		},
+		{
+			"id": "error",
+			"priority": 10,
+			"description": "Milestone creation failed",
+			"template": {
+				"summary": "Failed to create milestone: {{error.message}}",
+				"events": {
+					"milestone.create.started": "Creating milestone: {{input.title}}",
+					"milestone.create.error": "Error ({{error.type}}): {{error.message}}"
+				}
+			}
+		}
+	]
+}

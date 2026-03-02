@@ -170,4 +170,54 @@ describe("Task CRUD telemetry", () => {
 		});
 		console.log("[TEST] restoreTask telemetry sent to collector");
 	});
+
+	test("updateTask() with non-existent ID emits telemetry", async () => {
+		await withTestTrace("test.task.update.not-found", async () => {
+			const core = await createTestCore();
+
+			// Try to update a non-existent task
+			const updated = await core.updateTask("999", {
+				title: "Should not update",
+			});
+
+			expect(updated).toBeNull();
+		});
+		console.log("[TEST] updateTask (not found) telemetry sent to collector");
+	});
+
+	test("deleteTask() with non-existent ID emits telemetry", async () => {
+		await withTestTrace("test.task.delete.not-found", async () => {
+			const core = await createTestCore();
+
+			// Try to delete a non-existent task
+			const deleted = await core.deleteTask("999");
+
+			expect(deleted).toBe(false);
+		});
+		console.log("[TEST] deleteTask (not found) telemetry sent to collector");
+	});
+
+	test("archiveTask() with non-existent ID emits telemetry", async () => {
+		await withTestTrace("test.task.archive.not-found", async () => {
+			const core = await createTestCore();
+
+			// Try to archive a non-existent task
+			const archived = await core.archiveTask("999");
+
+			expect(archived).toBeNull();
+		});
+		console.log("[TEST] archiveTask (not found) telemetry sent to collector");
+	});
+
+	test("restoreTask() with non-existent ID emits telemetry", async () => {
+		await withTestTrace("test.task.restore.not-found", async () => {
+			const core = await createTestCore();
+
+			// Try to restore a non-existent task
+			const restored = await core.restoreTask("999");
+
+			expect(restored).toBeNull();
+		});
+		console.log("[TEST] restoreTask (not found) telemetry sent to collector");
+	});
 });

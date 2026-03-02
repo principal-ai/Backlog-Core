@@ -7,21 +7,17 @@
 			"y": 50,
 			"width": 220,
 			"height": 100,
-			"text": "# Create Started\n\nTask creation begins.",
+			"text": "# Create Started\n\nMilestone creation begins.",
 			"pv": {
 				"event": {
-					"name": "task.create.started",
+					"name": "milestone.create.started",
 					"attributes": {
 						"input.title": {
 							"type": "string",
 							"required": true
 						},
-						"input.status": {
-							"type": "string",
-							"required": false
-						},
-						"input.milestoneId": {
-							"type": "string",
+						"input.hasDescription": {
+							"type": "boolean",
 							"required": false
 						}
 					}
@@ -46,17 +42,13 @@
 			"y": 200,
 			"width": 220,
 			"height": 100,
-			"text": "# Create Complete\n\nTask created successfully.",
+			"text": "# Create Complete\n\nMilestone created successfully.",
 			"pv": {
 				"event": {
-					"name": "task.create.complete",
+					"name": "milestone.create.complete",
 					"attributes": {
-						"output.taskId": {
+						"output.milestoneId": {
 							"type": "string",
-							"required": true
-						},
-						"output.taskIndex": {
-							"type": "number",
 							"required": true
 						},
 						"duration.ms": {
@@ -85,10 +77,10 @@
 			"y": 125,
 			"width": 220,
 			"height": 100,
-			"text": "# Create Error\n\nTask creation failed.",
+			"text": "# Create Error\n\nMilestone creation failed.",
 			"pv": {
 				"event": {
-					"name": "task.create.error",
+					"name": "milestone.create.error",
 					"attributes": {
 						"error.type": {
 							"type": "string",
@@ -120,12 +112,12 @@
 			"y": 400,
 			"width": 220,
 			"height": 100,
-			"text": "# Update Started\n\nTask update begins.",
+			"text": "# Update Started\n\nMilestone update begins.",
 			"pv": {
 				"event": {
-					"name": "task.update.started",
+					"name": "milestone.update.started",
 					"attributes": {
-						"input.taskId": {
+						"input.milestoneId": {
 							"type": "string",
 							"required": true
 						},
@@ -133,11 +125,7 @@
 							"type": "boolean",
 							"required": false
 						},
-						"input.hasStatus": {
-							"type": "boolean",
-							"required": false
-						},
-						"input.hasMilestone": {
+						"input.hasDescription": {
 							"type": "boolean",
 							"required": false
 						}
@@ -163,16 +151,16 @@
 			"y": 550,
 			"width": 220,
 			"height": 100,
-			"text": "# Update Complete\n\nTask updated successfully.",
+			"text": "# Update Complete\n\nMilestone updated successfully.",
 			"pv": {
 				"event": {
-					"name": "task.update.complete",
+					"name": "milestone.update.complete",
 					"attributes": {
-						"output.taskId": {
+						"output.milestoneId": {
 							"type": "string",
 							"required": true
 						},
-						"output.statusChanged": {
+						"output.titleChanged": {
 							"type": "boolean",
 							"required": false
 						},
@@ -202,10 +190,10 @@
 			"y": 475,
 			"width": 220,
 			"height": 100,
-			"text": "# Update Error\n\nTask update failed.",
+			"text": "# Update Error\n\nMilestone update failed.",
 			"pv": {
 				"event": {
-					"name": "task.update.error",
+					"name": "milestone.update.error",
 					"attributes": {
 						"error.type": {
 							"type": "string",
@@ -215,7 +203,7 @@
 							"type": "string",
 							"required": true
 						},
-						"input.taskId": {
+						"input.milestoneId": {
 							"type": "string",
 							"required": true
 						}
@@ -241,12 +229,12 @@
 			"y": 750,
 			"width": 220,
 			"height": 100,
-			"text": "# Delete Started\n\nTask deletion begins.",
+			"text": "# Delete Started\n\nMilestone deletion begins.",
 			"pv": {
 				"event": {
-					"name": "task.delete.started",
+					"name": "milestone.delete.started",
 					"attributes": {
-						"input.taskId": {
+						"input.milestoneId": {
 							"type": "string",
 							"required": true
 						}
@@ -272,12 +260,12 @@
 			"y": 900,
 			"width": 220,
 			"height": 100,
-			"text": "# Delete Complete\n\nTask deleted successfully.",
+			"text": "# Delete Complete\n\nMilestone deleted successfully.",
 			"pv": {
 				"event": {
-					"name": "task.delete.complete",
+					"name": "milestone.delete.complete",
 					"attributes": {
-						"output.taskId": {
+						"output.milestoneId": {
 							"type": "string",
 							"required": true
 						},
@@ -311,10 +299,10 @@
 			"y": 825,
 			"width": 220,
 			"height": 100,
-			"text": "# Delete Error\n\nTask deletion failed.",
+			"text": "# Delete Error\n\nMilestone deletion failed.",
 			"pv": {
 				"event": {
-					"name": "task.delete.error",
+					"name": "milestone.delete.error",
 					"attributes": {
 						"error.type": {
 							"type": "string",
@@ -324,225 +312,7 @@
 							"type": "string",
 							"required": true
 						},
-						"input.taskId": {
-							"type": "string",
-							"required": true
-						}
-					}
-				},
-				"sources": ["src/core/Core.ts"],
-				"otel": {
-					"kind": "event",
-					"category": "error",
-					"files": ["src/core/Core.ts"]
-				},
-				"shape": "rectangle",
-				"fill": "#ef4444",
-				"stroke": "#dc2626",
-				"status": "implemented"
-			},
-			"color": "#ef4444"
-		},
-		{
-			"id": "archive-started",
-			"type": "text",
-			"x": 700,
-			"y": 50,
-			"width": 220,
-			"height": 100,
-			"text": "# Archive Started\n\nTask archival begins.",
-			"pv": {
-				"event": {
-					"name": "task.archive.started",
-					"attributes": {
-						"input.taskId": {
-							"type": "string",
-							"required": true
-						}
-					}
-				},
-				"sources": ["src/core/Core.ts"],
-				"otel": {
-					"kind": "event",
-					"category": "lifecycle",
-					"files": ["src/core/Core.ts"]
-				},
-				"shape": "rectangle",
-				"fill": "#8b5cf6",
-				"stroke": "#7c3aed",
-				"status": "implemented"
-			},
-			"color": "#8b5cf6"
-		},
-		{
-			"id": "archive-complete",
-			"type": "text",
-			"x": 700,
-			"y": 200,
-			"width": 220,
-			"height": 100,
-			"text": "# Archive Complete\n\nTask archived to completed.",
-			"pv": {
-				"event": {
-					"name": "task.archive.complete",
-					"attributes": {
-						"output.taskId": {
-							"type": "string",
-							"required": true
-						},
-						"output.newPath": {
-							"type": "string",
-							"required": true
-						},
-						"duration.ms": {
-							"type": "number",
-							"required": true
-						}
-					}
-				},
-				"sources": ["src/core/Core.ts"],
-				"otel": {
-					"kind": "event",
-					"category": "lifecycle",
-					"files": ["src/core/Core.ts"]
-				},
-				"shape": "rectangle",
-				"fill": "#8b5cf6",
-				"stroke": "#7c3aed",
-				"status": "implemented"
-			},
-			"color": "#8b5cf6"
-		},
-		{
-			"id": "archive-error",
-			"type": "text",
-			"x": 1000,
-			"y": 125,
-			"width": 220,
-			"height": 100,
-			"text": "# Archive Error\n\nTask archival failed.",
-			"pv": {
-				"event": {
-					"name": "task.archive.error",
-					"attributes": {
-						"error.type": {
-							"type": "string",
-							"required": true
-						},
-						"error.message": {
-							"type": "string",
-							"required": true
-						},
-						"input.taskId": {
-							"type": "string",
-							"required": true
-						}
-					}
-				},
-				"sources": ["src/core/Core.ts"],
-				"otel": {
-					"kind": "event",
-					"category": "error",
-					"files": ["src/core/Core.ts"]
-				},
-				"shape": "rectangle",
-				"fill": "#ef4444",
-				"stroke": "#dc2626",
-				"status": "implemented"
-			},
-			"color": "#ef4444"
-		},
-		{
-			"id": "restore-started",
-			"type": "text",
-			"x": 700,
-			"y": 400,
-			"width": 220,
-			"height": 100,
-			"text": "# Restore Started\n\nTask restore begins.",
-			"pv": {
-				"event": {
-					"name": "task.restore.started",
-					"attributes": {
-						"input.taskId": {
-							"type": "string",
-							"required": true
-						}
-					}
-				},
-				"sources": ["src/core/Core.ts"],
-				"otel": {
-					"kind": "event",
-					"category": "lifecycle",
-					"files": ["src/core/Core.ts"]
-				},
-				"shape": "rectangle",
-				"fill": "#06b6d4",
-				"stroke": "#0891b2",
-				"status": "implemented"
-			},
-			"color": "#06b6d4"
-		},
-		{
-			"id": "restore-complete",
-			"type": "text",
-			"x": 700,
-			"y": 550,
-			"width": 220,
-			"height": 100,
-			"text": "# Restore Complete\n\nTask restored from completed.",
-			"pv": {
-				"event": {
-					"name": "task.restore.complete",
-					"attributes": {
-						"output.taskId": {
-							"type": "string",
-							"required": true
-						},
-						"output.newPath": {
-							"type": "string",
-							"required": true
-						},
-						"duration.ms": {
-							"type": "number",
-							"required": true
-						}
-					}
-				},
-				"sources": ["src/core/Core.ts"],
-				"otel": {
-					"kind": "event",
-					"category": "lifecycle",
-					"files": ["src/core/Core.ts"]
-				},
-				"shape": "rectangle",
-				"fill": "#06b6d4",
-				"stroke": "#0891b2",
-				"status": "implemented"
-			},
-			"color": "#06b6d4"
-		},
-		{
-			"id": "restore-error",
-			"type": "text",
-			"x": 1000,
-			"y": 475,
-			"width": 220,
-			"height": 100,
-			"text": "# Restore Error\n\nTask restore failed.",
-			"pv": {
-				"event": {
-					"name": "task.restore.error",
-					"attributes": {
-						"error.type": {
-							"type": "string",
-							"required": true
-						},
-						"error.message": {
-							"type": "string",
-							"required": true
-						},
-						"input.taskId": {
+						"input.milestoneId": {
 							"type": "string",
 							"required": true
 						}
@@ -610,45 +380,13 @@
 			"toNode": "delete-error",
 			"toSide": "left",
 			"pv": { "edgeType": "error" }
-		},
-		{
-			"id": "archive-started-to-complete",
-			"fromNode": "archive-started",
-			"fromSide": "bottom",
-			"toNode": "archive-complete",
-			"toSide": "top",
-			"pv": { "edgeType": "flow" }
-		},
-		{
-			"id": "archive-started-to-error",
-			"fromNode": "archive-started",
-			"fromSide": "right",
-			"toNode": "archive-error",
-			"toSide": "left",
-			"pv": { "edgeType": "error" }
-		},
-		{
-			"id": "restore-started-to-complete",
-			"fromNode": "restore-started",
-			"fromSide": "bottom",
-			"toNode": "restore-complete",
-			"toSide": "top",
-			"pv": { "edgeType": "flow" }
-		},
-		{
-			"id": "restore-started-to-error",
-			"fromNode": "restore-started",
-			"fromSide": "right",
-			"toNode": "restore-error",
-			"toSide": "left",
-			"pv": { "edgeType": "error" }
 		}
 	],
 	"pv": {
-		"name": "Task CRUD Operations",
+		"name": "Milestone CRUD Operations",
 		"version": "1.0.0",
-		"description": "OpenTelemetry events for task create, update, delete, archive, and restore operations",
-		"markdown": ".principal-views/task-crud/task-crud.md",
+		"description": "OpenTelemetry events for milestone create, update, and delete operations",
+		"markdown": ".principal-views/milestone-crud/milestone-crud.md",
 		"edgeTypes": {
 			"flow": {
 				"label": "Flow",
