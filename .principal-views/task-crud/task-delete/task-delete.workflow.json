@@ -27,7 +27,7 @@
 				"summary": "Task {{input.taskId}} not found",
 				"events": {
 					"task.delete.started": "Deleting task {{input.taskId}}",
-					"task.delete.error": "Task {{input.taskId}} not found in {{context.projectRoot}} ({{context.taskCount}} tasks loaded)"
+					"task.delete.not-found": "Task {{input.taskId}} not found in {{context.tasksDir}} ({{context.taskCount}} tasks in {{context.projectRoot}})"
 				}
 			}
 		},
@@ -39,7 +39,7 @@
 				"summary": "Failed to delete task: {{error.message}}",
 				"events": {
 					"task.delete.started": "Deleting task {{input.taskId}}",
-					"task.delete.error": "Error ({{error.type}}): {{error.message}}"
+					"task.delete.error": "Failed to delete {{input.taskId}}: {{error.type}} - {{error.message}}"
 				}
 			}
 		}
