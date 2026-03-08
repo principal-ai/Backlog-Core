@@ -15,7 +15,7 @@
 				"summary": "Deleted milestone {{output.milestoneId}}",
 				"events": {
 					"milestone.delete.started": "Deleting milestone {{input.milestoneId}}",
-					"milestone.delete.complete": "Deleted milestone {{output.milestoneId}} in {{duration.ms}}ms"
+					"milestone.delete.complete": "Deleted milestone {{output.milestoneId}} (deleted={{output.deleted}}) in {{duration.ms}}ms"
 				}
 			}
 		},
@@ -27,7 +27,7 @@
 				"summary": "Milestone {{input.milestoneId}} not found",
 				"events": {
 					"milestone.delete.started": "Deleting milestone {{input.milestoneId}}",
-					"milestone.delete.error": "Error: Milestone not found"
+					"milestone.delete.error": "Error: Milestone {{input.milestoneId}} not found"
 				}
 			}
 		},
@@ -39,7 +39,7 @@
 				"summary": "Failed to delete milestone: {{error.message}}",
 				"events": {
 					"milestone.delete.started": "Deleting milestone {{input.milestoneId}}",
-					"milestone.delete.error": "Error ({{error.type}}): {{error.message}}"
+					"milestone.delete.error": "Error deleting {{input.milestoneId}} ({{error.type}}): {{error.message}}"
 				}
 			}
 		}

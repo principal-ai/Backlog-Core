@@ -14,7 +14,7 @@
 			"template": {
 				"summary": "Created milestone {{output.milestoneId}}: {{input.title}}",
 				"events": {
-					"milestone.create.started": "Creating milestone: {{input.title}}",
+					"milestone.create.started": "Creating milestone: {{input.title}} (hasDescription={{input.hasDescription}})",
 					"milestone.create.complete": "Created milestone {{output.milestoneId}} in {{duration.ms}}ms"
 				}
 			}
@@ -26,7 +26,7 @@
 			"template": {
 				"summary": "Failed to create milestone: {{error.message}}",
 				"events": {
-					"milestone.create.started": "Creating milestone: {{input.title}}",
+					"milestone.create.started": "Creating milestone: {{input.title}} (hasDescription={{input.hasDescription}})",
 					"milestone.create.error": "Error ({{error.type}}): {{error.message}}"
 				}
 			}

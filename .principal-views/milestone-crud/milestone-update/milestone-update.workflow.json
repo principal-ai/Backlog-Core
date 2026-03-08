@@ -14,8 +14,8 @@
 			"template": {
 				"summary": "Updated milestone {{output.milestoneId}}",
 				"events": {
-					"milestone.update.started": "Updating milestone {{input.milestoneId}}",
-					"milestone.update.complete": "Updated milestone {{output.milestoneId}} in {{duration.ms}}ms"
+					"milestone.update.started": "Updating milestone {{input.milestoneId}} (hasTitle={{input.hasTitle}}, hasDescription={{input.hasDescription}})",
+					"milestone.update.complete": "Updated milestone {{output.milestoneId}} (titleChanged={{output.titleChanged}}) in {{duration.ms}}ms"
 				}
 			}
 		},
@@ -26,8 +26,8 @@
 			"template": {
 				"summary": "Changed title for milestone {{output.milestoneId}}",
 				"events": {
-					"milestone.update.started": "Updating milestone {{input.milestoneId}} (title change)",
-					"milestone.update.complete": "Title updated for {{output.milestoneId}} in {{duration.ms}}ms"
+					"milestone.update.started": "Updating milestone {{input.milestoneId}} (hasTitle={{input.hasTitle}}, hasDescription={{input.hasDescription}})",
+					"milestone.update.complete": "Title updated for {{output.milestoneId}} (titleChanged={{output.titleChanged}}) in {{duration.ms}}ms"
 				}
 			}
 		},
@@ -38,8 +38,8 @@
 			"template": {
 				"summary": "Milestone {{input.milestoneId}} not found",
 				"events": {
-					"milestone.update.started": "Updating milestone {{input.milestoneId}}",
-					"milestone.update.error": "Error: Milestone not found"
+					"milestone.update.started": "Updating milestone {{input.milestoneId}} (hasTitle={{input.hasTitle}}, hasDescription={{input.hasDescription}})",
+					"milestone.update.error": "Error: Milestone {{input.milestoneId}} not found"
 				}
 			}
 		},
@@ -50,8 +50,8 @@
 			"template": {
 				"summary": "Failed to update milestone: {{error.message}}",
 				"events": {
-					"milestone.update.started": "Updating milestone {{input.milestoneId}}",
-					"milestone.update.error": "Error ({{error.type}}): {{error.message}}"
+					"milestone.update.started": "Updating milestone {{input.milestoneId}} (hasTitle={{input.hasTitle}}, hasDescription={{input.hasDescription}})",
+					"milestone.update.error": "Error updating {{input.milestoneId}} ({{error.type}}): {{error.message}}"
 				}
 			}
 		}

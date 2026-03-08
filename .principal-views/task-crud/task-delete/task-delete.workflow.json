@@ -15,7 +15,7 @@
 				"summary": "Deleted task {{output.taskId}}",
 				"events": {
 					"task.delete.started": "Deleting task {{input.taskId}}",
-					"task.delete.complete": "Deleted task {{output.taskId}} in {{duration.ms}}ms"
+					"task.delete.complete": "Deleted task {{output.taskId}} (deleted={{output.deleted}}) in {{duration.ms}}ms"
 				}
 			}
 		},

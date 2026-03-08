@@ -14,8 +14,8 @@
 			"template": {
 				"summary": "Updated task {{output.taskId}}",
 				"events": {
-					"task.update.started": "Updating task {{input.taskId}}",
-					"task.update.complete": "Updated task {{output.taskId}} in {{duration.ms}}ms"
+					"task.update.started": "Updating task {{input.taskId}} (hasTitle={{input.hasTitle}}, hasStatus={{input.hasStatus}}, hasMilestone={{input.hasMilestone}})",
+					"task.update.complete": "Updated task {{output.taskId}} (statusChanged={{output.statusChanged}}) in {{duration.ms}}ms"
 				}
 			}
 		},
@@ -26,8 +26,8 @@
 			"template": {
 				"summary": "Changed status for task {{output.taskId}}",
 				"events": {
-					"task.update.started": "Updating task {{input.taskId}} (status change)",
-					"task.update.complete": "Status updated for {{output.taskId}} in {{duration.ms}}ms"
+					"task.update.started": "Updating task {{input.taskId}} (hasTitle={{input.hasTitle}}, hasStatus={{input.hasStatus}}, hasMilestone={{input.hasMilestone}})",
+					"task.update.complete": "Status updated for {{output.taskId}} (statusChanged={{output.statusChanged}}) in {{duration.ms}}ms"
 				}
 			}
 		},
@@ -38,8 +38,8 @@
 			"template": {
 				"summary": "Task {{input.taskId}} not found",
 				"events": {
-					"task.update.started": "Updating task {{input.taskId}}",
-					"task.update.error": "Error: Task not found"
+					"task.update.started": "Updating task {{input.taskId}} (hasTitle={{input.hasTitle}}, hasStatus={{input.hasStatus}}, hasMilestone={{input.hasMilestone}})",
+					"task.update.error": "Error: Task {{input.taskId}} not found"
 				}
 			}
 		},
@@ -50,8 +50,8 @@
 			"template": {
 				"summary": "Failed to update task: {{error.message}}",
 				"events": {
-					"task.update.started": "Updating task {{input.taskId}}",
-					"task.update.error": "Error ({{error.type}}): {{error.message}}"
+					"task.update.started": "Updating task {{input.taskId}} (hasTitle={{input.hasTitle}}, hasStatus={{input.hasStatus}}, hasMilestone={{input.hasMilestone}})",
+					"task.update.error": "Error updating {{input.taskId}} ({{error.type}}): {{error.message}}"
 				}
 			}
 		}

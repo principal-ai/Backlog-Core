@@ -15,7 +15,7 @@
 				"summary": "Archived task {{output.taskId}}",
 				"events": {
 					"task.archive.started": "Archiving task {{input.taskId}}",
-					"task.archive.complete": "Archived to {{output.newPath}} in {{duration.ms}}ms"
+					"task.archive.complete": "Archived task {{output.taskId}} to {{output.newPath}} in {{duration.ms}}ms"
 				}
 			}
 		},
@@ -27,7 +27,7 @@
 				"summary": "Task {{input.taskId}} not found",
 				"events": {
 					"task.archive.started": "Archiving task {{input.taskId}}",
-					"task.archive.error": "Error: Task not found"
+					"task.archive.error": "Error: Task {{input.taskId}} not found"
 				}
 			}
 		},
@@ -39,7 +39,7 @@
 				"summary": "Failed to archive task: {{error.message}}",
 				"events": {
 					"task.archive.started": "Archiving task {{input.taskId}}",
-					"task.archive.error": "Error ({{error.type}}): {{error.message}}"
+					"task.archive.error": "Error archiving {{input.taskId}} ({{error.type}}): {{error.message}}"
 				}
 			}
 		}

@@ -327,6 +327,14 @@
 						"input.taskId": {
 							"type": "string",
 							"required": true
+						},
+						"context.projectRoot": {
+							"type": "string",
+							"required": false
+						},
+						"context.taskCount": {
+							"type": "number",
+							"required": false
 						}
 					}
 				},
