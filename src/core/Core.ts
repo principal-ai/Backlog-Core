@@ -1704,6 +1704,9 @@ export class Core {
             "error.type": "NotFoundError",
             "error.message": "Task not found",
             "input.taskId": id,
+            "context.projectRoot": this.projectRoot,
+            "context.tasksDir": this.getTasksDir(),
+            "context.taskCount": this.tasks.size,
           });
           span.setStatus({ code: SpanStatusCode.ERROR, message: "Task not found" });
           span.end();

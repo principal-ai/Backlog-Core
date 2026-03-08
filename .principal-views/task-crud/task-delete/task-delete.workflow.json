@@ -27,7 +27,7 @@
 				"summary": "Task {{input.taskId}} not found",
 				"events": {
 					"task.delete.started": "Deleting task {{input.taskId}}",
-					"task.delete.error": "Error: Task not found"
+					"task.delete.error": "Task {{input.taskId}} not found in {{context.projectRoot}} ({{context.taskCount}} tasks loaded)"
 				}
 			}
 		},
