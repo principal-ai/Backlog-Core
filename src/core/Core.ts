@@ -1698,14 +1698,16 @@ export class Core {
 
         const task = this.tasks.get(id);
         if (!task) {
+          const error = new Error("Task not found");
+          error.name = "NotFoundError";
           span.addEvent("task.delete.error", {
             "error.type": "NotFoundError",
             "error.message": "Task not found",
             "input.taskId": id,
           });
-          span.setStatus({ code: SpanStatusCode.OK });
+          span.setStatus({ code: SpanStatusCode.ERROR, message: "Task not found" });
           span.end();
-          return false;
+          throw error;
         }
 
         // Remove from milestone if assigned
