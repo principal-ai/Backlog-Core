@@ -27,7 +27,7 @@
 				"summary": "Milestone {{input.milestoneId}} not found",
 				"events": {
 					"milestone.delete.started": "Deleting milestone {{input.milestoneId}}",
-					"milestone.delete.error": "Error: Milestone {{input.milestoneId}} not found"
+					"milestone.not-found": "Milestone {{input.milestoneId}} not found"
 				}
 			}
 		},

@@ -20,18 +20,6 @@
 			}
 		},
 		{
-			"id": "status-change",
-			"priority": 2,
-			"description": "Task status changed",
-			"template": {
-				"summary": "Changed status for task {{output.taskId}}",
-				"events": {
-					"task.update.started": "Updating task {{input.taskId}} (hasTitle={{input.hasTitle}}, hasStatus={{input.hasStatus}}, hasMilestone={{input.hasMilestone}})",
-					"task.update.complete": "Status updated for {{output.taskId}} (statusChanged={{output.statusChanged}}) in {{duration.ms}}ms"
-				}
-			}
-		},
-		{
 			"id": "not-found",
 			"priority": 10,
 			"description": "Task not found",
@@ -39,7 +27,7 @@
 				"summary": "Task {{input.taskId}} not found",
 				"events": {
 					"task.update.started": "Updating task {{input.taskId}} (hasTitle={{input.hasTitle}}, hasStatus={{input.hasStatus}}, hasMilestone={{input.hasMilestone}})",
-					"task.update.error": "Error: Task {{input.taskId}} not found"
+					"task.not-found": "Task {{input.taskId}} not found"
 				}
 			}
 		},

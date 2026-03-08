@@ -305,31 +305,79 @@
 			"color": "#f97316"
 		},
 		{
-			"id": "delete-not-found",
+			"id": "task-not-found",
 			"type": "text",
-			"x": 400,
-			"y": 750,
+			"x": 1300,
+			"y": 275,
 			"width": 220,
 			"height": 100,
-			"text": "# Delete Not Found\n\nTask not found.",
+			"text": "# Task Not Found\n\nTask lookup failed.",
 			"pv": {
 				"event": {
-					"name": "task.delete.not-found",
+					"name": "task.not-found",
 					"attributes": {
 						"input.taskId": {
 							"type": "string",
 							"required": true
-						},
-						"context.projectRoot": {
+						}
+					}
+				},
+				"otel": {
+					"kind": "event",
+					"category": "outcome",
+					"files": ["src/core/Core.ts"]
+				},
+				"shape": "rectangle",
+				"fill": "#eab308",
+				"stroke": "#ca8a04",
+				"status": "implemented"
+			},
+			"color": "#eab308"
+		},
+		{
+			"id": "archive-already-archived",
+			"type": "text",
+			"x": 1000,
+			"y": 250,
+			"width": 220,
+			"height": 100,
+			"text": "# Already Archived\n\nTask already in completed.",
+			"pv": {
+				"event": {
+					"name": "task.archive.already-archived",
+					"attributes": {
+						"input.taskId": {
 							"type": "string",
 							"required": true
-						},
-						"context.tasksDir": {
+						}
+					}
+				},
+				"otel": {
+					"kind": "event",
+					"category": "outcome",
+					"files": ["src/core/Core.ts"]
+				},
+				"shape": "rectangle",
+				"fill": "#eab308",
+				"stroke": "#ca8a04",
+				"status": "implemented"
+			},
+			"color": "#eab308"
+		},
+		{
+			"id": "restore-not-archived",
+			"type": "text",
+			"x": 1000,
+			"y": 600,
+			"width": 220,
+			"height": 100,
+			"text": "# Not Archived\n\nTask not in completed.",
+			"pv": {
+				"event": {
+					"name": "task.restore.not-archived",
+					"attributes": {
+						"input.taskId": {
 							"type": "string",
-							"required": true
-						},
-						"context.taskCount": {
-							"type": "number",
 							"required": true
 						}
 					}
@@ -645,14 +693,6 @@
 			"pv": { "edgeType": "flow" }
 		},
 		{
-			"id": "delete-started-to-not-found",
-			"fromNode": "delete-started",
-			"fromSide": "right",
-			"toNode": "delete-not-found",
-			"toSide": "left",
-			"pv": { "edgeType": "not-found" }
-		},
-		{
 			"id": "delete-started-to-error",
 			"fromNode": "delete-started",
 			"fromSide": "right",
@@ -691,6 +731,54 @@
 			"toNode": "restore-error",
 			"toSide": "left",
 			"pv": { "edgeType": "error" }
+		},
+		{
+			"id": "update-started-to-not-found",
+			"fromNode": "update-started",
+			"fromSide": "right",
+			"toNode": "task-not-found",
+			"toSide": "left",
+			"pv": { "edgeType": "not-found" }
+		},
+		{
+			"id": "delete-started-to-not-found",
+			"fromNode": "delete-started",
+			"fromSide": "right",
+			"toNode": "task-not-found",
+			"toSide": "left",
+			"pv": { "edgeType": "not-found" }
+		},
+		{
+			"id": "archive-started-to-not-found",
+			"fromNode": "archive-started",
+			"fromSide": "right",
+			"toNode": "task-not-found",
+			"toSide": "left",
+			"pv": { "edgeType": "not-found" }
+		},
+		{
+			"id": "archive-started-to-already-archived",
+			"fromNode": "archive-started",
+			"fromSide": "right",
+			"toNode": "archive-already-archived",
+			"toSide": "left",
+			"pv": { "edgeType": "not-found" }
+		},
+		{
+			"id": "restore-started-to-not-found",
+			"fromNode": "restore-started",
+			"fromSide": "right",
+			"toNode": "task-not-found",
+			"toSide": "left",
+			"pv": { "edgeType": "not-found" }
+		},
+		{
+			"id": "restore-started-to-not-archived",
+			"fromNode": "restore-started",
+			"fromSide": "right",
+			"toNode": "restore-not-archived",
+			"toSide": "left",
+			"pv": { "edgeType": "not-found" }
 		}
 	],
 	"pv": {

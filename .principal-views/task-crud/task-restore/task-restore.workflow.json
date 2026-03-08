@@ -22,12 +22,24 @@
 		{
 			"id": "not-found",
 			"priority": 10,
-			"description": "Task not found in completed",
+			"description": "Task not found",
 			"template": {
-				"summary": "Task {{input.taskId}} not found in completed",
+				"summary": "Task {{input.taskId}} not found",
 				"events": {
 					"task.restore.started": "Restoring task {{input.taskId}}",
-					"task.restore.error": "Error: Task {{input.taskId}} not found in completed"
+					"task.not-found": "Task {{input.taskId}} not found"
+				}
+			}
+		},
+		{
+			"id": "not-archived",
+			"priority": 9,
+			"description": "Task not in completed",
+			"template": {
+				"summary": "Task {{input.taskId}} not archived",
+				"events": {
+					"task.restore.started": "Restoring task {{input.taskId}}",
+					"task.restore.not-archived": "Task {{input.taskId}} not in completed"
 				}
 			}
 		},

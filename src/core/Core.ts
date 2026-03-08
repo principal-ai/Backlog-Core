@@ -873,9 +873,7 @@ export class Core {
 
         const existing = await this.loadMilestone(id);
         if (!existing) {
-          span.addEvent("milestone.update.error", {
-            "error.type": "NotFoundError",
-            "error.message": "Milestone not found",
+          span.addEvent("milestone.not-found", {
             "input.milestoneId": id,
           });
           span.setStatus({ code: SpanStatusCode.OK });
@@ -893,9 +891,7 @@ export class Core {
         });
 
         if (!currentFile) {
-          span.addEvent("milestone.update.error", {
-            "error.type": "NotFoundError",
-            "error.message": "Milestone file not found",
+          span.addEvent("milestone.not-found", {
             "input.milestoneId": id,
           });
           span.setStatus({ code: SpanStatusCode.OK });
@@ -986,9 +982,7 @@ export class Core {
         const milestonesDir = this.getMilestonesDir();
 
         if (!(await this.fs.exists(milestonesDir))) {
-          span.addEvent("milestone.delete.error", {
-            "error.type": "NotFoundError",
-            "error.message": "Milestones directory not found",
+          span.addEvent("milestone.not-found", {
             "input.milestoneId": id,
           });
           span.setStatus({ code: SpanStatusCode.OK });
@@ -1005,9 +999,7 @@ export class Core {
         });
 
         if (!milestoneFile) {
-          span.addEvent("milestone.delete.error", {
-            "error.type": "NotFoundError",
-            "error.message": "Milestone not found",
+          span.addEvent("milestone.not-found", {
             "input.milestoneId": id,
           });
           span.setStatus({ code: SpanStatusCode.OK });
@@ -1531,12 +1523,10 @@ export class Core {
 
         const existing = this.tasks.get(id);
         if (!existing) {
-          span.addEvent("task.update.error", {
-            "error.type": "NotFoundError",
-            "error.message": "Task not found",
+          span.addEvent("task.not-found", {
             "input.taskId": id,
           });
-          span.setStatus({ code: SpanStatusCode.OK }); // Not found is not an error
+          span.setStatus({ code: SpanStatusCode.OK });
           span.end();
           return null;
         }
@@ -1698,7 +1688,7 @@ export class Core {
 
         const task = this.tasks.get(id);
         if (!task) {
-          span.addEvent("task.delete.not-found", {
+          span.addEvent("task.not-found", {
             "input.taskId": id,
             "context.projectRoot": this.projectRoot,
             "context.tasksDir": this.getTasksDir(),
@@ -1771,21 +1761,17 @@ export class Core {
 
         const task = this.tasks.get(id);
         if (!task) {
-          span.addEvent("task.archive.error", {
-            "error.type": "NotFoundError",
-            "error.message": "Task not found",
+          span.addEvent("task.not-found", {
             "input.taskId": id,
           });
-          span.setStatus({ code: SpanStatusCode.OK }); // Not found is not an error
+          span.setStatus({ code: SpanStatusCode.OK });
           span.end();
           return null;
         }
 
         // Check if already in completed
         if (task.source === "completed") {
-          span.addEvent("task.archive.error", {
-            "error.type": "InvalidStateError",
-            "error.message": "Task already archived",
+          span.addEvent("task.archive.already-archived", {
             "input.taskId": id,
           });
           span.setStatus({ code: SpanStatusCode.OK });
@@ -1883,21 +1869,17 @@ export class Core {
 
         const task = this.tasks.get(id);
         if (!task) {
-          span.addEvent("task.restore.error", {
-            "error.type": "NotFoundError",
-            "error.message": "Task not found",
+          span.addEvent("task.not-found", {
             "input.taskId": id,
           });
-          span.setStatus({ code: SpanStatusCode.OK }); // Not found is not an error
+          span.setStatus({ code: SpanStatusCode.OK });
           span.end();
           return null;
         }
 
         // Check if in completed
         if (task.source !== "completed") {
-          span.addEvent("task.restore.error", {
-            "error.type": "InvalidStateError",
-            "error.message": "Task not in completed",
+          span.addEvent("task.restore.not-archived", {
             "input.taskId": id,
           });
           span.setStatus({ code: SpanStatusCode.OK });

@@ -27,7 +27,19 @@
 				"summary": "Task {{input.taskId}} not found",
 				"events": {
 					"task.archive.started": "Archiving task {{input.taskId}}",
-					"task.archive.error": "Error: Task {{input.taskId}} not found"
+					"task.not-found": "Task {{input.taskId}} not found"
+				}
+			}
+		},
+		{
+			"id": "already-archived",
+			"priority": 9,
+			"description": "Task already in completed",
+			"template": {
+				"summary": "Task {{input.taskId}} already archived",
+				"events": {
+					"task.archive.started": "Archiving task {{input.taskId}}",
+					"task.archive.already-archived": "Task {{input.taskId}} already archived"
 				}
 			}
 		},

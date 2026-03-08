@@ -14,20 +14,8 @@
 			"template": {
 				"summary": "Created task #{{output.taskIndex}}: {{input.title}}",
 				"events": {
-					"task.create.started": "Creating task: {{input.title}} (status={{input.status}})",
+					"task.create.started": "Creating task: {{input.title}} (status={{input.status}}, milestone={{input.milestoneId}})",
 					"task.create.complete": "Created task {{output.taskId}} (#{{output.taskIndex}}) in {{duration.ms}}ms"
-				}
-			}
-		},
-		{
-			"id": "with-milestone",
-			"priority": 2,
-			"description": "Task created with milestone assignment",
-			"template": {
-				"summary": "Created task #{{output.taskIndex}} in milestone {{input.milestoneId}}",
-				"events": {
-					"task.create.started": "Creating task: {{input.title}} (milestone: {{input.milestoneId}}, status={{input.status}})",
-					"task.create.complete": "Created task {{output.taskId}} in {{duration.ms}}ms"
 				}
 			}
 		},

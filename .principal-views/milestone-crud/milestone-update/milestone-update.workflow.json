@@ -20,18 +20,6 @@
 			}
 		},
 		{
-			"id": "title-change",
-			"priority": 2,
-			"description": "Milestone title changed",
-			"template": {
-				"summary": "Changed title for milestone {{output.milestoneId}}",
-				"events": {
-					"milestone.update.started": "Updating milestone {{input.milestoneId}} (hasTitle={{input.hasTitle}}, hasDescription={{input.hasDescription}})",
-					"milestone.update.complete": "Title updated for {{output.milestoneId}} (titleChanged={{output.titleChanged}}) in {{duration.ms}}ms"
-				}
-			}
-		},
-		{
 			"id": "not-found",
 			"priority": 10,
 			"description": "Milestone not found",
@@ -39,7 +27,7 @@
 				"summary": "Milestone {{input.milestoneId}} not found",
 				"events": {
 					"milestone.update.started": "Updating milestone {{input.milestoneId}} (hasTitle={{input.hasTitle}}, hasDescription={{input.hasDescription}})",
-					"milestone.update.error": "Error: Milestone {{input.milestoneId}} not found"
+					"milestone.not-found": "Milestone {{input.milestoneId}} not found"
 				}
 			}
 		},
