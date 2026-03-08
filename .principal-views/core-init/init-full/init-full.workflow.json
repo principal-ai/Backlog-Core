@@ -3,33 +3,47 @@
 	"canvas": ".principal-views/core-init/core-init.otel.canvas",
 	"scope": "@backlog-md/core",
 	"mode": "span-tree",
-	"name": "Core Full Initialization",
-	"description": "Full initialization loading config and all tasks into memory",
+	"name": "Core Initialization",
+	"description": "Initialization workflow supporting both full and lazy modes",
 	"spanPattern": "core.init",
 	"scenarios": [
 		{
-			"id": "success",
+			"id": "full-success",
 			"priority": 1,
 			"description": "Successful full initialization with config and tasks loaded",
 			"template": {
 				"summary": "Initialized with {{taskCount}} tasks in {{duration.ms}}ms",
 				"events": {
-					"core.init.started": "Started initialization (mode: {{mode}})",
-					"core.init.config.loaded": "Loaded config: {{projectName}} with {{statusCount}} statuses",
-					"core.init.tasks.loaded": "Discovered {{localTaskCount}} active, {{completedTaskCount}} completed tasks",
-					"core.init.complete": "Completed in {{duration.ms}}ms with {{taskCount}} total tasks"
+					"core.init.started": "Started initialization at {{projectRoot}} (mode: {{mode}})",
+					"core.init.config.loaded": "Loaded config: {{projectName}} with {{statusCount}} statuses, {{labelCount}} labels",
+					"core.init.tasks.loaded": "Discovered {{localTaskCount}} active, {{completedTaskCount}} completed ({{totalTaskCount}} total) tasks",
+					"core.init.complete": "{{success}}: Completed in {{duration.ms}}ms with {{taskCount}} total tasks"
+				}
+			}
+		},
+		{
+			"id": "lazy-success",
+			"priority": 2,
+			"description": "Successful lazy initialization with paths indexed",
+			"template": {
+				"summary": "Indexed {{totalIndexed}} tasks in {{duration.ms}}ms",
+				"events": {
+					"core.init.started": "Started initialization at {{projectRoot}} (mode: {{mode}})",
+					"core.init.config.loaded": "Loaded config: {{projectName}} with {{statusCount}} statuses, {{labelCount}} labels",
+					"core.init.tasks.loaded": "Discovered {{localTaskCount}} active, {{completedTaskCount}} completed ({{totalTaskCount}} total) tasks",
+					"core.init.indexed": "{{success}}: Indexed {{tasksIndexed}} active, {{completedIndexed}} completed ({{totalIndexed}} total) in {{duration.ms}}ms"
 				}
 			}
 		},
 		{
 			"id": "config-error",
-			"priority": 2,
+			"priority": 3,
 			"description": "Initialization failed at config loading stage",
 			"template": {
 				"summary": "Failed: {{error.message}}",
 				"events": {
-					"core.init.started": "Started initialization (mode: {{mode}})",
-					"core.init.error": "Error ({{error.type}}): {{error.message}}"
+					"core.init.started": "Started initialization at {{projectRoot}} (mode: {{mode}})",
+					"core.init.error": "Error at {{stage}} ({{error.type}}): {{error.message}}"
 				}
 			}
 		}

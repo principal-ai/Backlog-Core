@@ -376,10 +376,16 @@ export class Core {
           if (isCompletedFile) completedIndexed++;
         }
 
+        span.addEvent("core.init.tasks.loaded", {
+          localTaskCount: tasksIndexed,
+          completedTaskCount: completedIndexed,
+          totalTaskCount: this.taskIndex.size,
+        });
+
         this.lazyInitialized = true;
 
         const duration = Date.now() - startTime;
-        span.addEvent("core.init.complete", {
+        span.addEvent("core.init.indexed", {
           success: true,
           "duration.ms": duration,
           tasksIndexed,
