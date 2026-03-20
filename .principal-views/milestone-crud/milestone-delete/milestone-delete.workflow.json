@@ -2,7 +2,6 @@
 	"version": "1.0.0",
 	"canvas": ".principal-views/milestone-crud/milestone-crud.otel.canvas",
 	"scope": "@backlog-md/core",
-	"mode": "span-tree",
 	"name": "Milestone Delete",
 	"description": "Permanently deleting a milestone",
 	"spanPattern": "milestone.delete",

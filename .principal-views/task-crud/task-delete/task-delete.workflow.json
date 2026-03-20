@@ -2,7 +2,6 @@
 	"version": "1.0.0",
 	"canvas": ".principal-views/task-crud/task-crud.otel.canvas",
 	"scope": "@backlog-md/core",
-	"mode": "span-tree",
 	"name": "Task Delete",
 	"description": "Permanently deleting a task",
 	"spanPattern": "task.delete",

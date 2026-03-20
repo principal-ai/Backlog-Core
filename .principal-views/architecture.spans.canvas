@@ -1,0 +1,238 @@
+{
+	"pv": {
+		"name": "Backlog Core Spans",
+		"version": "1.0.0",
+		"description": "OpenTelemetry span conventions for @backlog-md/core operations",
+		"markdown": ".principal-views/architecture.md"
+	},
+	"nodes": [
+		{
+			"id": "core-init-span",
+			"type": "text",
+			"x": 100,
+			"y": 100,
+			"width": 180,
+			"height": 80,
+			"text": "# core.init\n\nCore initialization span",
+			"color": "#22c55e",
+			"pv": {
+				"otel": {
+					"spanPattern": "core.init"
+				},
+				"shape": "rectangle",
+				"fill": "#22c55e",
+				"stroke": "#16a34a"
+			}
+		},
+		{
+			"id": "task-create-span",
+			"type": "text",
+			"x": 320,
+			"y": 100,
+			"width": 180,
+			"height": 80,
+			"text": "# task.create\n\nTask creation span",
+			"color": "#3b82f6",
+			"pv": {
+				"otel": {
+					"spanPattern": "task.create"
+				},
+				"shape": "rectangle",
+				"fill": "#3b82f6",
+				"stroke": "#1d4ed8"
+			}
+		},
+		{
+			"id": "task-update-span",
+			"type": "text",
+			"x": 540,
+			"y": 100,
+			"width": 180,
+			"height": 80,
+			"text": "# task.update\n\nTask update span",
+			"color": "#3b82f6",
+			"pv": {
+				"otel": {
+					"spanPattern": "task.update"
+				},
+				"shape": "rectangle",
+				"fill": "#3b82f6",
+				"stroke": "#1d4ed8"
+			}
+		},
+		{
+			"id": "task-delete-span",
+			"type": "text",
+			"x": 760,
+			"y": 100,
+			"width": 180,
+			"height": 80,
+			"text": "# task.delete\n\nTask deletion span",
+			"color": "#f97316",
+			"pv": {
+				"otel": {
+					"spanPattern": "task.delete"
+				},
+				"shape": "rectangle",
+				"fill": "#f97316",
+				"stroke": "#ea580c"
+			}
+		},
+		{
+			"id": "task-archive-span",
+			"type": "text",
+			"x": 320,
+			"y": 220,
+			"width": 180,
+			"height": 80,
+			"text": "# task.archive\n\nTask archive span",
+			"color": "#8b5cf6",
+			"pv": {
+				"otel": {
+					"spanPattern": "task.archive"
+				},
+				"shape": "rectangle",
+				"fill": "#8b5cf6",
+				"stroke": "#7c3aed"
+			}
+		},
+		{
+			"id": "task-restore-span",
+			"type": "text",
+			"x": 540,
+			"y": 220,
+			"width": 180,
+			"height": 80,
+			"text": "# task.restore\n\nTask restore span",
+			"color": "#06b6d4",
+			"pv": {
+				"otel": {
+					"spanPattern": "task.restore"
+				},
+				"shape": "rectangle",
+				"fill": "#06b6d4",
+				"stroke": "#0891b2"
+			}
+		},
+		{
+			"id": "milestone-create-span",
+			"type": "text",
+			"x": 100,
+			"y": 340,
+			"width": 180,
+			"height": 80,
+			"text": "# milestone.create\n\nMilestone creation span",
+			"color": "#22c55e",
+			"pv": {
+				"otel": {
+					"spanPattern": "milestone.create"
+				},
+				"shape": "rectangle",
+				"fill": "#22c55e",
+				"stroke": "#16a34a"
+			}
+		},
+		{
+			"id": "milestone-update-span",
+			"type": "text",
+			"x": 320,
+			"y": 340,
+			"width": 180,
+			"height": 80,
+			"text": "# milestone.update\n\nMilestone update span",
+			"color": "#3b82f6",
+			"pv": {
+				"otel": {
+					"spanPattern": "milestone.update"
+				},
+				"shape": "rectangle",
+				"fill": "#3b82f6",
+				"stroke": "#1d4ed8"
+			}
+		},
+		{
+			"id": "milestone-delete-span",
+			"type": "text",
+			"x": 540,
+			"y": 340,
+			"width": 180,
+			"height": 80,
+			"text": "# milestone.delete\n\nMilestone deletion span",
+			"color": "#f97316",
+			"pv": {
+				"otel": {
+					"spanPattern": "milestone.delete"
+				},
+				"shape": "rectangle",
+				"fill": "#f97316",
+				"stroke": "#ea580c"
+			}
+		}
+	],
+	"edges": [
+		{
+			"id": "init-to-task-create",
+			"fromNode": "core-init-span",
+			"fromSide": "right",
+			"toNode": "task-create-span",
+			"toSide": "left",
+			"pv": { "edgeType": "Dependency" }
+		},
+		{
+			"id": "task-create-to-update",
+			"fromNode": "task-create-span",
+			"fromSide": "right",
+			"toNode": "task-update-span",
+			"toSide": "left",
+			"pv": { "edgeType": "Dependency" }
+		},
+		{
+			"id": "task-update-to-delete",
+			"fromNode": "task-update-span",
+			"fromSide": "right",
+			"toNode": "task-delete-span",
+			"toSide": "left",
+			"pv": { "edgeType": "Dependency" }
+		},
+		{
+			"id": "task-create-to-archive",
+			"fromNode": "task-create-span",
+			"fromSide": "bottom",
+			"toNode": "task-archive-span",
+			"toSide": "top",
+			"pv": { "edgeType": "Dependency" }
+		},
+		{
+			"id": "task-archive-to-restore",
+			"fromNode": "task-archive-span",
+			"fromSide": "right",
+			"toNode": "task-restore-span",
+			"toSide": "left",
+			"pv": { "edgeType": "Dependency" }
+		},
+		{
+			"id": "init-to-milestone-create",
+			"fromNode": "core-init-span",
+			"fromSide": "bottom",
+			"toNode": "milestone-create-span",
+			"toSide": "top",
+			"pv": { "edgeType": "Dependency" }
+		},
+		{
+			"id": "milestone-create-to-update",
+			"fromNode": "milestone-create-span",
+			"fromSide": "right",
+			"toNode": "milestone-update-span",
+			"toSide": "left",
+			"pv": { "edgeType": "Dependency" }
+		},
+		{
+			"id": "milestone-update-to-delete",
+			"fromNode": "milestone-update-span",
+			"fromSide": "right",
+			"toNode": "milestone-delete-span",
+			"toSide": "left",
+			"pv": { "edgeType": "Dependency" }
+		}
+	]
+}

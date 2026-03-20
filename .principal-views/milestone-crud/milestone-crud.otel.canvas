@@ -1,457 +1,434 @@
 {
-	"nodes": [
-		{
-			"id": "create-started",
-			"type": "text",
-			"x": 100,
-			"y": 50,
-			"width": 220,
-			"height": 100,
-			"text": "# Create Started\n\nMilestone creation begins.",
-			"pv": {
-				"event": {
-					"name": "milestone.create.started",
-					"attributes": {
-						"input.title": {
-							"type": "string",
-							"required": true
-						},
-						"input.hasDescription": {
-							"type": "boolean",
-							"required": false
-						}
-					}
-				},
-				"sources": ["src/core/Core.ts"],
-				"otel": {
-					"kind": "event",
-					"category": "lifecycle",
-					"files": ["src/core/Core.ts"]
-				},
-				"shape": "rectangle",
-				"fill": "#22c55e",
-				"stroke": "#16a34a",
-				"status": "implemented"
-			},
-			"color": "#22c55e"
-		},
-		{
-			"id": "create-complete",
-			"type": "text",
-			"x": 100,
-			"y": 200,
-			"width": 220,
-			"height": 100,
-			"text": "# Create Complete\n\nMilestone created successfully.",
-			"pv": {
-				"event": {
-					"name": "milestone.create.complete",
-					"attributes": {
-						"output.milestoneId": {
-							"type": "string",
-							"required": true
-						},
-						"duration.ms": {
-							"type": "number",
-							"required": true
-						}
-					}
-				},
-				"sources": ["src/core/Core.ts"],
-				"otel": {
-					"kind": "event",
-					"category": "lifecycle",
-					"files": ["src/core/Core.ts"]
-				},
-				"shape": "rectangle",
-				"fill": "#22c55e",
-				"stroke": "#16a34a",
-				"status": "implemented"
-			},
-			"color": "#22c55e"
-		},
-		{
-			"id": "create-error",
-			"type": "text",
-			"x": 400,
-			"y": 125,
-			"width": 220,
-			"height": 100,
-			"text": "# Create Error\n\nMilestone creation failed.",
-			"pv": {
-				"event": {
-					"name": "milestone.create.error",
-					"attributes": {
-						"error.type": {
-							"type": "string",
-							"required": true
-						},
-						"error.message": {
-							"type": "string",
-							"required": true
-						}
-					}
-				},
-				"sources": ["src/core/Core.ts"],
-				"otel": {
-					"kind": "event",
-					"category": "error",
-					"files": ["src/core/Core.ts"]
-				},
-				"shape": "rectangle",
-				"fill": "#ef4444",
-				"stroke": "#dc2626",
-				"status": "implemented"
-			},
-			"color": "#ef4444"
-		},
-		{
-			"id": "update-started",
-			"type": "text",
-			"x": 100,
-			"y": 400,
-			"width": 220,
-			"height": 100,
-			"text": "# Update Started\n\nMilestone update begins.",
-			"pv": {
-				"event": {
-					"name": "milestone.update.started",
-					"attributes": {
-						"input.milestoneId": {
-							"type": "string",
-							"required": true
-						},
-						"input.hasTitle": {
-							"type": "boolean",
-							"required": false
-						},
-						"input.hasDescription": {
-							"type": "boolean",
-							"required": false
-						}
-					}
-				},
-				"sources": ["src/core/Core.ts"],
-				"otel": {
-					"kind": "event",
-					"category": "lifecycle",
-					"files": ["src/core/Core.ts"]
-				},
-				"shape": "rectangle",
-				"fill": "#3b82f6",
-				"stroke": "#1d4ed8",
-				"status": "implemented"
-			},
-			"color": "#3b82f6"
-		},
-		{
-			"id": "update-complete",
-			"type": "text",
-			"x": 100,
-			"y": 550,
-			"width": 220,
-			"height": 100,
-			"text": "# Update Complete\n\nMilestone updated successfully.",
-			"pv": {
-				"event": {
-					"name": "milestone.update.complete",
-					"attributes": {
-						"output.milestoneId": {
-							"type": "string",
-							"required": true
-						},
-						"output.titleChanged": {
-							"type": "boolean",
-							"required": false
-						},
-						"duration.ms": {
-							"type": "number",
-							"required": true
-						}
-					}
-				},
-				"sources": ["src/core/Core.ts"],
-				"otel": {
-					"kind": "event",
-					"category": "lifecycle",
-					"files": ["src/core/Core.ts"]
-				},
-				"shape": "rectangle",
-				"fill": "#3b82f6",
-				"stroke": "#1d4ed8",
-				"status": "implemented"
-			},
-			"color": "#3b82f6"
-		},
-		{
-			"id": "update-error",
-			"type": "text",
-			"x": 400,
-			"y": 475,
-			"width": 220,
-			"height": 100,
-			"text": "# Update Error\n\nMilestone update failed.",
-			"pv": {
-				"event": {
-					"name": "milestone.update.error",
-					"attributes": {
-						"error.type": {
-							"type": "string",
-							"required": true
-						},
-						"error.message": {
-							"type": "string",
-							"required": true
-						},
-						"input.milestoneId": {
-							"type": "string",
-							"required": true
-						}
-					}
-				},
-				"sources": ["src/core/Core.ts"],
-				"otel": {
-					"kind": "event",
-					"category": "error",
-					"files": ["src/core/Core.ts"]
-				},
-				"shape": "rectangle",
-				"fill": "#ef4444",
-				"stroke": "#dc2626",
-				"status": "implemented"
-			},
-			"color": "#ef4444"
-		},
-		{
-			"id": "delete-started",
-			"type": "text",
-			"x": 100,
-			"y": 750,
-			"width": 220,
-			"height": 100,
-			"text": "# Delete Started\n\nMilestone deletion begins.",
-			"pv": {
-				"event": {
-					"name": "milestone.delete.started",
-					"attributes": {
-						"input.milestoneId": {
-							"type": "string",
-							"required": true
-						}
-					}
-				},
-				"sources": ["src/core/Core.ts"],
-				"otel": {
-					"kind": "event",
-					"category": "lifecycle",
-					"files": ["src/core/Core.ts"]
-				},
-				"shape": "rectangle",
-				"fill": "#f97316",
-				"stroke": "#ea580c",
-				"status": "implemented"
-			},
-			"color": "#f97316"
-		},
-		{
-			"id": "delete-complete",
-			"type": "text",
-			"x": 100,
-			"y": 900,
-			"width": 220,
-			"height": 100,
-			"text": "# Delete Complete\n\nMilestone deleted successfully.",
-			"pv": {
-				"event": {
-					"name": "milestone.delete.complete",
-					"attributes": {
-						"output.milestoneId": {
-							"type": "string",
-							"required": true
-						},
-						"output.deleted": {
-							"type": "boolean",
-							"required": true
-						},
-						"duration.ms": {
-							"type": "number",
-							"required": true
-						}
-					}
-				},
-				"sources": ["src/core/Core.ts"],
-				"otel": {
-					"kind": "event",
-					"category": "lifecycle",
-					"files": ["src/core/Core.ts"]
-				},
-				"shape": "rectangle",
-				"fill": "#f97316",
-				"stroke": "#ea580c",
-				"status": "implemented"
-			},
-			"color": "#f97316"
-		},
-		{
-			"id": "delete-error",
-			"type": "text",
-			"x": 400,
-			"y": 825,
-			"width": 220,
-			"height": 100,
-			"text": "# Delete Error\n\nMilestone deletion failed.",
-			"pv": {
-				"event": {
-					"name": "milestone.delete.error",
-					"attributes": {
-						"error.type": {
-							"type": "string",
-							"required": true
-						},
-						"error.message": {
-							"type": "string",
-							"required": true
-						},
-						"input.milestoneId": {
-							"type": "string",
-							"required": true
-						}
-					}
-				},
-				"sources": ["src/core/Core.ts"],
-				"otel": {
-					"kind": "event",
-					"category": "error",
-					"files": ["src/core/Core.ts"]
-				},
-				"shape": "rectangle",
-				"fill": "#ef4444",
-				"stroke": "#dc2626",
-				"status": "implemented"
-			},
-			"color": "#ef4444"
-		},
-		{
-			"id": "milestone-not-found",
-			"type": "text",
-			"x": 700,
-			"y": 625,
-			"width": 220,
-			"height": 100,
-			"text": "# Milestone Not Found\n\nMilestone lookup failed.",
-			"pv": {
-				"event": {
-					"name": "milestone.not-found",
-					"attributes": {
-						"input.milestoneId": {
-							"type": "string",
-							"required": true
-						}
-					}
-				},
-				"otel": {
-					"kind": "event",
-					"category": "outcome",
-					"files": ["src/core/Core.ts"]
-				},
-				"shape": "rectangle",
-				"fill": "#eab308",
-				"stroke": "#ca8a04",
-				"status": "implemented"
-			},
-			"color": "#eab308"
-		}
-	],
-	"edges": [
-		{
-			"id": "create-started-to-complete",
-			"fromNode": "create-started",
-			"fromSide": "bottom",
-			"toNode": "create-complete",
-			"toSide": "top",
-			"pv": { "edgeType": "flow" }
-		},
-		{
-			"id": "create-started-to-error",
-			"fromNode": "create-started",
-			"fromSide": "right",
-			"toNode": "create-error",
-			"toSide": "left",
-			"pv": { "edgeType": "error" }
-		},
-		{
-			"id": "update-started-to-complete",
-			"fromNode": "update-started",
-			"fromSide": "bottom",
-			"toNode": "update-complete",
-			"toSide": "top",
-			"pv": { "edgeType": "flow" }
-		},
-		{
-			"id": "update-started-to-error",
-			"fromNode": "update-started",
-			"fromSide": "right",
-			"toNode": "update-error",
-			"toSide": "left",
-			"pv": { "edgeType": "error" }
-		},
-		{
-			"id": "delete-started-to-complete",
-			"fromNode": "delete-started",
-			"fromSide": "bottom",
-			"toNode": "delete-complete",
-			"toSide": "top",
-			"pv": { "edgeType": "flow" }
-		},
-		{
-			"id": "delete-started-to-error",
-			"fromNode": "delete-started",
-			"fromSide": "right",
-			"toNode": "delete-error",
-			"toSide": "left",
-			"pv": { "edgeType": "error" }
-		},
-		{
-			"id": "update-started-to-not-found",
-			"fromNode": "update-started",
-			"fromSide": "right",
-			"toNode": "milestone-not-found",
-			"toSide": "left",
-			"pv": { "edgeType": "not-found" }
-		},
-		{
-			"id": "delete-started-to-not-found",
-			"fromNode": "delete-started",
-			"fromSide": "right",
-			"toNode": "milestone-not-found",
-			"toSide": "left",
-			"pv": { "edgeType": "not-found" }
-		}
-	],
-	"pv": {
-		"name": "Milestone CRUD Operations",
-		"version": "1.0.0",
-		"description": "OpenTelemetry events for milestone create, update, and delete operations",
-		"markdown": ".principal-views/milestone-crud/milestone-crud.md",
-		"edgeTypes": {
-			"flow": {
-				"label": "Flow",
-				"style": "solid",
-				"width": 2,
-				"color": "#64748b"
-			},
-			"not-found": {
-				"label": "Not Found",
-				"style": "dashed",
-				"width": 2,
-				"color": "#eab308"
-			},
-			"error": {
-				"label": "Error Path",
-				"style": "dashed",
-				"width": 2,
-				"color": "#ef4444"
-			}
-		}
-	}
+  "nodes": [
+    {
+      "id": "create-started",
+      "type": "otel-event",
+      "x": 100,
+      "y": 50,
+      "width": 220,
+      "height": 100,
+      "color": "#22c55e",
+      "label": "Create Started",
+      "fill": "#22c55e",
+      "shape": "rectangle",
+      "event": {
+        "name": "milestone.create.started",
+        "attributes": {
+          "input.title": {
+            "type": "string",
+            "required": true
+          },
+          "input.hasDescription": {
+            "type": "boolean",
+            "required": false
+          }
+        }
+      },
+      "otel": {
+        "status": "implemented",
+        "files": [
+          "src/core/Core.ts"
+        ]
+      }
+    },
+    {
+      "id": "create-complete",
+      "type": "otel-event",
+      "x": 100,
+      "y": 200,
+      "width": 220,
+      "height": 100,
+      "color": "#22c55e",
+      "label": "Create Complete",
+      "fill": "#22c55e",
+      "shape": "rectangle",
+      "event": {
+        "name": "milestone.create.complete",
+        "attributes": {
+          "output.milestoneId": {
+            "type": "string",
+            "required": true
+          },
+          "duration.ms": {
+            "type": "number",
+            "required": true
+          }
+        }
+      },
+      "otel": {
+        "status": "implemented",
+        "files": [
+          "src/core/Core.ts"
+        ]
+      }
+    },
+    {
+      "id": "create-error",
+      "type": "otel-event",
+      "x": 400,
+      "y": 125,
+      "width": 220,
+      "height": 100,
+      "color": "#ef4444",
+      "label": "Create Error",
+      "fill": "#ef4444",
+      "shape": "rectangle",
+      "event": {
+        "name": "milestone.create.error",
+        "attributes": {
+          "error.type": {
+            "type": "string",
+            "required": true
+          },
+          "error.message": {
+            "type": "string",
+            "required": true
+          }
+        }
+      },
+      "otel": {
+        "status": "implemented",
+        "files": [
+          "src/core/Core.ts"
+        ]
+      }
+    },
+    {
+      "id": "update-started",
+      "type": "otel-event",
+      "x": 100,
+      "y": 400,
+      "width": 220,
+      "height": 100,
+      "color": "#3b82f6",
+      "label": "Update Started",
+      "fill": "#3b82f6",
+      "shape": "rectangle",
+      "event": {
+        "name": "milestone.update.started",
+        "attributes": {
+          "input.milestoneId": {
+            "type": "string",
+            "required": true
+          },
+          "input.hasTitle": {
+            "type": "boolean",
+            "required": false
+          },
+          "input.hasDescription": {
+            "type": "boolean",
+            "required": false
+          }
+        }
+      },
+      "otel": {
+        "status": "implemented",
+        "files": [
+          "src/core/Core.ts"
+        ]
+      }
+    },
+    {
+      "id": "update-complete",
+      "type": "otel-event",
+      "x": 100,
+      "y": 550,
+      "width": 220,
+      "height": 100,
+      "color": "#3b82f6",
+      "label": "Update Complete",
+      "fill": "#3b82f6",
+      "shape": "rectangle",
+      "event": {
+        "name": "milestone.update.complete",
+        "attributes": {
+          "output.milestoneId": {
+            "type": "string",
+            "required": true
+          },
+          "output.titleChanged": {
+            "type": "boolean",
+            "required": false
+          },
+          "duration.ms": {
+            "type": "number",
+            "required": true
+          }
+        }
+      },
+      "otel": {
+        "status": "implemented",
+        "files": [
+          "src/core/Core.ts"
+        ]
+      }
+    },
+    {
+      "id": "update-error",
+      "type": "otel-event",
+      "x": 400,
+      "y": 475,
+      "width": 220,
+      "height": 100,
+      "color": "#ef4444",
+      "label": "Update Error",
+      "fill": "#ef4444",
+      "shape": "rectangle",
+      "event": {
+        "name": "milestone.update.error",
+        "attributes": {
+          "error.type": {
+            "type": "string",
+            "required": true
+          },
+          "error.message": {
+            "type": "string",
+            "required": true
+          },
+          "input.milestoneId": {
+            "type": "string",
+            "required": true
+          }
+        }
+      },
+      "otel": {
+        "status": "implemented",
+        "files": [
+          "src/core/Core.ts"
+        ]
+      }
+    },
+    {
+      "id": "delete-started",
+      "type": "otel-event",
+      "x": 100,
+      "y": 750,
+      "width": 220,
+      "height": 100,
+      "color": "#f97316",
+      "label": "Delete Started",
+      "fill": "#f97316",
+      "shape": "rectangle",
+      "event": {
+        "name": "milestone.delete.started",
+        "attributes": {
+          "input.milestoneId": {
+            "type": "string",
+            "required": true
+          }
+        }
+      },
+      "otel": {
+        "status": "implemented",
+        "files": [
+          "src/core/Core.ts"
+        ]
+      }
+    },
+    {
+      "id": "delete-complete",
+      "type": "otel-event",
+      "x": 100,
+      "y": 900,
+      "width": 220,
+      "height": 100,
+      "color": "#f97316",
+      "label": "Delete Complete",
+      "fill": "#f97316",
+      "shape": "rectangle",
+      "event": {
+        "name": "milestone.delete.complete",
+        "attributes": {
+          "output.milestoneId": {
+            "type": "string",
+            "required": true
+          },
+          "output.deleted": {
+            "type": "boolean",
+            "required": true
+          },
+          "duration.ms": {
+            "type": "number",
+            "required": true
+          }
+        }
+      },
+      "otel": {
+        "status": "implemented",
+        "files": [
+          "src/core/Core.ts"
+        ]
+      }
+    },
+    {
+      "id": "delete-error",
+      "type": "otel-event",
+      "x": 400,
+      "y": 825,
+      "width": 220,
+      "height": 100,
+      "color": "#ef4444",
+      "label": "Delete Error",
+      "fill": "#ef4444",
+      "shape": "rectangle",
+      "event": {
+        "name": "milestone.delete.error",
+        "attributes": {
+          "error.type": {
+            "type": "string",
+            "required": true
+          },
+          "error.message": {
+            "type": "string",
+            "required": true
+          },
+          "input.milestoneId": {
+            "type": "string",
+            "required": true
+          }
+        }
+      },
+      "otel": {
+        "status": "implemented",
+        "files": [
+          "src/core/Core.ts"
+        ]
+      }
+    },
+    {
+      "id": "milestone-not-found",
+      "type": "otel-event",
+      "x": 401,
+      "y": 689,
+      "width": 220,
+      "height": 100,
+      "color": "#eab308",
+      "label": "Milestone Not Found",
+      "fill": "#eab308",
+      "shape": "rectangle",
+      "event": {
+        "name": "milestone.not-found",
+        "attributes": {
+          "input.milestoneId": {
+            "type": "string",
+            "required": true
+          }
+        }
+      },
+      "otel": {
+        "status": "implemented",
+        "files": [
+          "src/core/Core.ts"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "create-started-to-complete",
+      "fromNode": "create-started",
+      "fromSide": "bottom",
+      "toNode": "create-complete",
+      "toSide": "top",
+      "pv": {
+        "edgeType": "flow"
+      }
+    },
+    {
+      "id": "create-started-to-error",
+      "fromNode": "create-started",
+      "fromSide": "right",
+      "toNode": "create-error",
+      "toSide": "left",
+      "pv": {
+        "edgeType": "error"
+      }
+    },
+    {
+      "id": "update-started-to-complete",
+      "fromNode": "update-started",
+      "fromSide": "bottom",
+      "toNode": "update-complete",
+      "toSide": "top",
+      "pv": {
+        "edgeType": "flow"
+      }
+    },
+    {
+      "id": "update-started-to-error",
+      "fromNode": "update-started",
+      "fromSide": "right",
+      "toNode": "update-error",
+      "toSide": "left",
+      "pv": {
+        "edgeType": "error"
+      }
+    },
+    {
+      "id": "delete-started-to-complete",
+      "fromNode": "delete-started",
+      "fromSide": "bottom",
+      "toNode": "delete-complete",
+      "toSide": "top",
+      "pv": {
+        "edgeType": "flow"
+      }
+    },
+    {
+      "id": "delete-started-to-error",
+      "fromNode": "delete-started",
+      "fromSide": "right",
+      "toNode": "delete-error",
+      "toSide": "left",
+      "pv": {
+        "edgeType": "error"
+      }
+    },
+    {
+      "id": "update-started-to-not-found",
+      "fromNode": "update-started",
+      "fromSide": "right",
+      "toNode": "milestone-not-found",
+      "toSide": "left",
+      "pv": {
+        "edgeType": "not-found"
+      }
+    },
+    {
+      "id": "delete-started-to-not-found",
+      "fromNode": "delete-started",
+      "fromSide": "right",
+      "toNode": "milestone-not-found",
+      "toSide": "left",
+      "pv": {
+        "edgeType": "not-found"
+      }
+    }
+  ],
+  "pv": {
+    "name": "Milestone CRUD Operations",
+    "version": "1.0.0",
+    "description": "OpenTelemetry events for milestone create, update, and delete operations",
+    "markdown": ".principal-views/milestone-crud/milestone-crud.md",
+    "edgeTypes": {
+      "flow": {
+        "label": "Flow",
+        "style": "solid",
+        "width": 2,
+        "color": "#64748b"
+      },
+      "not-found": {
+        "label": "Not Found",
+        "style": "dashed",
+        "width": 2,
+        "color": "#eab308"
+      },
+      "error": {
+        "label": "Error Path",
+        "style": "dashed",
+        "width": 2,
+        "color": "#ef4444"
+      }
+    }
+  }
 }

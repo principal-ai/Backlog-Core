@@ -2,6 +2,12 @@ version: "1.1.0"
 name: "@backlog-md/core"
 description: "Core library for backlog.md - markdown-based project backlog management"
 
+# Scopes define instrumentation boundaries
+scopes:
+  "@backlog-md/core":
+    color: "#FF6B35"
+    description: "Core library instrumentation scope for backlog.md operations"
+
 # Service resource registry for OTEL trace routing
 resources:
   core-test:
@@ -169,6 +175,12 @@ nodeComponents:
     description: "Documentation or explanatory note"
     icon: "BookOpen"
     color: "#10B981"
+
+  # OpenTelemetry Event Types
+  event:
+    description: "OpenTelemetry span event"
+    icon: "Zap"
+    color: "#F59E0B"
 
 edgeComponents:
   Dependency:

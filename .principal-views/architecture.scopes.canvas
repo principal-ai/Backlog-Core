@@ -1,0 +1,55 @@
+{
+	"pv": {
+		"name": "Backlog Core Scopes",
+		"version": "1.0.0",
+		"description": "OpenTelemetry instrumentation scopes for @backlog-md/core",
+		"markdown": ".principal-views/architecture.md"
+	},
+	"nodes": [
+		{
+			"id": "backlog-core-scope",
+			"type": "text",
+			"x": 100,
+			"y": 100,
+			"width": 200,
+			"height": 100,
+			"text": "# @backlog-md/core\n\nCore library instrumentation scope",
+			"color": "#FF6B35",
+			"pv": {
+				"otel": {
+					"scope": "@backlog-md/core"
+				},
+				"shape": "rectangle",
+				"fill": "#FF6B35",
+				"stroke": "#E55A2B"
+			}
+		},
+		{
+			"id": "scope-description",
+			"type": "text",
+			"x": 350,
+			"y": 100,
+			"width": 200,
+			"height": 100,
+			"text": "# Scope Details\n\nAll OTEL spans and events use this scope",
+			"color": "#64748B",
+			"pv": {
+				"shape": "rectangle",
+				"fill": "#64748B",
+				"stroke": "#475569"
+			}
+		}
+	],
+	"edges": [
+		{
+			"id": "scope-to-description",
+			"fromNode": "backlog-core-scope",
+			"fromSide": "right",
+			"toNode": "scope-description",
+			"toSide": "left",
+			"pv": {
+				"edgeType": "Dependency"
+			}
+		}
+	]
+}

@@ -2,7 +2,6 @@
 	"version": "1.0.0",
 	"canvas": ".principal-views/milestone-crud/milestone-crud.otel.canvas",
 	"scope": "@backlog-md/core",
-	"mode": "span-tree",
 	"name": "Milestone Update",
 	"description": "Updating an existing milestone",
 	"spanPattern": "milestone.update",

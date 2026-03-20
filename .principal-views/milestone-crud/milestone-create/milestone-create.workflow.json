@@ -2,7 +2,6 @@
 	"version": "1.0.0",
 	"canvas": ".principal-views/milestone-crud/milestone-crud.otel.canvas",
 	"scope": "@backlog-md/core",
-	"mode": "span-tree",
 	"name": "Milestone Create",
 	"description": "Creating a new milestone in the backlog",
 	"spanPattern": "milestone.create",

@@ -2,7 +2,6 @@
 	"version": "1.0.0",
 	"canvas": ".principal-views/core-init/core-init.otel.canvas",
 	"scope": "@backlog-md/core",
-	"mode": "span-tree",
 	"name": "Core Initialization",
 	"description": "Initialization workflow supporting both full and lazy modes",
 	"spanPattern": "core.init",
